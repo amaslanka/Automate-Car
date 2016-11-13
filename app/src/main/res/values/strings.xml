@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">Automate Car</string>
+    <string name="device_not_supported">Device not supported!</string>
+    <string name="device_not_supported_message">Your device does not support Bluetooth, so this app will not work.</string>
+    <string name="ok">OK</string>
+    <string name="service_running">Service running</string>
+    <string name="stop_service">Stop service</string>
+    <string name="car_connected">Car connected</string>
+    <string name="car_disconnected">Car disconnected</string>
+    <string name="in_car_options">In-car options</string>
+    <string name="automate_service_running">Automate Car service running</string>
+    <string name="basic_options">Basic options</string>
+    <string name="other_options">Other options</string>
+    <string name="change_other_options">Change other options</string>
+    <string name="mobile_data">Mobile data</string>
+    <string name="mobile_data_on">Turn on mobile data</string>
+    <string name="mobile_data_off">Turn off mobile data</string>
+    <string name="wifi">Wi-Fi</string>
+    <string name="wifi_on">Turn on Wi-Fi</string>
+    <string name="wifi_off">Turn off Wi-Fi</string>
+    <string name="mobile_networks">Mobile networks</string>
+    <string name="network_mode_in">Set network mode when in car</string>
+    <string name="network_mode_out">Set network mode after leaving car</string>
+    <string name="media_volume">Media volume</string>
+    <string name="set_volume_in">Set media volume when in car</string>
+    <string name="set_volume_in_level">Choose in car volume level</string>
+    <string name="set_volume_out">Set media volume after leaving car</string>
+    <string name="set_volume_out_level">Choose volume level after leaving car</string>
+    <string name="select_bluetooth_devices">Select Bluetooth devices</string>
+    <string name="disable_lock_screen">Disable lock screen</string>
+    <string name="force_auto_rotation">Force auto-rotation</string>
+    <string name="check_if_in_pocket">Check if the device is in pocket</string>
+    <string name="check_wireless_power_supply">Check if device is connected to a wireless power supply</string>
+    <string name="check_nfc_tag">Check if NFC tag has been recognized</string>
+    <string name="show_cancel_dialog">Show dialog to cancel operation</string>
+    <string name="dialog_timeout">Dialog duration</string>
+    <string name="action_dialog_timeout">Continue operation on dialog timeout</string>
+    <string name="apps_to_launch">Select packages to launch</string>
+    <string name="show_navigation">Open navigation if it is active</string>
+    <string name="service_started">Automate Car service started</string>
+    <string name="service_stopped">Automate Car service stopped</string>
+    <string name="duration_time_null_alert">Duration time cannot equals 0 seconds!</string>
+    <string name="duration_time_dialog_message">Please input value between %1$d and %2$d (in seconds)</string>
+    <string name="select_apps">Select Apps</string>
+
+
+
+</resources>

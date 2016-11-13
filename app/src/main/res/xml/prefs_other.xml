@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/mobile_data">
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/mobile_data_on"
+            android:key="mobile_data_on" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/mobile_data_off"
+            android:key="mobile_data_off" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/wifi">
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/wifi_on"
+            android:key="wifi_on" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/wifi_off"
+            android:key="wifi_off" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/mobile_networks">
+
+        <ListPreference
+            android:title="@string/network_mode_in"
+            android:key="network_mode_in">
+        </ListPreference>
+
+        <ListPreference android:title="@string/network_mode_out"
+            android:key="network_mode_out">
+        </ListPreference>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/media_volume">
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/set_volume_in"
+            android:key="media_volume_in" />
+
+            <ListPreference
+                android:dependency="media_volume_in"
+                android:title="@string/set_volume_in_level"
+                android:key="network_mode_in">
+            </ListPreference>
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/set_volume_out"
+            android:key="media_volume_out" />
+
+            <ListPreference
+                android:dependency="media_volume_out"
+                android:title="@string/set_volume_out_level"
+                android:key="network_mode_in">
+            </ListPreference>
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

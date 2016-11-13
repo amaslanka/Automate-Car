@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+
+    <PreferenceCategory android:title="@string/car_connected">
+
+        <MultiSelectListPreference
+            android:title="@string/select_bluetooth_devices"
+            android:key="select_bluetooth_devices" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/disable_lock_screen"
+            android:key="disable_lock_screen" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/force_auto_rotation"
+            android:key="force_auto_rotation" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/check_if_in_pocket"
+            android:key="check_if_in_pocket" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/check_wireless_power_supply"
+            android:key="check_wireless_power_supply" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/check_nfc_tag"
+            android:key="check_nfc_tag" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:title="@string/show_cancel_dialog"
+            android:key="show_cancel_dialog" />
+
+        <pl.maslanka.automatecar.EditTextIntegerPreference
+            android:dependency="show_cancel_dialog"
+            android:defaultValue="10"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:inputType="number"
+            android:title="@string/dialog_timeout"
+            android:key="dialog_timeout" />
+
+        <CheckBoxPreference
+            android:dependency="show_cancel_dialog"
+            android:defaultValue="true"
+            android:title="@string/action_dialog_timeout"
+            android:key="action_dialog_timeout" />
+
+        <Preference
+            android:title="@string/apps_to_launch"
+            android:defaultValue="@android:array/config_keySystemUuidMapping"
+            android:entries="@android:array/config_keySystemUuidMapping"
+            android:entryValues="@android:array/imProtocols"
+            android:key="apps_to_launch" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/show_navigation"
+            android:key="show_navi" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>
