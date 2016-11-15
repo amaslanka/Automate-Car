@@ -92,22 +92,33 @@ public class Logic implements Constants.PREF_KEYS {
 
         Collections.sort(installedApps, new ApplicationInfo.DisplayNameComparator(pm));
 
-        for (ApplicationInfo packageInfo : installedApps) {
-            Log.d(TAG, "Installed package :" + packageInfo.packageName);
-            Log.d(TAG, "Source dir : " + packageInfo.sourceDir);
-            Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName));
-        }
+//        for (ApplicationInfo packageInfo : installedApps) {
+//            Log.d(TAG, "Installed package :" + packageInfo.packageName);
+//            Log.d(TAG, "Source dir : " + packageInfo.sourceDir);
+//            Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName));
+//        }
 
         return installedApps;
     }
 
     public static Set getSharedPrefAppList(Context context) {
         blankAppsToLaunch = new HashSet<>();
-        blankAppsToLaunch.add("");
         SharedPreferences prefs =
                 PreferenceManager.getDefaultSharedPreferences(context);
         Set result = prefs.getStringSet(KEYS_APPS_TO_LAUNCH, null);
         return result == null ? blankAppsToLaunch : result;
 
+    }
+
+    public static void setSharedPrefAppList(Context context, Set<String> appName) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putStringSet(KEYS_APPS_TO_LAUNCH, appName);
+        editor.apply();
+
+        Set set  = preferences.getStringSet(KEYS_APPS_TO_LAUNCH, null);
+        if (set != null)
+            Log.d("Saved apps", set.toString());
     }
 }

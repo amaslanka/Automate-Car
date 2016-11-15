@@ -6,12 +6,16 @@ package pl.maslanka.automatecar;
 
 public class Constants {
 
-    public interface DIALOG_DURATION_MAX_MIN_VALUES {
+    interface APP_CREATOR_FRAGMENT {
+        String TAG_APP_CREATOR_FRAGMENT = "app_creator_fragment";
+    }
+
+    interface DIALOG_DURATION_MAX_MIN_VALUES {
         int DIALOG_DURATION_MAX_VALUE = 600;
         int DIALOG_DURATION_MIN_VALUE = 1;
     }
 
-    public interface PREF_KEYS {
+    interface PREF_KEYS {
         String KEY_SELECT_BLUETOOTH_DEVICES = "select_bluetooth_devices";
         String KEY_DISABLE_LOCK_SCREEN = "disable_lock_screen";
         String KEY_FORCE_AUTO_ROTATION = "force_auto_rotation";
@@ -26,13 +30,13 @@ public class Constants {
     }
 
 
-    public interface ACTION {
+    interface ACTION {
        String MAIN_ACTION = "com.maslanka.automatecar.action.main";
        String STARTFOREGROUND_ACTION = "com.maslanka.automatecar.startforeground";
        String STOPFOREGROUND_ACTION = "com.maslanka.automatecar..stopforeground";
     }
 
-    public interface NOTIFICATION_ID {
+    interface NOTIFICATION_ID {
         int FOREGROUND_SERVICE = 101;
     }
 }

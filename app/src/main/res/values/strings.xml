@@ -42,6 +42,7 @@
     <string name="duration_time_null_alert">Duration time cannot equals 0 seconds!</string>
     <string name="duration_time_dialog_message">Please input value between %1$d and %2$d (in seconds)</string>
     <string name="select_apps">Select Apps</string>
+    <string name="loading_app_list">Loading Apps</string>
 
 
 
