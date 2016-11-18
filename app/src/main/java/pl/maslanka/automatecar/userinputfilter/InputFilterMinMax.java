@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar;
+package pl.maslanka.automatecar.userinputfilter;
 
 import android.text.InputFilter;
 import android.text.Spanned;

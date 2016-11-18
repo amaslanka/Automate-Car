@@ -1,9 +1,11 @@
-package pl.maslanka.automatecar;
+package pl.maslanka.automatecar.connectedpref.adapters;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +16,10 @@ import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import pl.maslanka.automatecar.R;
 
 /**
  * Created by Artur on 09.11.2016.
@@ -24,11 +29,20 @@ public class ArrayAdapterWithIcon extends BaseAdapter {
 
     private List<String> appNames;
     private List<Drawable> appIcons;
-    protected CheckedTextView[] checkedTextViews;
+    private CheckedTextView[] checkedTextViews;
     private Activity activity;
-    protected CheckedTextView checkedTextView;
-    protected ImageView appIcon;
-    protected TextView appName;
+    private CheckedTextView checkedTextView;
+    private ImageView appIcon;
+    private TextView appName;
+
+
+    public CheckedTextView[] getCheckedTextViews() {
+        return checkedTextViews;
+    }
+
+    public void setCheckedTextViews(CheckedTextView[] checkedTextViews) {
+        this.checkedTextViews = checkedTextViews;
+    }
 
     public Activity getActivity() {
         return activity;
@@ -40,9 +54,8 @@ public class ArrayAdapterWithIcon extends BaseAdapter {
 
     public ArrayAdapterWithIcon(List<String> appNames, List<Drawable> appIcons, Activity activity) {
         this.appNames = appNames;
-        this.appIcons = appIcons;
         this.activity = activity;
-
+        this.appIcons = appIcons;
 
     }
 

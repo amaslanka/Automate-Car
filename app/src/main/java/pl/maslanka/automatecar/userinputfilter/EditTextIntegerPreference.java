@@ -1,17 +1,11 @@
-package pl.maslanka.automatecar;
+package pl.maslanka.automatecar.userinputfilter;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.Button;
 
 /**
  * Created by Artur on 09.11.2016.
@@ -55,6 +49,5 @@ public class EditTextIntegerPreference extends EditTextPreference implements Dia
         try { return Integer.parseInt(text); }
         catch (NumberFormatException e) { return null; }
     }
-
 
 }

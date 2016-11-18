@@ -1,33 +1,41 @@
-package pl.maslanka.automatecar;
+package pl.maslanka.automatecar.utils;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static android.content.ContentValues.TAG;
+import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.helperobjectsandinterfaces.PairObject;
 
 /**
  * Created by Artur on 09.11.2016.
  */
 
-public class Logic implements Constants.PREF_KEYS {
+public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
 
     private BluetoothAdapter mBluetoothAdapter;
     private Set<BluetoothDevice> pairedDevices;
     private static Set blankAppsToLaunch;
-    private Context context;
 
 
     public BluetoothAdapter getMBluetoothAdapter() {
@@ -38,8 +46,7 @@ public class Logic implements Constants.PREF_KEYS {
         return pairedDevices;
     }
 
-    public Logic(Context context) {
-        this.context = context;
+    public Logic() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
@@ -59,7 +66,8 @@ public class Logic implements Constants.PREF_KEYS {
         queryBluetoothDevices().toArray(bluetoothDevicesArray);
 
         for (int i=0; i<bluetoothDevicesArray.length; i++) {
-            bluetoothDeviceNamesAndAddresses[i] = bluetoothDevicesArray[i].getName() +"\n" + bluetoothDevicesArray[i].getAddress();
+            bluetoothDeviceNamesAndAddresses[i] = bluetoothDevicesArray[i].getName() +"\n"
+                    + bluetoothDevicesArray[i].getAddress();
             bluetoothDeviceAddresses[i] = bluetoothDevicesArray[i].getAddress();
             Log.d("bluetoothDevicesNamesAn", bluetoothDeviceNamesAndAddresses[i]);
             Log.d("bluetoothDevicesAddr", bluetoothDeviceAddresses[i]);
@@ -71,8 +79,8 @@ public class Logic implements Constants.PREF_KEYS {
         return resultList;
     }
 
-    public List<ApplicationInfo> getListOfInstalledApps() {
-        final PackageManager pm = context.getPackageManager();
+    public static List<ApplicationInfo> getListOfInstalledApps(Activity activity) {
+        final PackageManager pm = activity.getPackageManager();
         List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
         List<ApplicationInfo> installedApps = new ArrayList<>();
@@ -85,18 +93,14 @@ public class Logic implements Constants.PREF_KEYS {
             } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                 //Discard this one
                 //in this case, it should be a user-installed app
+            } else if(app.packageName.equals(activity.getPackageName())) {
+                //Discard this one
             } else {
                 installedApps.add(app);
             }
         }
 
         Collections.sort(installedApps, new ApplicationInfo.DisplayNameComparator(pm));
-
-//        for (ApplicationInfo packageInfo : installedApps) {
-//            Log.d(TAG, "Installed package :" + packageInfo.packageName);
-//            Log.d(TAG, "Source dir : " + packageInfo.sourceDir);
-//            Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName));
-//        }
 
         return installedApps;
     }
@@ -120,5 +124,55 @@ public class Logic implements Constants.PREF_KEYS {
         Set set  = preferences.getStringSet(KEYS_APPS_TO_LAUNCH, null);
         if (set != null)
             Log.d("Saved apps", set.toString());
+    }
+
+    public static void saveToInternalStorage(Activity activity, LinkedList<PairObject<String,
+            String>> appList) {
+
+        ContextWrapper cw = new ContextWrapper(activity);
+        File directory = cw.getDir(PATH, Context.MODE_PRIVATE);
+        File myPath = new File(directory, FILE_NAME);
+
+        FileOutputStream fos;
+        ObjectOutputStream out;
+
+        try {
+            fos = new FileOutputStream(myPath);
+            out = new ObjectOutputStream(fos);
+            out.writeObject(appList);
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static LinkedList<PairObject<String, String>> readList(Activity activity) {
+
+        LinkedList<PairObject<String, String>> appList = new LinkedList<>();
+        ContextWrapper cw = new ContextWrapper(activity);
+        File directory = cw.getDir(PATH, Context.MODE_PRIVATE);
+        File myPath = new File(directory, FILE_NAME);
+
+        FileInputStream fis;
+        ObjectInputStream in;
+
+        try {
+            fis = new FileInputStream(myPath);
+            in = new ObjectInputStream(fis);
+            appList = (LinkedList<PairObject<String, String>>) in.readObject();
+            in.close();
+        } catch (IOException ex) {
+            Log.d("readList", "File not found!");
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
+
+        if (appList != null) {
+            return appList;
+        } else {
+            appList = new LinkedList<>();
+            return appList;
+        }
+
     }
 }

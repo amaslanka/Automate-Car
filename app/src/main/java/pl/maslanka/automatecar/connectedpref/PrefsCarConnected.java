@@ -1,18 +1,12 @@
-package pl.maslanka.automatecar;
+package pl.maslanka.automatecar.connectedpref;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceCategory;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
-import android.util.Log;
 import android.view.MenuItem;
 
-import static android.R.attr.fragment;
+import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
 
 /**
  * Created by Artur on 09.11.2016.
@@ -38,7 +32,7 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
             getSupportFragmentManager().beginTransaction().add(android.R.id.content, prefsCarConnectedFragment, TAG_APP_CREATOR_FRAGMENT).commit();
         } else {
             prefsCarConnectedFragment = (PrefsCarConnectedFragment) getSupportFragmentManager().findFragmentByTag(TAG_APP_CREATOR_FRAGMENT);
-            appListWasShowing = savedInstanceState.getBoolean(KEY_APP_LIST_WAS_SHOWING);
+//            appListWasShowing = savedInstanceState.getBoolean(KEY_APP_LIST_WAS_SHOWING);
         }
 
 
@@ -70,15 +64,15 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
     @Override
     public void onStop() {
         super.onStop();
-
-        if (prefsCarConnectedFragment.getAppList() != null)
-            if (prefsCarConnectedFragment.getAppList().isShowing())
-                prefsCarConnectedFragment.getAppList().dismiss();
-
-
-        if (prefsCarConnectedFragment.getDialog() != null)
-            if (prefsCarConnectedFragment.getDialog().isShowing())
-                prefsCarConnectedFragment.getDialog().dismiss();
+//
+//        if (prefsCarConnectedFragment.getAppList() != null)
+//            if (prefsCarConnectedFragment.getAppList().isShowing())
+//                prefsCarConnectedFragment.getAppList().dismiss();
+//
+//
+//        if (prefsCarConnectedFragment.getDialog() != null)
+//            if (prefsCarConnectedFragment.getDialog().isShowing())
+//                prefsCarConnectedFragment.getDialog().dismiss();
 
 
     }
@@ -87,22 +81,22 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
     protected void onStart() {
         super.onStart();
 
-        if (prefsCarConnectedFragment != null) {
-            if (prefsCarConnectedFragment.getAppListCreator() != null) {
-                if (prefsCarConnectedFragment.getAppListCreatorStatus() == AsyncTask.Status.RUNNING)
-                    prefsCarConnectedFragment.getDialog().show();
-
-                if (appListWasShowing && prefsCarConnectedFragment.getAppList() != null)
-                    prefsCarConnectedFragment.getAppList().show();
-            }
-        }
+//        if (prefsCarConnectedFragment != null) {
+//            if (prefsCarConnectedFragment.getAppListCreator() != null) {
+//                if (prefsCarConnectedFragment.getAppListCreatorStatus() == AsyncTask.Status.RUNNING)
+//                    prefsCarConnectedFragment.getDialog().show();
+//
+//                if (appListWasShowing && prefsCarConnectedFragment.getAppList() != null)
+//                    prefsCarConnectedFragment.getAppList().show();
+//            }
+//        }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        if (prefsCarConnectedFragment.getAppList() != null)
-            savedInstanceState.putBoolean(KEY_APP_LIST_WAS_SHOWING, prefsCarConnectedFragment.getAppList().isShowing());
-        super.onSaveInstanceState(savedInstanceState);
-    }
+//    @Override
+//    public void onSaveInstanceState(Bundle savedInstanceState) {
+//        if (prefsCarConnectedFragment.getAppList() != null)
+//            savedInstanceState.putBoolean(KEY_APP_LIST_WAS_SHOWING, prefsCarConnectedFragment.getAppList().isShowing());
+//        super.onSaveInstanceState(savedInstanceState);
+//    }
 
 }

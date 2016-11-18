@@ -40,7 +40,7 @@
             android:title="@string/show_cancel_dialog"
             android:key="show_cancel_dialog" />
 
-        <pl.maslanka.automatecar.EditTextIntegerPreference
+        <pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference
             android:dependency="show_cancel_dialog"
             android:defaultValue="10"
             android:selectAllOnFocus="true"

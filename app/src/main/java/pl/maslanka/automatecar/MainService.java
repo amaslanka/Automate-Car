@@ -8,6 +8,8 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+
 
 public class MainService extends Service {
     private static final String LOG_TAG = "MainService";

@@ -18,9 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PrefsCarConnected"
+        <activity android:name=".connectedpref.PrefsCarConnected"
             android:label="@string/car_connected"/>
         <service android:name=".MainService"/>
+        <activity android:name=".connectedpref.AppsToLaunch"
+            android:label="@string/apps_to_launch"/>
     </application>
 
 </manifest>
