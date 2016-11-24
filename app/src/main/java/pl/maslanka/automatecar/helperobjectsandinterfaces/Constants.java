@@ -20,9 +20,18 @@ public class Constants {
 
     }
 
-    public interface DIALOG_DURATION_MAX_MIN_VALUES {
+    public interface DEFAULT_VALUES {
         int DIALOG_DURATION_MAX_VALUE = 600;
         int DIALOG_DURATION_MIN_VALUE = 1;
+        boolean DISABLE_LOCK_SCREEN_DEFAULT_VALUE = false;
+        boolean FORCE_AUTO_ROTATION_DEFAULT_VALUE = false;
+        boolean CHECK_IF_IN_POCKET_DEFAULT_VALUE = true;
+        boolean CHECK_WIRELESS_POWER_SUPPLY_DEFAULT_VALUE = false;
+        boolean CHECK_NFC_TAG_DEFAULT_VALUE = false;
+        boolean SHOW_CANCEL_DIALOG_DEFAULT_VALUE = true;
+        int DIALOG_TIMEOUT_DEFAULT_VALUE = 10;
+        boolean ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE = true;
+        boolean SHOW_NAVI_DEFAULT_VALUE =  true;
     }
 
     public interface PREF_KEYS {
@@ -42,11 +51,16 @@ public class Constants {
 
     public interface ACTION {
        String MAIN_ACTION = "com.maslanka.automatecar.action.main";
-       String STARTFOREGROUND_ACTION = "com.maslanka.automatecar.startforeground";
-       String STOPFOREGROUND_ACTION = "com.maslanka.automatecar..stopforeground";
+       String START_FOREGROUND_ACTION = "com.maslanka.automatecar.startforeground";
+       String STOP_FOREGROUND_ACTION = "com.maslanka.automatecar..stopforeground";
     }
 
     public interface NOTIFICATION_ID {
         int FOREGROUND_SERVICE = 101;
+    }
+
+    public interface BROADCAST_NOTIFICATIONS {
+        String POPUP_ACTION = "com.maslanka.automatecar.popup.action";
+        String CONTINUE_ACTION = "com.maslanka.automatecar.continue.action";
     }
 }

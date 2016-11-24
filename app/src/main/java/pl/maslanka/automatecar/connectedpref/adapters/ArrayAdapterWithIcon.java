@@ -2,21 +2,15 @@ package pl.maslanka.automatecar.connectedpref.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import pl.maslanka.automatecar.R;
@@ -78,7 +72,7 @@ public class ArrayAdapterWithIcon extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.list_item_app, parent, false);
+            convertView = inflater.inflate(R.layout.app_list_view_item, parent, false);
         }
 
         checkedTextView = (CheckedTextView) convertView.findViewById(R.id.checked_text_view);

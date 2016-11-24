@@ -3,6 +3,7 @@
     package="pl.maslanka.automatecar">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
         android:allowBackup="true"
@@ -10,7 +11,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,11 +20,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".connectedpref.PrefsCarConnected"
-            android:label="@string/car_connected"/>
-        <service android:name=".MainService"/>
-        <activity android:name=".connectedpref.AppsToLaunch"
-            android:label="@string/apps_to_launch"/>
+        <activity
+            android:name=".connectedpref.PrefsCarConnected"
+            android:label="@string/car_connected" />
+
+        <service android:name=".services.MainService" />
+        <service android:name=".services.CarConnectedService" />
+
+        <activity
+            android:name=".connectedpref.AppsToLaunch"
+            android:label="@string/apps_to_launch" />
+        <activity
+            android:name=".utils.PopupActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Transparent" />
     </application>
 
 </manifest>

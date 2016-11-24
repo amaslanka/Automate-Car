@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import pl.maslanka.automatecar.MainActivity;
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.connectedpref.adapters.ArrayAdapterWithIcon;
+import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
 import pl.maslanka.automatecar.helperobjectsandinterfaces.PairObject;
 import pl.maslanka.automatecar.utils.Logic;
 
@@ -35,7 +35,7 @@ import pl.maslanka.automatecar.utils.Logic;
  * Created by Artur on 15.11.2016.
  */
 
-public class SelectAppsFragment extends Fragment {
+public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS {
 
     private PackageManager pm;
     private List<ApplicationInfo> installedApps;
@@ -98,47 +98,53 @@ public class SelectAppsFragment extends Fragment {
         @Override
         protected Void doInBackground(Activity... params) {
 
-            final Activity activity = params[0];
-            selectedApps = new HashMap<>();
-            appNames = new ArrayList<>();
-            appIcons = new ArrayList<>();
-            appPackages = new ArrayList<>();
-            appsFromPrefs = new HashSet<>();
-            appsFromPrefsBackup = new HashSet<>();
+            try {
 
-            installedApps = Logic.getListOfInstalledApps(activity);
-            appsToSave = Logic.readList(activity);
+                final Activity activity = params[0];
+                selectedApps = new HashMap<>();
+                appNames = new ArrayList<>();
+                appIcons = new ArrayList<>();
+                appPackages = new ArrayList<>();
+                appsFromPrefs = new HashSet<>();
+                appsFromPrefsBackup = new HashSet<>();
 
-            appsFromPrefs.addAll(Logic.getSharedPrefAppList(activity));
-            appsFromPrefsBackup.addAll(appsFromPrefs);
+                installedApps = Logic.getListOfInstalledApps(activity);
+                appsToSave = Logic.readList(activity);
 
-            createAppListData();
-            checkForUninstalledApps(activity);
+                appsFromPrefs.addAll(Logic.getSharedPrefStringSet(activity, KEYS_APPS_TO_LAUNCH));
+                appsFromPrefsBackup.addAll(appsFromPrefs);
 
-            adapter = new ArrayAdapterWithIcon(appNames, appIcons, activity);
+                createAppListData();
+                checkForUninstalledApps(activity);
 
-            setCheckStateToCheckBoxes();
+                adapter = new ArrayAdapterWithIcon(appNames, appIcons, activity);
 
+                setCheckStateToCheckBoxes();
 
-            builder = new AlertDialog.Builder(activity)
-                    .setTitle(getString(R.string.select_apps))
-                    .setAdapter(adapter, null)
-                    .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Log.d("appsFromPrefs", appsFromPrefs.toString());
-                            Log.d("appsToSave", appsToSave.toString());
-                            Log.d("appsToSave", "print");
-                            for (PairObject<String, String> pair: appsToSave) {
-                                Log.d("element", pair.toString());
+                builder = new AlertDialog.Builder(activity)
+                        .setTitle(getString(R.string.select_apps))
+                        .setAdapter(adapter, null)
+                        .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Log.d("appsFromPrefs", appsFromPrefs.toString());
+                                Log.d("appsToSave", "print");
+                                for (PairObject<String, String> pair: appsToSave) {
+                                    Log.d("element", pair.toString());
+                                }
+                                Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEYS_APPS_TO_LAUNCH);
+                                Logic.saveListToInternalStorage(activity, appsToSave);
+
+                                ((AppsToLaunch) getActivity()).buildAndRefreshView();
+                                ((AppsToLaunch) getActivity()).notifyAdapterDataHasChanged();
                             }
-                            Logic.setSharedPrefAppList(activity, appsFromPrefs);
-                            Logic.saveToInternalStorage(activity, appsToSave);
+                        })
+                        .setNegativeButton(getResources().getString(android.R.string.cancel), null);
+            } catch (IllegalStateException ex) {
+                Log.e("Error", "Fragment not attached to an activity - task cancelled");
+                this.cancel(true);
+            }
 
-                            ((AppsToLaunch)getActivity()).buildAndRefreshView();
-                        }
-                    })
-                    .setNegativeButton(getResources().getString(android.R.string.cancel), null);
 
             return null;
         }
@@ -228,7 +234,7 @@ public class SelectAppsFragment extends Fragment {
                 appsFromPrefs.remove(uninstalledApp);
             }
 
-            Logic.setSharedPrefAppList(activity, appsFromPrefs);
+            Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEYS_APPS_TO_LAUNCH);
         }
 
         void setCheckStateToCheckBoxes() {

@@ -1,6 +1,8 @@
 package pl.maslanka.automatecar.utils;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -33,30 +35,29 @@ import pl.maslanka.automatecar.helperobjectsandinterfaces.PairObject;
 
 public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
 
-    private BluetoothAdapter mBluetoothAdapter;
-    private Set<BluetoothDevice> pairedDevices;
-    private static Set blankAppsToLaunch;
-
-
-    public BluetoothAdapter getMBluetoothAdapter() {
-        return mBluetoothAdapter;
-    }
-
-    public Set<BluetoothDevice> getPairedDevices() {
-        return pairedDevices;
-    }
 
     public Logic() {
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
     }
 
-    public Set<BluetoothDevice> queryBluetoothDevices() {
-        pairedDevices = mBluetoothAdapter.getBondedDevices();
+    public static boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static Set<BluetoothDevice> queryBluetoothDevices() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
         Log.d("Bluetooth devices", pairedDevices.toString());
         return pairedDevices;
     }
 
-    public List<String[]> getBluetoothDevicesArrays() {
+    public static List<String[]> getBluetoothDevicesArrays() {
 
         List<String[]> resultList = new ArrayList<>();
         BluetoothDevice[] bluetoothDevicesArray = new BluetoothDevice[queryBluetoothDevices().size()];
@@ -105,31 +106,49 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         return installedApps;
     }
 
-    public static Set getSharedPrefAppList(Context context) {
-        blankAppsToLaunch = new HashSet<>();
-        SharedPreferences prefs =
-                PreferenceManager.getDefaultSharedPreferences(context);
-        Set result = prefs.getStringSet(KEYS_APPS_TO_LAUNCH, null);
-        return result == null ? blankAppsToLaunch : result;
-
-    }
-
-    public static void setSharedPrefAppList(Context context, Set<String> appName) {
+    public static void setSharedPrefStringSet(Context context, Set<String> set, String key) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
 
-        editor.putStringSet(KEYS_APPS_TO_LAUNCH, appName);
+        editor.putStringSet(key, set);
         editor.apply();
 
-        Set set  = preferences.getStringSet(KEYS_APPS_TO_LAUNCH, null);
-        if (set != null)
-            Log.d("Saved apps", set.toString());
+        Set readSet  = preferences.getStringSet(key, null);
+        if (readSet != null)
+            Log.d("Saved SharedPref set", readSet.toString());
     }
 
-    public static void saveToInternalStorage(Activity activity, LinkedList<PairObject<String,
+    public static boolean getSharedPrefBoolean(Context context, String key) {
+        boolean result;
+        SharedPreferences prefs =
+                PreferenceManager.getDefaultSharedPreferences(context);
+        result = prefs.getBoolean(key, false);
+        return result;
+
+    }
+
+    public static String getSharedPrefString(Context context, String key) {
+        String result;
+        SharedPreferences prefs =
+                PreferenceManager.getDefaultSharedPreferences(context);
+        result = prefs.getString(key, null);
+        return result == null ? "" : result;
+
+    }
+
+    public static Set<String> getSharedPrefStringSet(Context context, String key) {
+        Set<String> blankSet = new HashSet<>();
+        SharedPreferences prefs =
+                PreferenceManager.getDefaultSharedPreferences(context);
+        Set<String> result = prefs.getStringSet(key, null);
+        return result == null ? blankSet : result;
+
+    }
+
+    public static void saveListToInternalStorage(Context context, LinkedList<PairObject<String,
             String>> appList) {
 
-        ContextWrapper cw = new ContextWrapper(activity);
+        ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir(PATH, Context.MODE_PRIVATE);
         File myPath = new File(directory, FILE_NAME);
 
@@ -146,10 +165,10 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         }
     }
 
-    public static LinkedList<PairObject<String, String>> readList(Activity activity) {
+    public static LinkedList<PairObject<String, String>> readList(Context context) {
 
         LinkedList<PairObject<String, String>> appList = new LinkedList<>();
-        ContextWrapper cw = new ContextWrapper(activity);
+        ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir(PATH, Context.MODE_PRIVATE);
         File myPath = new File(directory, FILE_NAME);
 

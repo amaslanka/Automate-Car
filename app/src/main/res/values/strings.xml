@@ -44,8 +44,11 @@
     <string name="select_apps">Select Apps</string>
     <string name="loading_app_list">Loading Apps</string>
     <string name="add_apps">Add apps</string>
-    <string name="drag_apps_to_change_order">Drag applications\' icons to change order</string>
-
+    <string name="drag_apps_to_change_order">To change order drag apps icons</string>
+    <string name="car_detected_desc">Car bluetooth set has been connected. Do you want to enable car mode?</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="delete_app_question">Delete app?</string>
+    <string name="sure_about_deleting_app_question">Are you sure you want to delete this app?</string>
 
 
 </resources>

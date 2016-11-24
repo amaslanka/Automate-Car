@@ -1,6 +1,7 @@
 package pl.maslanka.automatecar;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import pl.maslanka.automatecar.connectedpref.PrefsCarConnected;
 import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.services.MainService;
 import pl.maslanka.automatecar.utils.Logic;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
@@ -38,13 +40,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         findViews();
 
-        if (logic.getMBluetoothAdapter() != null) {
+        if (BluetoothAdapter.getDefaultAdapter() != null) {
             setListeners();
+            automateServiceRunning.setChecked(Logic.isMyServiceRunning(MainService.class, getApplicationContext()));
         } else {
             showAlertDialog();
         }
 
     }
+
 
     protected void findViews() {
         automateServiceRunning = (Switch) findViewById(R.id.automate_service_running);
@@ -106,20 +110,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        Toast.makeText(this, (isChecked ? getString(R.string.service_started): getString(R.string.service_stopped)),
-                Toast.LENGTH_SHORT).show();
+        if (Logic.isMyServiceRunning(MainService.class, getApplicationContext()) && !isChecked) {
+            Toast.makeText(this, getString(R.string.service_stopped), Toast.LENGTH_SHORT).show();
+        } else if (!Logic.isMyServiceRunning(MainService.class, getApplicationContext()) && isChecked){
+            Toast.makeText(this, getString(R.string.service_started), Toast.LENGTH_SHORT).show();
+        }
 
         if (isChecked) {
             Intent startIntent = new Intent(MainActivity.this, MainService.class);
-            startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+            startIntent.setAction(Constants.ACTION.START_FOREGROUND_ACTION);
             startService(startIntent);
+            if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                android.content.Intent enableIntent = new android.content.Intent(
+                        android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivity(enableIntent);
+            }
+
         } else {
             Intent stopIntent = new Intent(MainActivity.this, MainService.class);
-            stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+            stopIntent.setAction(Constants.ACTION.STOP_FOREGROUND_ACTION);
             startService(stopIntent);
         }
 
     }
 
 }
+
+
+
+
 

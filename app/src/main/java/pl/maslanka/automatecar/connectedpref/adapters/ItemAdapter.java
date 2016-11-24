@@ -16,11 +16,17 @@
 
 package pl.maslanka.automatecar.connectedpref.adapters;
 
+import android.animation.Animator;
+import android.animation.TimeInterpolator;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,16 +36,19 @@ import com.woxthebox.draglistview.DragItemAdapter;
 import java.util.ArrayList;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Triplet;
+import pl.maslanka.automatecar.connectedpref.AppsToLaunch;
+import pl.maslanka.automatecar.helperobjectsandinterfaces.QuattroObject;
 
-public class ItemAdapter extends DragItemAdapter<Triplet<Long, String, Drawable>, ItemAdapter.ViewHolder> {
+public class ItemAdapter extends
+        DragItemAdapter<QuattroObject<Long, String, String, Drawable>, ItemAdapter.ViewHolder> {
 
     private Activity mActivity;
     private int mLayoutId;
     private int mGrabHandleId;
     private boolean mDragOnLongPress;
 
-    public ItemAdapter(Activity activity, ArrayList<Triplet<Long, String, Drawable>> list, int layoutId, int grabHandleId, boolean dragOnLongPress) {
+    public ItemAdapter(Activity activity, ArrayList<QuattroObject<Long, String, String, Drawable>> list,
+                       int layoutId, int grabHandleId, boolean dragOnLongPress) {
         mActivity = activity;
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
@@ -57,21 +66,22 @@ public class ItemAdapter extends DragItemAdapter<Triplet<Long, String, Drawable>
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-        String text = mItemList.get(position).getSecond();
-        Drawable icon = mItemList.get(position).getThird();
+        String text = mItemList.get(position).getName();
+        Drawable icon = mItemList.get(position).getDrawable();
         holder.mText.setText(text);
-        holder.itemView.setTag(text);
+        holder.itemView.setTag(position);
         holder.mImage.setImageDrawable(icon);
     }
 
     @Override
     public long getItemId(int position) {
-        return mItemList.get(position).getFirst();
+        return mItemList.get(position).getIndex();
     }
 
     public class ViewHolder extends DragItemAdapter.ViewHolder {
         public TextView mText;
         public ImageView mImage;
+
 
         public ViewHolder(final View itemView) {
             super(itemView, mGrabHandleId, mDragOnLongPress);
@@ -86,6 +96,24 @@ public class ItemAdapter extends DragItemAdapter<Triplet<Long, String, Drawable>
 
         @Override
         public boolean onItemLongClicked(View view) {
+            AlertDialog deleteConfirmDialog = new AlertDialog.Builder(view.getContext())
+                    .setTitle(mActivity.getString(R.string.delete_app_question))
+                    .setMessage(mActivity.getString(R.string.sure_about_deleting_app_question))
+                    .setIcon(R.drawable.ic_delete_forever_black)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            int position = getAdapterPosition();
+//                            removeItem(position);
+                            ((AppsToLaunch) mActivity).deleteApp(position);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .create();
+
+            deleteConfirmDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+
+            deleteConfirmDialog.show();
             return true;
         }
     }
