@@ -13,8 +13,8 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import pl.maslanka.automatecar.connectedpref.PrefsCarConnected;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.prefconnected.PrefsCarConnected;
+import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.services.MainService;
 import pl.maslanka.automatecar.utils.Logic;
 

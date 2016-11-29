@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.utils;
+package pl.maslanka.automatecar.connected;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -11,7 +11,7 @@ import android.view.KeyEvent;
 import android.view.Window;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.helpers.Constants;
 
 import static android.view.KeyEvent.KEYCODE_BACK;
 
@@ -19,8 +19,9 @@ import static android.view.KeyEvent.KEYCODE_BACK;
  * Created by Artur on 22.11.2016.
  */
 
-public class PopupActivity extends AppCompatActivity implements Constants.PREF_KEYS, Constants.DEFAULT_VALUES, Constants.BROADCAST_NOTIFICATIONS {
+public class PopupActivityConnected extends AppCompatActivity implements Constants.PREF_KEYS, Constants.DEFAULT_VALUES, Constants.BROADCAST_NOTIFICATIONS {
 
+    public static boolean isInFront = false;
     private AlertDialog alertDialog;
     private int dialogTimeout;
     private boolean actionDialogTimeout;
@@ -107,6 +108,7 @@ public class PopupActivity extends AppCompatActivity implements Constants.PREF_K
         if (alertDialog != null) {
             alertDialog.show();
         }
+        isInFront = true;
     }
 
     @Override
@@ -120,5 +122,6 @@ public class PopupActivity extends AppCompatActivity implements Constants.PREF_K
     protected void onPause() {
         super.onPause();
         alertDialog.dismiss();
+        isInFront = false;
     }
 }

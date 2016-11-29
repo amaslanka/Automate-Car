@@ -1,17 +1,14 @@
-package pl.maslanka.automatecar.connectedpref;
+package pl.maslanka.automatecar.prefconnected;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
-import android.preference.SwitchPreference;
 import android.text.InputFilter;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,7 +18,7 @@ import java.util.List;
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference;
 import pl.maslanka.automatecar.userinputfilter.InputFilterMinMax;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.utils.Logic;
 
 /**

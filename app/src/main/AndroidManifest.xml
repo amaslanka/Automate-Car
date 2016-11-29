@@ -21,17 +21,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".connectedpref.PrefsCarConnected"
+            android:name=".prefconnected.PrefsCarConnected"
             android:label="@string/car_connected" />
 
         <service android:name=".services.MainService" />
         <service android:name=".services.CarConnectedService" />
 
         <activity
-            android:name=".connectedpref.AppsToLaunch"
+            android:name=".prefconnected.AppsToLaunch"
             android:label="@string/apps_to_launch" />
         <activity
-            android:name=".utils.PopupActivity"
+            android:name=".connected.PopupActivityConnected"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:theme="@style/Transparent" />

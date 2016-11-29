@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.helperobjectsandinterfaces;
+package pl.maslanka.automatecar.helpers;
 
 import java.io.Serializable;
 

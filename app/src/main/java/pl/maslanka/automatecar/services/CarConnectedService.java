@@ -15,10 +15,10 @@ import android.view.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
 
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.PairObject;
+import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.utils.Logic;
-import pl.maslanka.automatecar.utils.PopupActivity;
+import pl.maslanka.automatecar.connected.PopupActivityConnected;
 
 /**
  * Created by Artur on 22.11.2016.
@@ -140,7 +140,7 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
                 CarConnectedService.this, KEY_ACTION_DIALOG_TIMEOUT, ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
         if (showCancelDialog) {
             Log.d("popUp", "showDialog");
-            Intent popup = new Intent(getBaseContext(), PopupActivity.class);
+            Intent popup = new Intent(getBaseContext(), PopupActivityConnected.class);
             popup.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             popup.putExtra(KEY_DIALOG_TIMEOUT, dialogTimeout);
             popup.putExtra(KEY_ACTION_DIALOG_TIMEOUT, actionDialogTimeout);

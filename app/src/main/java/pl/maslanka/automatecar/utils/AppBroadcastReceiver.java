@@ -2,13 +2,13 @@ package pl.maslanka.automatecar.utils;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.connected.PopupActivityConnected;
+import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.services.CarConnectedService;
 
 /**
@@ -35,7 +35,7 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
 
                 if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES)
                         .contains(bluetoothDevice.getAddress()) &&
-                        !Logic.isMyServiceRunning(CarConnectedService.class, context)) {
+                        !Logic.isMyServiceRunning(CarConnectedService.class, context) && !PopupActivityConnected.isInFront) {
 
                     startServiceWithAction(context, POPUP_ACTION);
                 }

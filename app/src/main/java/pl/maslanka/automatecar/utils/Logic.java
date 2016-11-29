@@ -2,10 +2,8 @@ package pl.maslanka.automatecar.utils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -14,9 +12,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
@@ -26,15 +22,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.PairObject;
+import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.helpers.PairObject;
 
 /**
  * Created by Artur on 09.11.2016.

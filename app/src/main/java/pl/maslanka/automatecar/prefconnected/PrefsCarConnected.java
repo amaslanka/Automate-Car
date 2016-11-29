@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.connectedpref;
+package pl.maslanka.automatecar.prefconnected;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.MenuItem;
 
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.helpers.Constants;
 
 /**
  * Created by Artur on 09.11.2016.
@@ -20,15 +20,12 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
     private PrefsCarConnectedFragment prefsCarConnectedFragment;
 
     private static final String KEY_MUSIC_PLAYER_LIST_WAS_SHOWING = "app_list_was_showing";
-    protected static Activity activity;
     private boolean musicPlayerListWasShowing;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        activity = this;
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

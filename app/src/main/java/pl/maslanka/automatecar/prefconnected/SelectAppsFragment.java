@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.connectedpref;
+package pl.maslanka.automatecar.prefconnected;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Set;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.connectedpref.adapters.ArrayAdapterWithIcon;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.PairObject;
+import pl.maslanka.automatecar.prefconnected.adapters.ArrayAdapterWithIcon;
+import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.utils.Logic;
 
 /**

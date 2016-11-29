@@ -13,7 +13,7 @@ import android.util.Log;
 
 import pl.maslanka.automatecar.MainActivity;
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
 
 

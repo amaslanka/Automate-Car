@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.connectedpref;
+package pl.maslanka.automatecar.prefconnected;
 
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -19,11 +19,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.connectedpref.adapters.ItemAdapter;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.PairObject;
+import pl.maslanka.automatecar.prefconnected.adapters.ItemAdapter;
+import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.utils.Logic;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.QuattroObject;
+import pl.maslanka.automatecar.helpers.QuattroObject;
 
 /**
  * Created by Artur on 15.11.2016.

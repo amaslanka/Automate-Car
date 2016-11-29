@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.helperobjectsandinterfaces;
+package pl.maslanka.automatecar.helpers;
 
 /**
  * Created by Artur on 15.11.2016.

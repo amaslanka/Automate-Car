@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.connectedpref;
+package pl.maslanka.automatecar.prefconnected;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.connectedpref.adapters.MusicPlayerAdapterWithIcon;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
+import pl.maslanka.automatecar.prefconnected.adapters.MusicPlayerAdapterWithIcon;
+import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.utils.Logic;
 
 /**
@@ -129,7 +129,7 @@ public class MusicPlayerListCreator extends AsyncTask<Activity, Void, Void> impl
         ((PrefsCarConnectedFragment) prefsCarConnectedFragment).dismissProgressDialog();
     }
 
-    void createAppListData(Activity activity) {
+    private void createAppListData(Activity activity) {
         appNames.add(activity.getResources().getString(R.string.clear_selection));
         appIcons.add(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.close_circle, null));
         appPackages.add(null);

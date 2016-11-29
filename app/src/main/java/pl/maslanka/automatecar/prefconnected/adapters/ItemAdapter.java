@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package pl.maslanka.automatecar.connectedpref.adapters;
+package pl.maslanka.automatecar.prefconnected.adapters;
 
-import android.animation.Animator;
-import android.animation.TimeInterpolator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -25,8 +23,6 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationSet;
-import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,8 +32,8 @@ import com.woxthebox.draglistview.DragItemAdapter;
 import java.util.ArrayList;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.connectedpref.AppsToLaunch;
-import pl.maslanka.automatecar.helperobjectsandinterfaces.QuattroObject;
+import pl.maslanka.automatecar.prefconnected.AppsToLaunch;
+import pl.maslanka.automatecar.helpers.QuattroObject;
 
 public class ItemAdapter extends
         DragItemAdapter<QuattroObject<Long, String, String, Drawable>, ItemAdapter.ViewHolder> {
