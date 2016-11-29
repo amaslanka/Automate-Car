@@ -5,12 +5,18 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
@@ -20,6 +26,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -106,6 +113,61 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         return installedApps;
     }
 
+    public static List<ApplicationInfo> getListOfInstalledMusicPlayers (Activity activity) {
+        final PackageManager pm = activity.getPackageManager();
+        List<ResolveInfo> musicPlayersResolveInfo;
+        List<ApplicationInfo> allApps;
+        List<String> musicPlayerPackages = new ArrayList<>();
+        List<ApplicationInfo> musicPlayers = new ArrayList<>();
+
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        musicPlayersResolveInfo = pm.queryBroadcastReceivers(mediaButtonIntent,
+                PackageManager.GET_RESOLVED_FILTER);
+
+        allApps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        for (ResolveInfo resolveInfo: musicPlayersResolveInfo) {
+            musicPlayerPackages.add(resolveInfo.activityInfo.packageName);
+        }
+
+        Log.d("allPackagesSize", Integer.toString(allApps.size()));
+
+        for(ApplicationInfo app : allApps) {
+            if (musicPlayerPackages.contains(app.packageName))
+                musicPlayers.add(app);
+        }
+
+        Collections.sort(musicPlayers, new ApplicationInfo.DisplayNameComparator(pm));
+
+        Log.d("musicPlayersSize", Integer.toString(musicPlayers.size()));
+
+        return musicPlayers;
+    }
+
+    public static List<ActivityInfo> getListOfMediaBroadcastReceivers(Context activity) {
+        final PackageManager pm = activity.getPackageManager();
+        List<ResolveInfo> musicPlayersResolveInfo;
+        List<ActivityInfo> musicPlayersActivityInfo = new ArrayList<>();
+
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        musicPlayersResolveInfo = pm.queryBroadcastReceivers(mediaButtonIntent,
+                PackageManager.GET_RESOLVED_FILTER);
+
+        for (ResolveInfo resolveInfo: musicPlayersResolveInfo) {
+            musicPlayersActivityInfo.add(resolveInfo.activityInfo);
+        }
+
+        return musicPlayersActivityInfo;
+    }
+
+    public static void setSharedPrefString(Context context, String string, String key) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putString(key, string);
+        editor.apply();
+    }
+
     public static void setSharedPrefStringSet(Context context, Set<String> set, String key) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
@@ -118,21 +180,21 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
             Log.d("Saved SharedPref set", readSet.toString());
     }
 
-    public static boolean getSharedPrefBoolean(Context context, String key) {
+    public static boolean getSharedPrefBoolean(Context context, String key, boolean defaultValue) {
         boolean result;
         SharedPreferences prefs =
                 PreferenceManager.getDefaultSharedPreferences(context);
-        result = prefs.getBoolean(key, false);
+        result = prefs.getBoolean(key, defaultValue);
         return result;
 
     }
 
-    public static String getSharedPrefString(Context context, String key) {
+    public static String getSharedPrefString(Context context, String key, String defaultValue) {
         String result;
         SharedPreferences prefs =
                 PreferenceManager.getDefaultSharedPreferences(context);
-        result = prefs.getString(key, null);
-        return result == null ? "" : result;
+        result = prefs.getString(key, defaultValue);
+        return result;
 
     }
 

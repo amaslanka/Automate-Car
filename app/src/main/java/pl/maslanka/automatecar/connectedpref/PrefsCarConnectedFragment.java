@@ -1,7 +1,12 @@
 package pl.maslanka.automatecar.connectedpref;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.MultiSelectListPreference;
@@ -37,13 +42,19 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     private CheckBoxPreference checkIfInPocket;
     private CheckBoxPreference checkWirelessPowerSupply;
     private CheckBoxPreference checkNfcTag;
-    private SwitchPreference showCancelDialog;
+    private CheckBoxPreference showCancelDialog;
     private EditTextIntegerPreference dialogTimeout;
     private CheckBoxPreference actionDialogTimeout;
     private Preference appsToLaunch;
+    private EditTextIntegerPreference sleepTimes;
+    private CheckBoxPreference maxVolume;
+    private CheckBoxPreference playMusic;
+    private Preference chooseMusicPlayer;
     private CheckBoxPreference showNavi;
 
-
+    private MusicPlayerListCreator musicPlayerListCreator;
+    private ProgressDialog dialog;
+    private AlertDialog musicPlayerList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +65,6 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
 
         findPreferences();
         setPreferencesFeatures();
-        refreshBluetoothDevicesList();
 
     }
 
@@ -65,10 +75,14 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         checkIfInPocket = (CheckBoxPreference) findPreference(KEY_CHECK_IF_IN_POCKET);
         checkWirelessPowerSupply = (CheckBoxPreference) findPreference(KEY_CHECK_WIRELESS_POWER_SUPPLY);
         checkNfcTag = (CheckBoxPreference) findPreference(KEY_CHECK_NFC_TAG);
-        showCancelDialog = (SwitchPreference) findPreference(KEY_SHOW_CANCEL_DIALOG);
+        showCancelDialog = (CheckBoxPreference) findPreference(KEY_SHOW_CANCEL_DIALOG);
         dialogTimeout = (EditTextIntegerPreference) findPreference(KEY_DIALOG_TIMEOUT);
         actionDialogTimeout = (CheckBoxPreference) findPreference(KEY_ACTION_DIALOG_TIMEOUT);
-        appsToLaunch = findPreference(KEYS_APPS_TO_LAUNCH);
+        appsToLaunch = findPreference(KEY_APPS_TO_LAUNCH);
+        sleepTimes = (EditTextIntegerPreference) findPreference(KEY_SLEEP_TIMES);
+        maxVolume = (CheckBoxPreference) findPreference(KEY_MAX_VOLUME);
+        playMusic = (CheckBoxPreference) findPreference(KEY_PLAY_MUSIC);
+        chooseMusicPlayer = findPreference(KEY_CHOOSE_MUSIC_PLAYER);
         showNavi = (CheckBoxPreference) findPreference(KEY_SHOW_NAVI);
     }
 
@@ -83,6 +97,17 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
             public boolean onPreferenceClick(Preference preference) {
                 Intent appsToLaunch = new Intent(getActivity(), AppsToLaunch.class);
                 getActivity().startActivity(appsToLaunch);
+                return false;
+            }
+        });
+
+        setSleepTimesFeatures();
+
+        chooseMusicPlayer.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                musicPlayerListCreator = new MusicPlayerListCreator(PrefsCarConnectedFragment.this);
+                musicPlayerListCreator.execute(getActivity());
                 return false;
             }
         });
@@ -115,8 +140,28 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
             }
         });
         dialogTimeout.setDialogMessage(
-                String.format(getString(R.string.duration_time_dialog_message),
+                String.format(getString(R.string.max_min_seconds_dialog_message),
                         DIALOG_DURATION_MIN_VALUE, DIALOG_DURATION_MAX_VALUE));
+    }
+
+    protected void setSleepTimesFeatures() {
+        sleepTimes.getEditText().setFilters(new InputFilter[]{
+                new InputFilterMinMax(SLEEP_TIMES_MIN_VALUE, SLEEP_TIMES_MAX_VALUE)});
+        sleepTimes.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(
+                    android.preference.Preference preference, Object newValue) {
+                if (newValue.toString().trim().equals("")) {
+                    Toast.makeText(getActivity(), getString(R.string.sleep_time_null_alert),
+                            Toast.LENGTH_LONG).show();
+                    return false;
+                }
+                return true;
+            }
+        });
+        sleepTimes.setDialogMessage(
+                String.format(getString(R.string.max_min_seconds_dialog_message),
+                        SLEEP_TIMES_MIN_VALUE, SLEEP_TIMES_MAX_VALUE));
     }
 
     @Override
@@ -141,6 +186,55 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         getPreferenceScreen().getSharedPreferences()
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
+
+
+    public void showProgressDialog() {
+        dialog = new ProgressDialog(getActivity());
+        dialog.setTitle(getResources().getString(R.string.loading_app_list));
+        dialog.setMessage(getResources().getString(R.string.loading_app_list));
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
+    }
+
+    public void dismissProgressDialog() {
+        if (dialog != null) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+    }
+
+    public void showMusicPlayerList (AlertDialog musicPlayerList) {
+        this.musicPlayerList = musicPlayerList;
+        this.musicPlayerList.show();
+    }
+
+    public void dismissMusicPlayerList () {
+        if (musicPlayerList != null) {
+            if (musicPlayerList.isShowing()) {
+                musicPlayerList.dismiss();
+            }
+        }
+    }
+
+    public AlertDialog getMusicPlayerList() {
+        return musicPlayerList;
+    }
+
+    public ProgressDialog getDialog() {
+        return dialog;
+    }
+
+    public MusicPlayerListCreator getMusicPlayerListCreator() {
+        return musicPlayerListCreator;
+    }
+
+    public AsyncTask.Status getMusicPlayerListCreatorStatus() {
+        return musicPlayerListCreator.getStatus();
+    }
+
 
 
 }

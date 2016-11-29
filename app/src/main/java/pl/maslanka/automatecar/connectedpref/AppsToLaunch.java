@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -112,7 +111,7 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
 
         mDragListView = (DragListView) findViewById(R.id.drag_list_view);
         appPackages = new ArrayList<>();
-        appPackages.addAll(Logic.getSharedPrefStringSet(this, KEYS_APPS_TO_LAUNCH));
+        appPackages.addAll(Logic.getSharedPrefStringSet(this, KEY_APPS_TO_LAUNCH));
         appList = Logic.readList(this);
 
         setFloatingActionButton();
@@ -268,7 +267,7 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
 
     protected void saveLists() {
         Logic.setSharedPrefStringSet(
-                AppsToLaunch.this, new HashSet<>(appPackages), KEYS_APPS_TO_LAUNCH);
+                AppsToLaunch.this, new HashSet<>(appPackages), KEY_APPS_TO_LAUNCH);
         Logic.saveListToInternalStorage(AppsToLaunch.this, appList);
     }
 

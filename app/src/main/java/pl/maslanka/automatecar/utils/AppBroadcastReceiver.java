@@ -15,10 +15,11 @@ import pl.maslanka.automatecar.services.CarConnectedService;
  * Created by Artur on 21.11.2016.
  */
 
-public class BluetoothConnectionReceiver extends BroadcastReceiver implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS {
+public class AppBroadcastReceiver extends android.content.BroadcastReceiver implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS {
 
+    private Intent carConnectedService;
 
-    public BluetoothConnectionReceiver(){
+    public AppBroadcastReceiver(){
     }
 
     @Override
@@ -36,9 +37,7 @@ public class BluetoothConnectionReceiver extends BroadcastReceiver implements Co
                         .contains(bluetoothDevice.getAddress()) &&
                         !Logic.isMyServiceRunning(CarConnectedService.class, context)) {
 
-                    Intent carConnectedService = new Intent(context, CarConnectedService.class);
-                    carConnectedService.setAction(POPUP_ACTION);
-                    context.startService(carConnectedService);
+                    startServiceWithAction(context, POPUP_ACTION);
                 }
                 break;
 
@@ -48,10 +47,14 @@ public class BluetoothConnectionReceiver extends BroadcastReceiver implements Co
 
             case CONTINUE_ACTION:
                 Log.d("onReceive", "continue action");
-                Intent carConnectedService = new Intent(context, CarConnectedService.class);
-                carConnectedService.setAction(CONTINUE_ACTION);
-                context.startService(carConnectedService);
+               startServiceWithAction(context, CONTINUE_ACTION);
                 break;
+
+            case PLAY_MUSIC_ACTION:
+                Log.d("onReceive", "play music action");
+                startServiceWithAction(context, PLAY_MUSIC_ACTION);
+                break;
+
 
             case BluetoothAdapter.ACTION_STATE_CHANGED:
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
@@ -68,4 +71,11 @@ public class BluetoothConnectionReceiver extends BroadcastReceiver implements Co
                 break;
         }
     }
+
+    protected void startServiceWithAction(Context context, String action) {
+        carConnectedService = new Intent(context, CarConnectedService.class);
+        carConnectedService.setAction(action);
+        context.startService(carConnectedService);
+    }
 }
+

@@ -23,6 +23,8 @@ public class Constants {
     public interface DEFAULT_VALUES {
         int DIALOG_DURATION_MAX_VALUE = 600;
         int DIALOG_DURATION_MIN_VALUE = 1;
+        int SLEEP_TIMES_MIN_VALUE = 1;
+        int SLEEP_TIMES_MAX_VALUE = 20;
         boolean DISABLE_LOCK_SCREEN_DEFAULT_VALUE = false;
         boolean FORCE_AUTO_ROTATION_DEFAULT_VALUE = false;
         boolean CHECK_IF_IN_POCKET_DEFAULT_VALUE = true;
@@ -31,6 +33,9 @@ public class Constants {
         boolean SHOW_CANCEL_DIALOG_DEFAULT_VALUE = true;
         int DIALOG_TIMEOUT_DEFAULT_VALUE = 10;
         boolean ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE = true;
+        int SLEEP_TIMES_DEFAULT_VALUE = 8;
+        boolean MAX_VOLUME_DEFAULT_VALUE = true;
+        boolean PLAY_MUSIC_DEFAULT_VALUE = false;
         boolean SHOW_NAVI_DEFAULT_VALUE =  true;
     }
 
@@ -44,7 +49,11 @@ public class Constants {
         String KEY_SHOW_CANCEL_DIALOG = "show_cancel_dialog";
         String KEY_DIALOG_TIMEOUT = "dialog_timeout";
         String KEY_ACTION_DIALOG_TIMEOUT = "action_dialog_timeout";
-        String KEYS_APPS_TO_LAUNCH = "apps_to_launch";
+        String KEY_APPS_TO_LAUNCH = "apps_to_launch";
+        String KEY_SLEEP_TIMES = "sleep_times";
+        String KEY_MAX_VOLUME = "max_volume";
+        String KEY_PLAY_MUSIC = "play_music";
+        String KEY_CHOOSE_MUSIC_PLAYER = "choose_music_player";
         String KEY_SHOW_NAVI = "show_navi";
     }
 
@@ -62,5 +71,6 @@ public class Constants {
     public interface BROADCAST_NOTIFICATIONS {
         String POPUP_ACTION = "com.maslanka.automatecar.popup.action";
         String CONTINUE_ACTION = "com.maslanka.automatecar.continue.action";
+        String PLAY_MUSIC_ACTION = "com.maslanka.automatecar.play.music.action";
     }
 }

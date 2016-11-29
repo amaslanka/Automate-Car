@@ -35,7 +35,7 @@
             android:title="@string/check_nfc_tag"
             android:key="check_nfc_tag" />
 
-        <SwitchPreference
+        <CheckBoxPreference
             android:defaultValue="true"
             android:title="@string/show_cancel_dialog"
             android:key="show_cancel_dialog" />
@@ -59,10 +59,34 @@
             android:title="@string/apps_to_launch"
             android:key="apps_to_launch" />
 
+        <pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference
+            android:defaultValue="8"
+            android:selectAllOnFocus="true"
+            android:inputType="number"
+            android:title="@string/sleep_times"
+            android:key="sleep_times" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/max_volume"
+            android:key="max_volume" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/play_music"
+            android:key="play_music" />
+
+        <Preference
+            android:dependency="play_music"
+            android:title="@string/choose_music_player"
+            android:key="choose_music_player" />
+
+
         <CheckBoxPreference
             android:defaultValue="true"
             android:title="@string/show_navigation"
             android:key="show_navi" />
+
 
     </PreferenceCategory>
 

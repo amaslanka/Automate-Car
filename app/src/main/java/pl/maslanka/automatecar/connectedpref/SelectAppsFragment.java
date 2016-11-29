@@ -111,7 +111,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
                 installedApps = Logic.getListOfInstalledApps(activity);
                 appsToSave = Logic.readList(activity);
 
-                appsFromPrefs.addAll(Logic.getSharedPrefStringSet(activity, KEYS_APPS_TO_LAUNCH));
+                appsFromPrefs.addAll(Logic.getSharedPrefStringSet(activity, KEY_APPS_TO_LAUNCH));
                 appsFromPrefsBackup.addAll(appsFromPrefs);
 
                 createAppListData();
@@ -132,7 +132,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
                                 for (PairObject<String, String> pair: appsToSave) {
                                     Log.d("element", pair.toString());
                                 }
-                                Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEYS_APPS_TO_LAUNCH);
+                                Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_APPS_TO_LAUNCH);
                                 Logic.saveListToInternalStorage(activity, appsToSave);
 
                                 ((AppsToLaunch) getActivity()).buildAndRefreshView();
@@ -234,7 +234,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
                 appsFromPrefs.remove(uninstalledApp);
             }
 
-            Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEYS_APPS_TO_LAUNCH);
+            Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_APPS_TO_LAUNCH);
         }
 
         void setCheckStateToCheckBoxes() {

@@ -14,25 +14,26 @@ import android.util.Log;
 import pl.maslanka.automatecar.MainActivity;
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.helperobjectsandinterfaces.Constants;
-import pl.maslanka.automatecar.utils.BluetoothConnectionReceiver;
+import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
 
 
 public class MainService extends Service implements Constants.BROADCAST_NOTIFICATIONS{
     private static final String LOG_TAG = "MainService";
     private Notification notification;
-    private IntentFilter bluetoothIntentFilter;
-    private final BluetoothConnectionReceiver mReceiver = new BluetoothConnectionReceiver();
+    private IntentFilter mIntentFilter;
+    private final AppBroadcastReceiver mReceiver = new AppBroadcastReceiver();
 
 
     @Override
     public void onCreate() {
         super.onCreate();
-        bluetoothIntentFilter = new IntentFilter();
-        bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
-        bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        bluetoothIntentFilter.addAction(CONTINUE_ACTION);
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
+        mIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        mIntentFilter.addAction(CONTINUE_ACTION);
+        mIntentFilter.addAction(PLAY_MUSIC_ACTION);
 
     }
 
@@ -58,7 +59,7 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
             startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
                     notification);
 
-            registerReceiver(mReceiver, bluetoothIntentFilter);
+            registerReceiver(mReceiver, mIntentFilter);
 
         } else if (intent.getAction().equals(
                 Constants.ACTION.STOP_FOREGROUND_ACTION)) {
