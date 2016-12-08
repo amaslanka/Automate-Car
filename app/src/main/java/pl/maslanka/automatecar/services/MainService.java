@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
@@ -32,8 +33,11 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
         mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
         mIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        mIntentFilter.addAction(POPUP_ACTION);
         mIntentFilter.addAction(CONTINUE_ACTION);
+        mIntentFilter.addAction(DISCONTINUE_ACTION);
         mIntentFilter.addAction(PLAY_MUSIC_ACTION);
+        mIntentFilter.addAction(DISABLE_LOCK_SCREEN_ACTION);
 
     }
 
@@ -76,6 +80,7 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopRunningService(this, ForceAutoRotationService.class);
         Log.i(LOG_TAG, "In onDestroy");
     }
 
@@ -85,5 +90,10 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
         return null;
     }
 
+
+    protected void stopRunningService(Context context, Class<?> cls) {
+        Intent intent = new Intent(context, cls);
+        context.stopService(intent);
+    }
 
 }

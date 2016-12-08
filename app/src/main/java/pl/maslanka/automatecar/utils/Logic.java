@@ -1,19 +1,30 @@
 package pl.maslanka.automatecar.utils;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,19 +39,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import pl.maslanka.automatecar.R;
+import pl.maslanka.automatecar.connected.DeviceAdminLock;
+import pl.maslanka.automatecar.helpers.ActivityForResult;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.services.FAutoRotationAccessibilityService;
 
 /**
  * Created by Artur on 09.11.2016.
  */
 
 public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
-
-
-    public Logic() {
-
-    }
 
     public static boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
@@ -155,6 +165,14 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         return musicPlayersActivityInfo;
     }
 
+    public static void setSharedPrefBoolean(Context context, boolean value, String key) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
     public static void setSharedPrefString(Context context, String string, String key) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
@@ -251,4 +269,42 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         }
 
     }
+
+    public static boolean testDeviceAdminPermission(Activity activity) {
+        DevicePolicyManager mDPM = (DevicePolicyManager) activity.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        final ComponentName compName = new ComponentName(activity, DeviceAdminLock.class);
+
+        return mDPM != null && mDPM.isAdminActive(compName);
+    }
+
+    @SuppressLint("NewApi")
+    public static boolean testSystemOverlayPermission(Activity activity) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return Settings.canDrawOverlays(activity);
+        } else {
+            return true;
+        }
+    }
+
+    public static boolean testAccessibilityPermission(Activity activity) {
+        AccessibilityManager mDPM = (AccessibilityManager) activity
+                .getSystemService(Context.ACCESSIBILITY_SERVICE);
+
+        String runningAccessibilityAppPackage;
+        String myAccessibilityAppPackage = activity.getApplicationContext().getPackageName();
+
+        List<AccessibilityServiceInfo> runningServices = mDPM
+                .getEnabledAccessibilityServiceList(AccessibilityEvent.TYPES_ALL_MASK);
+
+        for (AccessibilityServiceInfo service : runningServices) {
+            runningAccessibilityAppPackage =  service.getResolveInfo().serviceInfo.packageName;
+            if (myAccessibilityAppPackage.equals(runningAccessibilityAppPackage)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

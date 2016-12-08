@@ -2,6 +2,7 @@ package pl.maslanka.automatecar.services;
 
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Handler;
@@ -18,7 +19,7 @@ import java.util.List;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.utils.Logic;
-import pl.maslanka.automatecar.connected.PopupActivityConnected;
+import pl.maslanka.automatecar.connected.PopupConnectedActivity;
 
 /**
  * Created by Artur on 22.11.2016.
@@ -26,6 +27,9 @@ import pl.maslanka.automatecar.connected.PopupActivityConnected;
 
 public class CarConnectedService extends Service implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS, Constants.DEFAULT_VALUES {
 
+    private final String LOG_NAME = this.getClass().getSimpleName();
+
+    private Intent intent;
     private boolean disableLockScreen;
     private boolean forceAutoRotation;
     private boolean checkIfInPocket;
@@ -52,8 +56,17 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         @Override
         public void handleMessage(Message msg) {
             switch (action) {
+                case FORCE_ROTATION_ACTION:
+                    Log.d(LOG_NAME, "starting: forceAutoRotationService");
+                    startForcingAutoRotation();
+                    stopSelf(msg.arg1);
+                    break;
                 case POPUP_ACTION:
                     showPopup();
+                    stopSelf(msg.arg1);
+                    break;
+                case DISCONTINUE_ACTION:
+                    stopRunningService(CarConnectedService.this, ForceAutoRotationService.class);
                     stopSelf(msg.arg1);
                     break;
                 case CONTINUE_ACTION:
@@ -63,19 +76,26 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
                     break;
                 case PLAY_MUSIC_ACTION:
                     playMusic();
+                    sendBroadcastAction(DISABLE_LOCK_SCREEN_ACTION);
+                    stopSelf(msg.arg1);
+                    break;
+                case DISABLE_LOCK_SCREEN_ACTION:
+                    disableLockScreen();
                     stopSelf(msg.arg1);
                     break;
                 default:
                     stopSelf(msg.arg1);
             }
 
-            Log.d("CarConnectedService", "stopped! StopID: " + Integer.toString(msg.arg1));
+            Log.d(LOG_NAME, "stopped! StopID: " + Integer.toString(msg.arg1));
 
         }
     }
 
     @Override
     public void onCreate() {
+        Log.d(LOG_NAME, "onCreate");
+
         HandlerThread thread = new HandlerThread("ServiceStartArguments",
                 android.os.Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
@@ -86,7 +106,7 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("CarConnectedService", "started! StartID: " + Integer.toString(startId));
+        Log.d(LOG_NAME, "started! StartID: " + Integer.toString(startId));
 
         Message msg = mServiceHandler.obtainMessage();
         msg.arg1 = startId;
@@ -130,6 +150,16 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         sendBroadcast(intent);
     }
 
+    protected void startForcingAutoRotation() {
+        forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION, FORCE_AUTO_ROTATION_DEFAULT_VALUE);
+
+
+        if (forceAutoRotation) {
+            startNewService(CarConnectedService.this, ForceAutoRotationService.class);
+        }
+
+
+    }
 
     protected void showPopup() {
         showCancelDialog = Logic.getSharedPrefBoolean(
@@ -139,12 +169,14 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         actionDialogTimeout = Logic.getSharedPrefBoolean(
                 CarConnectedService.this, KEY_ACTION_DIALOG_TIMEOUT, ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
         if (showCancelDialog) {
-            Log.d("popUp", "showDialog");
-            Intent popup = new Intent(getBaseContext(), PopupActivityConnected.class);
+            Log.d(LOG_NAME, "showCancelDialog");
+            Intent popup = new Intent(getBaseContext(), PopupConnectedActivity.class);
             popup.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             popup.putExtra(KEY_DIALOG_TIMEOUT, dialogTimeout);
             popup.putExtra(KEY_ACTION_DIALOG_TIMEOUT, actionDialogTimeout);
             startActivity(popup);
+        } else {
+            sendBroadcastAction(CONTINUE_ACTION);
         }
     }
 
@@ -153,7 +185,7 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
                 CarConnectedService.this, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
 
-        Log.d("continue", "launchApps");
+        Log.d(LOG_NAME, "continue - launchApps");
         try {
             Thread.sleep(1000);
             for (PairObject<String, String> app: appList) {
@@ -161,6 +193,7 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
                 Intent launchIntent = getPackageManager().getLaunchIntentForPackage(app.getPackageName());
 
                 if (launchIntent != null) {
+                    launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(launchIntent);
                     Thread.sleep(sleepTimes*1000);
                 } else {
@@ -190,13 +223,13 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
 
                 ComponentName component = new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
 
-                Log.d("broadcastName", musicPlayerInfo.name);
+                Log.d(LOG_NAME, "broadcastName: " + musicPlayerInfo.name);
 
                 sendOrderedPlayBroadcast(component, KeyEvent.ACTION_DOWN);
                 sendOrderedPlayBroadcast(component, KeyEvent.ACTION_UP);
 
             } else {
-                Log.d("musicPlayer", "noMusicPlayerDefined");
+                Log.d(LOG_NAME, "musicPlayer: no Music Player defined");
                 sendPlayBroadcast(KeyEvent.ACTION_DOWN);
                 sendPlayBroadcast(KeyEvent.ACTION_UP);
             }
@@ -216,6 +249,28 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         sendBroadcast(intent);
     }
 
+    protected void disableLockScreen() {
+//        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+//        final KeyguardManager.KeyguardLock kl = km .newKeyguardLock("MyKeyguardLock");
+//        kl.disableKeyguard();
+//
+//        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK
+//                | PowerManager.ACQUIRE_CAUSES_WAKEUP
+//                | PowerManager.ON_AFTER_RELEASE, "MyWakeLock");
+//        wakeLock.acquire();
+    }
+
+    protected void startNewService(Context context, Class<?> cls) {
+        Intent intent = new Intent(context, cls);
+        context.startService(intent);
+    }
+
+    protected void stopRunningService(Context context, Class<?> cls) {
+        Intent intent = new Intent(context, cls);
+        context.stopService(intent);
+        Log.d("stop", "stop serivce called");
+    }
 
 }
 

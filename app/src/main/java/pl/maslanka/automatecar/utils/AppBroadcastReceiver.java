@@ -7,9 +7,10 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
-import pl.maslanka.automatecar.connected.PopupActivityConnected;
+import pl.maslanka.automatecar.connected.PopupConnectedActivity;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.services.CarConnectedService;
+import pl.maslanka.automatecar.services.ForceAutoRotationService;
 
 /**
  * Created by Artur on 21.11.2016.
@@ -17,7 +18,14 @@ import pl.maslanka.automatecar.services.CarConnectedService;
 
 public class AppBroadcastReceiver extends android.content.BroadcastReceiver implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS {
 
-    private Intent carConnectedService;
+    private final String LOG_NAME = this.getClass().getSimpleName();
+
+    private Intent intent;
+    private static boolean inCarAlreadyPerformed;
+
+    public static boolean isInCarAlreadyPerformed() {
+        return inCarAlreadyPerformed;
+    }
 
     public AppBroadcastReceiver(){
     }
@@ -28,33 +36,59 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
         switch (action) {
 
             case BluetoothDevice.ACTION_ACL_CONNECTED:
-                BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                BluetoothDevice bluetoothDeviceConnected = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                Log.d("bluetoothDev", bluetoothDevice.getAddress());
-                Log.d("SharedPrefDevice", Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
+                Log.d(LOG_NAME, "bluetoothDevCon: " + bluetoothDeviceConnected.getAddress());
+                Log.d(LOG_NAME, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
 
-                if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES)
-                        .contains(bluetoothDevice.getAddress()) &&
-                        !Logic.isMyServiceRunning(CarConnectedService.class, context) && !PopupActivityConnected.isInFront) {
-
-                    startServiceWithAction(context, POPUP_ACTION);
+                if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceConnected.getAddress()) &&
+                        !inCarAlreadyPerformed) {
+                    inCarAlreadyPerformed = true;
+                    startServiceWithAction(context, FORCE_ROTATION_ACTION, CarConnectedService.class);
                 }
+
                 break;
 
-            case BluetoothDevice.ACTION_ACL_DISCONNECTED:
-                //Do something with bluetooth device disconnection
+            case POPUP_ACTION:
+                Log.d(LOG_NAME, "popup action");
+                startServiceWithAction(context, POPUP_ACTION, CarConnectedService.class);
                 break;
 
             case CONTINUE_ACTION:
-                Log.d("onReceive", "continue action");
-               startServiceWithAction(context, CONTINUE_ACTION);
+                Log.d(LOG_NAME, "continue action");
+                startServiceWithAction(context, CONTINUE_ACTION, CarConnectedService.class);
+                break;
+
+            case DISCONTINUE_ACTION:
+                Log.d(LOG_NAME, "discontinue action");
+                startServiceWithAction(context, DISCONTINUE_ACTION, CarConnectedService.class);
+                inCarAlreadyPerformed = false;
                 break;
 
             case PLAY_MUSIC_ACTION:
-                Log.d("onReceive", "play music action");
-                startServiceWithAction(context, PLAY_MUSIC_ACTION);
+                Log.d(LOG_NAME, "play music action");
+                startServiceWithAction(context, PLAY_MUSIC_ACTION, CarConnectedService.class);
                 break;
 
+            case DISABLE_LOCK_SCREEN_ACTION:
+                Log.d(LOG_NAME, "disable lock screen action");
+                startServiceWithAction(context, DISABLE_LOCK_SCREEN_ACTION, CarConnectedService.class);
+                break;
+
+            case BluetoothDevice.ACTION_ACL_DISCONNECTED:
+                BluetoothDevice bluetoothDeviceDisconnected = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                Log.d(LOG_NAME, "bluetoothDevDisconnected: " + bluetoothDeviceDisconnected.getAddress());
+                Log.d(LOG_NAME, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
+
+                if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceDisconnected.getAddress()) &&
+                        inCarAlreadyPerformed && !Logic.isMyServiceRunning(CarConnectedService.class, context) &&
+                        !PopupConnectedActivity.isInFront) {
+                    inCarAlreadyPerformed = false;
+                    context.stopService(new Intent(context, ForceAutoRotationService.class));
+                }
+
+                break;
 
             case BluetoothAdapter.ACTION_STATE_CHANGED:
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
@@ -72,10 +106,10 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
         }
     }
 
-    protected void startServiceWithAction(Context context, String action) {
-        carConnectedService = new Intent(context, CarConnectedService.class);
-        carConnectedService.setAction(action);
-        context.startService(carConnectedService);
+    protected void startServiceWithAction(Context context, String action, Class<?> cls) {
+        intent = new Intent(context, cls);
+        intent.setAction(action);
+        context.startService(intent);
     }
 }
 

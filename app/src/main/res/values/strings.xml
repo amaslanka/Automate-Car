@@ -2,7 +2,27 @@
     <string name="app_name">Automate Car</string>
     <string name="device_not_supported">Device not supported!</string>
     <string name="device_not_supported_message">Your device does not support Bluetooth, so this app will not work.</string>
-    <string name="ok">OK</string>
+    <string name="admin_rights_needed">Admin rights needed</string>
+    <string name="need_device_admin_rights_dialog">This app needs device admin rights for controlling screen state
+                                                    and for managing keyguard when you are in a car.</string>
+    <string name="please_turn_on_admin_rights">After clicking OK you will be directed to screen containing more details
+                                                where you will have a possibility to activate device admin right.</string>
+    <string name="device_admin_permissions_granted">Device admin permissions granted!</string>
+    <string name="force_rotation_rights_needed">System overlay rights needed</string>
+    <string name="force_rotation_rights_dialog">This app needs system overlay rights for controlling screen rotation
+                                                when you are in a car.</string>
+    <string name="please_turn_on_system_overlay_rights">After clicking OK you will be directed to screen containing more details
+                                                what is this permission for and you will get a possibility to activate
+                                                device admin right.</string>
+    <string name="force_rotation_permissions_granted">Permissions for changing screen rotation granted!</string>
+    <string name="message_on_disable_admin_rights_request">This app will no loner be able to control screen state.
+                                                            Are you sure you want to disable?</string>
+    <string name="accessibility_service_needed">Accessibility service needed</string>
+    <string name="accessibility_service_dialog">This app needs accessibility service to control screen rotation
+                                                in each app separately.</string>
+    <string name="please_turn_on_accessibility_service">After clicking OK you will be directed to screen containing more details
+                                                Please enable AutomateCar.</string>
+    <string name="accessibility_service_enabled">Accessibility service has been enabled!</string>
     <string name="service_running">Service running</string>
     <string name="stop_service">Stop service</string>
     <string name="car_connected">Car connected</string>
@@ -56,6 +76,10 @@
     <string name="delete_app_question">Delete app?</string>
     <string name="sure_about_deleting_app_question">Are you sure you want to delete this app?</string>
     <string name="clear_selection">Clear selection</string>
+    <string name="accessibility_service_description">Accessibility service is used to manage forced
+                                                    screen rotation</string>
+    <string name="accessibility_service_label">Screen rotation accessibility service</string>
+    <string name="no_system_overlay_permission">No system overlay permission! Auto rotation will not work!</string>
 
 
 </resources>

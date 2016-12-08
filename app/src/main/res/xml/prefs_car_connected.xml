@@ -21,7 +21,7 @@
             android:key="force_auto_rotation" />
 
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:title="@string/check_if_in_pocket"
             android:key="check_if_in_pocket" />
 

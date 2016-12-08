@@ -12,8 +12,7 @@
 
     </style>
 
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/anim_in</item>
+    <style name="DialogAnimation" parent="Base.Animation.AppCompat.Dialog">
         <item name="android:windowExitAnimation">@anim/anim_out</item>
     </style>
 

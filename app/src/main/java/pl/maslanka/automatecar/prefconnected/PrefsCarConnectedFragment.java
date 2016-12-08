@@ -30,6 +30,8 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         Constants.PREF_KEYS, Constants.DEFAULT_VALUES,
         Constants.APP_CREATOR_FRAGMENT {
 
+    private final String LOG_NAME = this.getClass().getSimpleName();
+
     private List<String[]> bluetoothDevicesArray;
     private String[] bluetoothDeviceNamesAndAddresses;
     private String[] bluetoothDeviceAddresses;
@@ -84,6 +86,20 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     }
 
     protected void setPreferencesFeatures() {
+
+        forceAutoRotation.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                return false;
+            }
+        });
+
+        checkIfInPocket.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                return false;
+            }
+        });
 
         checkNfcTag.setEnabled(false);
 
@@ -171,7 +187,7 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("Fragment", "onResume");
+        Log.d(LOG_NAME, "Fragment: onResume");
         refreshBluetoothDevicesList();
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
