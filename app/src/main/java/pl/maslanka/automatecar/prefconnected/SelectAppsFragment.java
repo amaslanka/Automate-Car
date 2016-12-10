@@ -44,7 +44,6 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
     private List<Drawable> appIcons;
     private List<String> appPackages;
     private Set<String> appsFromPrefs;
-    private Set<String> appsFromPrefsBackup;
     private LinkedList<PairObject<String, String>> appsToSave;
     private ArrayAdapterWithIcon adapter;
     private AlertDialog.Builder builder;
@@ -106,18 +105,16 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
                 appIcons = new ArrayList<>();
                 appPackages = new ArrayList<>();
                 appsFromPrefs = new HashSet<>();
-                appsFromPrefsBackup = new HashSet<>();
 
-                installedApps = Logic.getListOfInstalledApps(activity);
+                installedApps = Logic.getListOfUserInstalledApps(activity);
                 appsToSave = Logic.readList(activity);
 
                 appsFromPrefs.addAll(Logic.getSharedPrefStringSet(activity, KEY_APPS_TO_LAUNCH));
-                appsFromPrefsBackup.addAll(appsFromPrefs);
 
                 createAppListData();
                 checkForUninstalledApps(activity);
 
-                adapter = new ArrayAdapterWithIcon(appNames, appIcons, activity);
+                adapter = new ArrayAdapterWithIcon(appNames, appPackages, appIcons, activity);
 
                 setCheckStateToCheckBoxes();
 

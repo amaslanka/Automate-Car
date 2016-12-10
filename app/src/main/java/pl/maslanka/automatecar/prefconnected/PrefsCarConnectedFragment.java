@@ -2,8 +2,10 @@ package pl.maslanka.automatecar.prefconnected;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -30,30 +32,38 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         Constants.PREF_KEYS, Constants.DEFAULT_VALUES,
         Constants.APP_CREATOR_FRAGMENT {
 
-    private final String LOG_NAME = this.getClass().getSimpleName();
+    private final String LOG_TAG = this.getClass().getSimpleName();
 
     private List<String[]> bluetoothDevicesArray;
     private String[] bluetoothDeviceNamesAndAddresses;
     private String[] bluetoothDeviceAddresses;
+
     private MultiSelectListPreference selectBluetoothDevices;
-    private CheckBoxPreference disableLockScreen;
-    private CheckBoxPreference forceAutoRotation;
-    private CheckBoxPreference checkIfInPocket;
-    private CheckBoxPreference checkWirelessPowerSupply;
     private CheckBoxPreference checkNfcTag;
+    private CheckBoxPreference checkWirelessPowerSupply;
+
     private CheckBoxPreference showCancelDialog;
     private EditTextIntegerPreference dialogTimeout;
     private CheckBoxPreference actionDialogTimeout;
+
     private Preference appsToLaunch;
     private EditTextIntegerPreference sleepTimes;
-    private CheckBoxPreference maxVolume;
+
     private CheckBoxPreference playMusic;
-    private Preference chooseMusicPlayer;
+    private Preference selectMusicPlayer;
+
+    private CheckBoxPreference forceAutoRotation;
+    private Preference rotationExcludedApps;
+
+    private CheckBoxPreference disableLockScreen;
+    private CheckBoxPreference checkIfInPocket;
     private CheckBoxPreference showNavi;
 
-    private MusicPlayerListCreator musicPlayerListCreator;
     private ProgressDialog dialog;
+    private MusicPlayerListCreator musicPlayerListCreator;
     private AlertDialog musicPlayerList;
+    private RotationExcludedAppsListCreator rotationExcludedAppsListCreator;
+    private AlertDialog rotationExcludedAppsList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,34 +79,33 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
 
     protected void findPreferences() {
         selectBluetoothDevices = (MultiSelectListPreference) findPreference(KEY_SELECT_BLUETOOTH_DEVICES);
-        disableLockScreen = (CheckBoxPreference) findPreference(KEY_DISABLE_LOCK_SCREEN);
-        forceAutoRotation = (CheckBoxPreference) findPreference(KEY_FORCE_AUTO_ROTATION);
-        checkIfInPocket = (CheckBoxPreference) findPreference(KEY_CHECK_IF_IN_POCKET);
-        checkWirelessPowerSupply = (CheckBoxPreference) findPreference(KEY_CHECK_WIRELESS_POWER_SUPPLY);
         checkNfcTag = (CheckBoxPreference) findPreference(KEY_CHECK_NFC_TAG);
+        checkWirelessPowerSupply = (CheckBoxPreference) findPreference(KEY_CHECK_WIRELESS_POWER_SUPPLY);
         showCancelDialog = (CheckBoxPreference) findPreference(KEY_SHOW_CANCEL_DIALOG);
         dialogTimeout = (EditTextIntegerPreference) findPreference(KEY_DIALOG_TIMEOUT);
         actionDialogTimeout = (CheckBoxPreference) findPreference(KEY_ACTION_DIALOG_TIMEOUT);
         appsToLaunch = findPreference(KEY_APPS_TO_LAUNCH);
         sleepTimes = (EditTextIntegerPreference) findPreference(KEY_SLEEP_TIMES);
-        maxVolume = (CheckBoxPreference) findPreference(KEY_MAX_VOLUME);
         playMusic = (CheckBoxPreference) findPreference(KEY_PLAY_MUSIC);
-        chooseMusicPlayer = findPreference(KEY_CHOOSE_MUSIC_PLAYER);
+        selectMusicPlayer = findPreference(KEY_SELECT_MUSIC_PLAYER);
+        forceAutoRotation = (CheckBoxPreference) findPreference(KEY_FORCE_AUTO_ROTATION);
+        rotationExcludedApps = findPreference(KEY_ROTATION_EXCLUDED_APPS);
+        disableLockScreen = (CheckBoxPreference) findPreference(KEY_DISABLE_LOCK_SCREEN);
+        checkIfInPocket = (CheckBoxPreference) findPreference(KEY_CHECK_IF_IN_POCKET);
         showNavi = (CheckBoxPreference) findPreference(KEY_SHOW_NAVI);
     }
 
     protected void setPreferencesFeatures() {
 
-        forceAutoRotation.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        selectBluetoothDevices.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                return false;
-            }
-        });
-
-        checkIfInPocket.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
+                if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                    android.content.Intent enableIntent = new android.content.Intent(
+                            android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivity(enableIntent);
+                    selectBluetoothDevices.getDialog().dismiss();
+                }
                 return false;
             }
         });
@@ -116,11 +125,22 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
 
         setSleepTimesFeatures();
 
-        chooseMusicPlayer.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        setMusicPlayerSummary(Logic.getSharedPrefString(getActivity(), KEY_SELECT_MUSIC_PLAYER, null));
+
+        selectMusicPlayer.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 musicPlayerListCreator = new MusicPlayerListCreator(PrefsCarConnectedFragment.this);
                 musicPlayerListCreator.execute(getActivity());
+                return false;
+            }
+        });
+
+        rotationExcludedApps.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                rotationExcludedAppsListCreator = new RotationExcludedAppsListCreator(PrefsCarConnectedFragment.this);
+                rotationExcludedAppsListCreator.execute(getActivity());
                 return false;
             }
         });
@@ -134,6 +154,19 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         bluetoothDeviceAddresses = bluetoothDevicesArray.get(1);
         selectBluetoothDevices.setEntries(bluetoothDeviceNamesAndAddresses);
         selectBluetoothDevices.setEntryValues(bluetoothDeviceAddresses);
+    }
+
+    protected void setMusicPlayerSummary(String summary) {
+        PackageManager pm = getActivity().getPackageManager();
+        if (summary == null) {
+            selectMusicPlayer.setSummary(getString(R.string.no_player_selected));
+        } else {
+            try {
+                selectMusicPlayer.setSummary(pm.getApplicationLabel(pm.getApplicationInfo(summary, 0)));
+            } catch (PackageManager.NameNotFoundException e) {
+                selectMusicPlayer.setSummary(summary);
+            }
+        }
     }
 
 
@@ -187,7 +220,7 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(LOG_NAME, "Fragment: onResume");
+        Log.d(LOG_TAG, "Fragment: onResume");
         refreshBluetoothDevicesList();
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
@@ -212,11 +245,13 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     }
 
     public void dismissProgressDialog() {
-        if (dialog != null) {
-            if (dialog.isShowing()) {
+        if (dialog != null)
+            if (dialog.isShowing())
                 dialog.dismiss();
-            }
-        }
+    }
+
+    public ProgressDialog getDialog() {
+        return dialog;
     }
 
     public void showMusicPlayerList (AlertDialog musicPlayerList) {
@@ -225,19 +260,13 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     }
 
     public void dismissMusicPlayerList () {
-        if (musicPlayerList != null) {
-            if (musicPlayerList.isShowing()) {
+        if (musicPlayerList != null)
+            if (musicPlayerList.isShowing())
                 musicPlayerList.dismiss();
-            }
-        }
     }
 
     public AlertDialog getMusicPlayerList() {
         return musicPlayerList;
-    }
-
-    public ProgressDialog getDialog() {
-        return dialog;
     }
 
     public MusicPlayerListCreator getMusicPlayerListCreator() {
@@ -248,6 +277,24 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         return musicPlayerListCreator.getStatus();
     }
 
+
+
+    public void showRotationExcludedAppsList (AlertDialog rotationExcludedAppsList) {
+        this.rotationExcludedAppsList = rotationExcludedAppsList;
+        this.rotationExcludedAppsList.show();
+    }
+
+    public AlertDialog getRotationExcludedAppsList() {
+        return rotationExcludedAppsList;
+    }
+
+    public RotationExcludedAppsListCreator getRotationExcludedAppsListCreator() {
+        return rotationExcludedAppsListCreator;
+    }
+
+    public AsyncTask.Status getRotationExcludedAppsListCreatorStatus() {
+        return rotationExcludedAppsListCreator.getStatus();
+    }
 
 
 }

@@ -36,7 +36,6 @@ public class PopupConnectedFragment extends Fragment implements Constants.PREF_K
 
         setRetainInstance(true);
 
-        Log.e("fragment", "onCreate");
         try {
 
             createAlertDialog();

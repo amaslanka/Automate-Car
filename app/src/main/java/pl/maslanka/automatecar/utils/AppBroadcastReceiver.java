@@ -18,7 +18,7 @@ import pl.maslanka.automatecar.services.ForceAutoRotationService;
 
 public class AppBroadcastReceiver extends android.content.BroadcastReceiver implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS {
 
-    private final String LOG_NAME = this.getClass().getSimpleName();
+    private final String LOG_TAG = this.getClass().getSimpleName();
 
     private Intent intent;
     private static boolean inCarAlreadyPerformed;
@@ -38,8 +38,8 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
             case BluetoothDevice.ACTION_ACL_CONNECTED:
                 BluetoothDevice bluetoothDeviceConnected = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                Log.d(LOG_NAME, "bluetoothDevCon: " + bluetoothDeviceConnected.getAddress());
-                Log.d(LOG_NAME, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
+                Log.d(LOG_TAG, "bluetoothDevCon: " + bluetoothDeviceConnected.getAddress());
+                Log.d(LOG_TAG, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
 
                 if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceConnected.getAddress()) &&
                         !inCarAlreadyPerformed) {
@@ -49,37 +49,43 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
 
                 break;
 
+            case FORCE_ROTATION_COMPLETED:
+                Log.d(LOG_TAG, "force rotation complete received");
+                sendBroadcastAction(context, POPUP_ACTION);
+                break;
+
+
             case POPUP_ACTION:
-                Log.d(LOG_NAME, "popup action");
+                Log.d(LOG_TAG, "popup action");
                 startServiceWithAction(context, POPUP_ACTION, CarConnectedService.class);
                 break;
 
             case CONTINUE_ACTION:
-                Log.d(LOG_NAME, "continue action");
+                Log.d(LOG_TAG, "continue action");
                 startServiceWithAction(context, CONTINUE_ACTION, CarConnectedService.class);
                 break;
 
             case DISCONTINUE_ACTION:
-                Log.d(LOG_NAME, "discontinue action");
+                Log.d(LOG_TAG, "discontinue action");
                 startServiceWithAction(context, DISCONTINUE_ACTION, CarConnectedService.class);
                 inCarAlreadyPerformed = false;
                 break;
 
             case PLAY_MUSIC_ACTION:
-                Log.d(LOG_NAME, "play music action");
+                Log.d(LOG_TAG, "play music action");
                 startServiceWithAction(context, PLAY_MUSIC_ACTION, CarConnectedService.class);
                 break;
 
             case DISABLE_LOCK_SCREEN_ACTION:
-                Log.d(LOG_NAME, "disable lock screen action");
+                Log.d(LOG_TAG, "disable lock screen action");
                 startServiceWithAction(context, DISABLE_LOCK_SCREEN_ACTION, CarConnectedService.class);
                 break;
 
             case BluetoothDevice.ACTION_ACL_DISCONNECTED:
                 BluetoothDevice bluetoothDeviceDisconnected = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                Log.d(LOG_NAME, "bluetoothDevDisconnected: " + bluetoothDeviceDisconnected.getAddress());
-                Log.d(LOG_NAME, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
+                Log.d(LOG_TAG, "bluetoothDevDisconnected: " + bluetoothDeviceDisconnected.getAddress());
+                Log.d(LOG_TAG, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
 
                 if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceDisconnected.getAddress()) &&
                         inCarAlreadyPerformed && !Logic.isMyServiceRunning(CarConnectedService.class, context) &&
@@ -110,6 +116,12 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
         intent = new Intent(context, cls);
         intent.setAction(action);
         context.startService(intent);
+    }
+
+    protected void sendBroadcastAction(Context context, String action) {
+        Intent intent = new Intent();
+        intent.setAction(action);
+        context.sendBroadcast(intent);
     }
 }
 

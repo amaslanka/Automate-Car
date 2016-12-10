@@ -1,7 +1,6 @@
 package pl.maslanka.automatecar.services;
 
 import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -20,19 +19,22 @@ import pl.maslanka.automatecar.utils.Logic;
 public class FAutoRotationAccessibilityService extends AccessibilityService implements
         Constants.PREF_KEYS, Constants.DEFAULT_VALUES {
 
-    private final String LOG_TAG = this.getClass().getSimpleName();
-    private Set<String> rotationExcludedApps;
+    private static final String LOG_TAG = FAutoRotationAccessibilityService.class.getSimpleName();
+    private static Set<String> rotationExcludedApps;
     private boolean forceAutoRotation;
+
+    public static void setRotationExcludedApps(Set<String> newRotationExcludedApps) {
+        rotationExcludedApps = newRotationExcludedApps;
+        Log.e(LOG_TAG, "Set new rotation excluded apps list: " + rotationExcludedApps.toString());
+    }
 
     @Override
     protected void onServiceConnected() {
 
-        rotationExcludedApps = Logic.getSharedPrefStringSet(this, KEY_ROTATION_EXCLUDED_APPS);
+        setRotationExcludedApps(Logic.getSharedPrefStringSet(this, KEY_ROTATION_EXCLUDED_APPS));
 
         forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION,
                 FORCE_AUTO_ROTATION_DEFAULT_VALUE);
-
-        rotationExcludedApps = new HashSet<>();
 
         super.onServiceConnected();
     }
@@ -40,42 +42,46 @@ public class FAutoRotationAccessibilityService extends AccessibilityService impl
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
 
-
         if(event == null) {
             Log.d(LOG_TAG, "Null event");
             return;
         }
 
-
         try {
-            boolean shouldStopService = false;
+
+            Log.d(LOG_TAG, event.getPackageName().toString());
 
             if (forceAutoRotation && AppBroadcastReceiver.isInCarAlreadyPerformed()) {
-                for (String packageName: rotationExcludedApps) {
-                    Log.d(LOG_TAG, "if true");
-                    if (event.getPackageName().toString().equals(packageName)) {
-                        Log.d(LOG_TAG, "app equals");
-                        shouldStopService = true;
-                    } else {
-                        shouldStopService = false;
+                if (rotationExcludedApps.contains(event.getPackageName().toString())) {
+
+                    if (Logic.isMyServiceRunning(ForceAutoRotationService.class, this)) {
+
+                        Log.d(LOG_TAG, "Accessibility service will stop forcing rotation " +
+                                "app package from received event equals the one from excluded apps. " +
+                                "Service has been running before.");
+
+                        Intent autoRotation = new Intent(this, ForceAutoRotationService.class);
+                        stopService(autoRotation);
                     }
-                }
 
-                if (shouldStopService) {
-                    Intent autoRotation = new Intent(this, ForceAutoRotationService.class);
-                    stopService(autoRotation);
-                } else {
-                    Intent autoRotation = new Intent(this, ForceAutoRotationService.class);
-                    startService(autoRotation);
-                }
+                } else  {
 
+                    if (!Logic.isMyServiceRunning(ForceAutoRotationService.class, this)) {
+
+                        Log.d(LOG_TAG, "Accessibility service will start forcing rotation " +
+                                "app package from received event equals the one from excluded apps. " +
+                                "Service has not been running before.");
+
+                        Intent autoRotation = new Intent(this, ForceAutoRotationService.class);
+                        startService(autoRotation);
+                    }
+
+                }
             }
-
 
         } catch (Exception e) {
             Log.d(LOG_TAG, "unable to get package name");
         }
-
 
     }
 

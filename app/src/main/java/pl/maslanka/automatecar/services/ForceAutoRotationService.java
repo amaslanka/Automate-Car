@@ -8,7 +8,7 @@ import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Process;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +25,7 @@ import pl.maslanka.automatecar.helpers.Constants;
 
 public class ForceAutoRotationService extends Service implements Constants.BROADCAST_NOTIFICATIONS {
 
-    private final String LOG_NAME = this.getClass().getSimpleName();
+    private final String LOG_TAG = this.getClass().getSimpleName();
 
     private LinearLayout orientationChanger;
     private Handler mHandler = null;
@@ -35,13 +35,13 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
     public void startHandlerThread(){
         mHandlerThread = new HandlerThread("HandlerThread");
         mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(LOG_NAME, "onCreate");
+        Log.d(LOG_TAG, "onCreate");
 
         startHandlerThread();
 
@@ -49,14 +49,13 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
             @Override
             public void run() {
                 enableAutoRotation(ForceAutoRotationService.this);
-                sendBroadcastAction(POPUP_ACTION);
             }
         });
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LOG_NAME, "onStartCommand");
+        Log.d(LOG_TAG, "onStartCommand");
 
         return START_STICKY;
 
@@ -64,7 +63,7 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
 
     @Override
     public void onDestroy() {
-        Log.d(LOG_NAME, "onDestroy");
+        Log.d(LOG_TAG, "onDestroy");
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -77,7 +76,7 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(LOG_NAME, "onBind");
+        Log.d(LOG_TAG, "onBind");
 
         return null;
     }
@@ -87,16 +86,18 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
             orientationChanger = new LinearLayout(context);
             // Using TYPE_SYSTEM_OVERLAY is crucial to make window appear on top
             // Need the permission android.permission.SYSTEM_ALERT_WINDOW
-            WindowManager.LayoutParams orientationLayout = new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY, 0, PixelFormat.RGBA_8888);
+            WindowManager.LayoutParams orientationLayout = new WindowManager
+                    .LayoutParams(WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY, 0, PixelFormat.RGBA_8888);
             orientationLayout.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR;
 
             WindowManager wm = (WindowManager) context.getSystemService(Service.WINDOW_SERVICE);
             wm.addView(orientationChanger, orientationLayout);
             orientationChanger.setVisibility(View.VISIBLE);
 
-            Log.d(LOG_NAME, "enabled auto rotation");
+            Log.d(LOG_TAG, "enabled auto rotation");
+
         } catch (SecurityException ex) {
-            Log.e(LOG_NAME, "No needed permissions granted! Auto rotation will not work.");
+            Log.e(LOG_TAG, "No needed permissions granted! Auto rotation will not work.");
             Toast.makeText(context, getString(R.string.no_system_overlay_permission), Toast.LENGTH_SHORT).show();
         }
 
@@ -106,10 +107,10 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
         try {
             if (orientationChanger != null) {
                 orientationChanger.setVisibility(View.GONE);
-                Log.d(LOG_NAME, "disabled auto rotation");
+                Log.d(LOG_TAG, "disabled auto rotation");
             }
         } catch (SecurityException ex) {
-            Log.e(LOG_NAME, "No needed permissions granted! Auto rotation will not work.");
+            Log.e(LOG_TAG, "No needed permissions granted! Auto rotation will not work.");
             Toast.makeText(context, getString(R.string.no_system_overlay_permission), Toast.LENGTH_LONG).show();
         }
 

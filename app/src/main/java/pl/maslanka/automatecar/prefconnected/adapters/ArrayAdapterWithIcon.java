@@ -22,12 +22,14 @@ import pl.maslanka.automatecar.R;
 public class ArrayAdapterWithIcon extends BaseAdapter {
 
     private List<String> appNames;
+    private List<String> appPackages;
     private List<Drawable> appIcons;
     private CheckedTextView[] checkedTextViews;
     private Activity activity;
     private CheckedTextView checkedTextView;
     private ImageView appIcon;
     private TextView appName;
+    private TextView appPackage;
 
 
     public CheckedTextView[] getCheckedTextViews() {
@@ -46,11 +48,11 @@ public class ArrayAdapterWithIcon extends BaseAdapter {
         this.activity = activity;
     }
 
-    public ArrayAdapterWithIcon(List<String> appNames, List<Drawable> appIcons, Activity activity) {
+    public ArrayAdapterWithIcon(List<String> appNames, List<String> appPackages, List<Drawable> appIcons, Activity activity) {
         this.appNames = appNames;
-        this.activity = activity;
+        this.appPackages = appPackages;
         this.appIcons = appIcons;
-
+        this.activity = activity;
     }
 
     @Override
@@ -78,10 +80,12 @@ public class ArrayAdapterWithIcon extends BaseAdapter {
         checkedTextView = (CheckedTextView) convertView.findViewById(R.id.checked_text_view);
         appIcon = (ImageView) convertView.findViewById(R.id.app_icon);
         appName = (TextView) convertView.findViewById(R.id.app_name);
+        appPackage = (TextView) convertView.findViewById(R.id.app_package);
 
         checkedTextView.setChecked(checkedTextViews[position].isChecked());
         appIcon.setImageDrawable(appIcons.get(position));
         appName.setText(appNames.get(position));
+        appPackage.setText(appPackages.get(position));
 
         return convertView;
     }

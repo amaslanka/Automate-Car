@@ -17,12 +17,13 @@ import pl.maslanka.automatecar.helpers.Constants;
 
 public class PopupConnectedActivity extends AppCompatActivity implements Constants.PREF_KEYS, Constants.DEFAULT_VALUES, Constants.BROADCAST_NOTIFICATIONS, Constants.POPUP_CONNECTED_FRAGMENT {
 
-    private final String LOG_NAME = this.getClass().getSimpleName();
+    private final String LOG_TAG = this.getClass().getSimpleName();
     private static final String KEY_POPUP_WAS_SHOWING = "popup_was_showing";
 
     public static boolean isInFront = false;
     public static int dialogTimeout;
     public static boolean actionDialogTimeout;
+    public static boolean popupConnectedActive = false;
 
     private PopupConnectedFragment popupFragment;
     private boolean popupWasShowing;
@@ -34,31 +35,29 @@ public class PopupConnectedActivity extends AppCompatActivity implements Constan
 
         turnScreenOn();
 
-        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
+            supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+            overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
 
-        dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT, DIALOG_TIMEOUT_DEFAULT_VALUE);
-        actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT,
-                ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
+            dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT, DIALOG_TIMEOUT_DEFAULT_VALUE);
+            actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT,
+                    ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
 
 
-        if(savedInstanceState == null && popupFragment == null) {
-            Log.e("activity", "savedInstanceNull");
-            popupFragment = new PopupConnectedFragment();
-            // Display the fragment as the main content.
-            getSupportFragmentManager().beginTransaction().add(android.R.id.content, popupFragment, TAG_POPUP_CONNECTED_FRAGMENT).commit();
-        } else {
-            Log.e("activity", "savedInstanceNotNull");
-            popupFragment = (PopupConnectedFragment) getSupportFragmentManager().findFragmentByTag(TAG_POPUP_CONNECTED_FRAGMENT);
-            popupWasShowing = savedInstanceState.getBoolean(KEY_POPUP_WAS_SHOWING);
-            Log.d(LOG_NAME, "popupWasShowing - " + Boolean.toString(popupWasShowing));
-        }
+            if(savedInstanceState == null && popupFragment == null) {
+                popupFragment = new PopupConnectedFragment();
+                // Display the fragment as the main content.
+                getSupportFragmentManager().beginTransaction().add(android.R.id.content, popupFragment, TAG_POPUP_CONNECTED_FRAGMENT).commit();
+            } else {
+                popupFragment = (PopupConnectedFragment) getSupportFragmentManager().findFragmentByTag(TAG_POPUP_CONNECTED_FRAGMENT);
+                popupWasShowing = savedInstanceState.getBoolean(KEY_POPUP_WAS_SHOWING);
+                Log.d(LOG_TAG, "popupWasShowing - " + Boolean.toString(popupWasShowing));
+            }
 
     }
 
+
     @Override
     protected void onResume() {
-        Log.e("activity", "onResume");
         super.onResume();
         isInFront = true;
         if (popupFragment != null)
@@ -69,38 +68,27 @@ public class PopupConnectedActivity extends AppCompatActivity implements Constan
 
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.e("activity", "onDestroy");
-
-        super.onDestroy();
-    }
 
     @Override
     public void finish() {
         super.finish();
-        Log.e("activity", "finish()");
-
         overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
     }
 
 
     @Override
     protected void onPause() {
-        Log.e("activity", "onPause");
 
         super.onPause();
         isInFront = false;
-        if (popupFragment.getAlertDialog() != null) {
-            popupWasShowing = popupFragment.getAlertDialog().isShowing();
-            if (popupWasShowing)
-                popupFragment.getAlertDialog().dismiss();
+        if (popupFragment != null) {
+            if (popupFragment.getAlertDialog() != null) {
+                popupWasShowing = popupFragment.getAlertDialog().isShowing();
+                if (popupWasShowing)
+                    popupFragment.getAlertDialog().dismiss();
+            }
         }
+
     }
 
     @Override

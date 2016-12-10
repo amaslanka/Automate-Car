@@ -27,7 +27,7 @@ import pl.maslanka.automatecar.connected.PopupConnectedActivity;
 
 public class CarConnectedService extends Service implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS, Constants.DEFAULT_VALUES {
 
-    private final String LOG_NAME = this.getClass().getSimpleName();
+    private final String LOG_TAG = this.getClass().getSimpleName();
 
     private Intent intent;
     private boolean disableLockScreen;
@@ -57,7 +57,6 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         public void handleMessage(Message msg) {
             switch (action) {
                 case FORCE_ROTATION_ACTION:
-                    Log.d(LOG_NAME, "starting: forceAutoRotationService");
                     startForcingAutoRotation();
                     stopSelf(msg.arg1);
                     break;
@@ -87,14 +86,14 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
                     stopSelf(msg.arg1);
             }
 
-            Log.d(LOG_NAME, "stopped! StopID: " + Integer.toString(msg.arg1));
+            Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(msg.arg1));
 
         }
     }
 
     @Override
     public void onCreate() {
-        Log.d(LOG_NAME, "onCreate");
+        Log.d(LOG_TAG, "onCreate");
 
         HandlerThread thread = new HandlerThread("ServiceStartArguments",
                 android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -106,7 +105,7 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LOG_NAME, "started! StartID: " + Integer.toString(startId));
+        Log.d(LOG_TAG, "started! StartID: " + Integer.toString(startId));
 
         Message msg = mServiceHandler.obtainMessage();
         msg.arg1 = startId;
@@ -138,27 +137,20 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         actionDialogTimeout = Logic.getSharedPrefBoolean(this, KEY_ACTION_DIALOG_TIMEOUT, ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
         appList = Logic.readList(this);
         sleepTimes = Integer.parseInt(Logic.getSharedPrefString(this, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
-        maxVolume = Logic.getSharedPrefBoolean(this, KEY_MAX_VOLUME, MAX_VOLUME_DEFAULT_VALUE);
         playMusic = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
-        musicPlayer = Logic.getSharedPrefString(this, KEY_CHOOSE_MUSIC_PLAYER, null);
+        musicPlayer = Logic.getSharedPrefString(this, KEY_SELECT_MUSIC_PLAYER, null);
         showNavi = Logic.getSharedPrefBoolean(this, KEY_SHOW_NAVI, SHOW_NAVI_DEFAULT_VALUE);
     }
 
-    protected void sendBroadcastAction(String action) {
-        Intent intent = new Intent();
-        intent.setAction(action);
-        sendBroadcast(intent);
-    }
 
     protected void startForcingAutoRotation() {
+        Log.d(LOG_TAG, "starting: forceAutoRotationService");
         forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION, FORCE_AUTO_ROTATION_DEFAULT_VALUE);
 
-
-        if (forceAutoRotation) {
+        if (forceAutoRotation)
             startNewService(CarConnectedService.this, ForceAutoRotationService.class);
-        }
 
-
+        sendBroadcastAction(FORCE_ROTATION_COMPLETED);
     }
 
     protected void showPopup() {
@@ -169,8 +161,8 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         actionDialogTimeout = Logic.getSharedPrefBoolean(
                 CarConnectedService.this, KEY_ACTION_DIALOG_TIMEOUT, ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
         if (showCancelDialog) {
-            Log.d(LOG_NAME, "showCancelDialog");
-            Intent popup = new Intent(getBaseContext(), PopupConnectedActivity.class);
+            Log.d(LOG_TAG, "showCancelDialog");
+            Intent popup = new Intent(this, PopupConnectedActivity.class);
             popup.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             popup.putExtra(KEY_DIALOG_TIMEOUT, dialogTimeout);
             popup.putExtra(KEY_ACTION_DIALOG_TIMEOUT, actionDialogTimeout);
@@ -185,7 +177,7 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
                 CarConnectedService.this, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
 
-        Log.d(LOG_NAME, "continue - launchApps");
+        Log.d(LOG_TAG, "continue - launchApps");
         try {
             Thread.sleep(1000);
             for (PairObject<String, String> app: appList) {
@@ -207,7 +199,7 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
 
     protected void playMusic() {
         playMusic = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
-        musicPlayer = Logic.getSharedPrefString(this, KEY_CHOOSE_MUSIC_PLAYER, null);
+        musicPlayer = Logic.getSharedPrefString(this, KEY_SELECT_MUSIC_PLAYER, null);
 
         if (playMusic) {
             if (musicPlayer != null) {
@@ -223,13 +215,13 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
 
                 ComponentName component = new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
 
-                Log.d(LOG_NAME, "broadcastName: " + musicPlayerInfo.name);
+                Log.d(LOG_TAG, "broadcastName: " + musicPlayerInfo.name);
 
                 sendOrderedPlayBroadcast(component, KeyEvent.ACTION_DOWN);
                 sendOrderedPlayBroadcast(component, KeyEvent.ACTION_UP);
 
             } else {
-                Log.d(LOG_NAME, "musicPlayer: no Music Player defined");
+                Log.d(LOG_TAG, "musicPlayer: no Music Player defined");
                 sendPlayBroadcast(KeyEvent.ACTION_DOWN);
                 sendPlayBroadcast(KeyEvent.ACTION_UP);
             }
@@ -270,6 +262,12 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         Intent intent = new Intent(context, cls);
         context.stopService(intent);
         Log.d("stop", "stop serivce called");
+    }
+
+    protected void sendBroadcastAction(String action) {
+        Intent intent = new Intent();
+        intent.setAction(action);
+        sendBroadcast(intent);
     }
 
 }

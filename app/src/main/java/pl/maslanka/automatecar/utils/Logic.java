@@ -92,16 +92,25 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         return resultList;
     }
 
-    public static List<ApplicationInfo> getListOfInstalledApps(Activity activity) {
+    public static List<ApplicationInfo> getListOfAllInstalledApps(Activity activity) {
         final PackageManager pm = activity.getPackageManager();
-        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        List<ApplicationInfo> allInstalledApps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
-        List<ApplicationInfo> installedApps = new ArrayList<>();
+        Collections.sort(allInstalledApps, new ApplicationInfo.DisplayNameComparator(pm));
 
-        for(ApplicationInfo app : packages) {
+        return allInstalledApps;
+    }
+
+    public static List<ApplicationInfo> getListOfUserInstalledApps(Activity activity) {
+        final PackageManager pm = activity.getPackageManager();
+        List<ApplicationInfo> allInstalledApps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        List<ApplicationInfo> userInstalledApps = new ArrayList<>();
+
+        for(ApplicationInfo app : allInstalledApps) {
             //checks for flags; if flagged, check if updated system app
             if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-                installedApps.add(app);
+                userInstalledApps.add(app);
                 //it's a system app, not interested
             } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                 //Discard this one
@@ -109,13 +118,13 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
             } else if(app.packageName.equals(activity.getPackageName())) {
                 //Discard this one
             } else {
-                installedApps.add(app);
+                userInstalledApps.add(app);
             }
         }
 
-        Collections.sort(installedApps, new ApplicationInfo.DisplayNameComparator(pm));
+        Collections.sort(userInstalledApps, new ApplicationInfo.DisplayNameComparator(pm));
 
-        return installedApps;
+        return userInstalledApps;
     }
 
     public static List<ApplicationInfo> getListOfInstalledMusicPlayers (Activity activity) {

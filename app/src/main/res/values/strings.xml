@@ -46,20 +46,26 @@
     <string name="set_volume_in_level">Choose in car volume level</string>
     <string name="set_volume_out">Set media volume after leaving car</string>
     <string name="set_volume_out_level">Choose volume level after leaving car</string>
+    <string name="trigger">Trigger</string>
     <string name="select_bluetooth_devices">Select Bluetooth devices</string>
     <string name="disable_lock_screen">Disable lock screen</string>
+    <string name="auto_rotation">Auto rotation</string>
     <string name="force_auto_rotation">Force auto-rotation</string>
+    <string name="rotation_excluded_apps">Excluded apps</string>
     <string name="check_if_in_pocket">Check if the device is in pocket</string>
     <string name="check_wireless_power_supply">Check if device is connected to a wireless power supply</string>
     <string name="check_nfc_tag">Check if NFC tag has been recognized</string>
+    <string name="cancellation_dialog">Cancellation dialog</string>
     <string name="show_cancel_dialog">Show dialog to cancel operation</string>
     <string name="dialog_timeout">Dialog duration</string>
     <string name="action_dialog_timeout">Continue operation on dialog timeout</string>
+    <string name="launch_apps">Launch apps</string>
     <string name="apps_to_launch">Select apps to launch</string>
     <string name="sleep_times">Sleep times between launching apps</string>
     <string name="max_volume">Max media volume</string>
+    <string name="control_media">Control media</string>
     <string name="play_music">Play music when connected</string>
-    <string name="choose_music_player">Choose music player</string>
+    <string name="other_features">Other features</string>
     <string name="show_navigation">Open navigation if it is active</string>
     <string name="service_started">Automate Car service started</string>
     <string name="service_stopped">Automate Car service stopped</string>
@@ -72,7 +78,6 @@
     <string name="add_apps">Add apps</string>
     <string name="drag_apps_to_change_order">To change order drag apps icons</string>
     <string name="car_detected_desc">Car bluetooth set has been connected. Do you want to enable car mode?</string>
-    <string name="title_activity_main2">Main2Activity</string>
     <string name="delete_app_question">Delete app?</string>
     <string name="sure_about_deleting_app_question">Are you sure you want to delete this app?</string>
     <string name="clear_selection">Clear selection</string>
@@ -80,6 +85,8 @@
                                                     screen rotation</string>
     <string name="accessibility_service_label">Screen rotation accessibility service</string>
     <string name="no_system_overlay_permission">No system overlay permission! Auto rotation will not work!</string>
+    <string name="exclude_from_forcing_auto_rotation">Exclude from forcing auto rotation</string>
+    <string name="no_player_selected">No specified player selected</string>
 
 
 </resources>

@@ -29,7 +29,7 @@ import pl.maslanka.automatecar.utils.Logic;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
         CompoundButton.OnCheckedChangeListener, Constants.DEFAULT_VALUES, Constants.PREF_KEYS {
 
-    private final String LOG_NAME = this.getClass().getSimpleName();
+    private final String LOG_TAG = this.getClass().getSimpleName();
     private static final int DEVICE_ADMIN_REQUEST_CODE = 1346;
     private static final int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 2541;
     private static final int ACCESSIBILITY_MANAGER_REQUEST_CODE = 3462;
@@ -64,9 +64,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             adminDialogWasShowing = savedInstanceState.getBoolean(ADMIN_DIALOG_WAS_SHOWING);
             overlayDialogWasShowing = savedInstanceState.getBoolean(OVERLAY_DIALOG_WAS_SHOWING);
             accessibilityDialogWasShowing = savedInstanceState.getBoolean(ACCESSIBILITY_DIALOG_WAS_SHOWING);
-            Log.d(LOG_NAME, "firstAdminDialog: " + Boolean.toString(adminDialogWasShowing));
-            Log.d(LOG_NAME, "firstOverlayDialog: " + Boolean.toString(overlayDialogWasShowing));
-            Log.d(LOG_NAME, "firstAccessibilityDialog: " + Boolean.toString(accessibilityDialogWasShowing));
+            Log.d(LOG_TAG, "firstAdminDialog: " + Boolean.toString(adminDialogWasShowing));
+            Log.d(LOG_TAG, "firstOverlayDialog: " + Boolean.toString(overlayDialogWasShowing));
+            Log.d(LOG_TAG, "firstAccessibilityDialog: " + Boolean.toString(accessibilityDialogWasShowing));
         }
 
         firstRun = Logic.getSharedPrefBoolean(this, KEY_FIRST_RUN, FIRST_RUN_DEFAULT_VALUE);
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.car_connected:
-                Log.d(LOG_NAME, "car connected card clicked");
+                Log.d(LOG_TAG, "car connected card clicked");
                 Intent carConnectedIntent = new Intent(MainActivity.this, PrefsCarConnected.class);
                 startActivity(carConnectedIntent);
                 break;
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onPause();
         if (builderAdmin != null) {
             adminDialogWasShowing = builderAdmin.isShowing();
-            Log.d(LOG_NAME, "adminDialogWasShowing: " + Boolean.toString(adminDialogWasShowing));
+            Log.d(LOG_TAG, "adminDialogWasShowing: " + Boolean.toString(adminDialogWasShowing));
             if (adminDialogWasShowing) {
                 builderAdmin.dismiss();
             }
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (builderOverlay != null) {
             overlayDialogWasShowing = builderOverlay.isShowing();
-            Log.d(LOG_NAME, "overlayDialogWasShowing: " + Boolean.toString(overlayDialogWasShowing));
+            Log.d(LOG_TAG, "overlayDialogWasShowing: " + Boolean.toString(overlayDialogWasShowing));
             if (overlayDialogWasShowing) {
                 builderOverlay.dismiss();
             }
@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (builderAccessibility != null) {
             accessibilityDialogWasShowing = builderAccessibility.isShowing();
-            Log.d(LOG_NAME, "accessibilityDialogWasShowing: " + Boolean.toString(accessibilityDialogWasShowing));
+            Log.d(LOG_TAG, "accessibilityDialogWasShowing: " + Boolean.toString(accessibilityDialogWasShowing));
             if (accessibilityDialogWasShowing) {
                 builderAccessibility.dismiss();
             }
@@ -260,18 +260,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(LOG_NAME, "adminDialogIsShowing: " + Boolean.toString(adminDialogWasShowing));
+        Log.d(LOG_TAG, "adminDialogIsShowing: " + Boolean.toString(adminDialogWasShowing));
         if (adminDialogWasShowing) {
             showDeviceAdminPermissionDialog();
         }
 
-        Log.d(LOG_NAME, "overlayDialogIsShowing: " + Boolean.toString(overlayDialogWasShowing));
+        Log.d(LOG_TAG, "overlayDialogIsShowing: " + Boolean.toString(overlayDialogWasShowing));
 
         if (overlayDialogWasShowing) {
             showSystemOverlayPermissionDialog();
         }
 
-        Log.d(LOG_NAME, "accessibilityDialogIsShowing: " + Boolean.toString(accessibilityDialogWasShowing));
+        Log.d(LOG_TAG, "accessibilityDialogIsShowing: " + Boolean.toString(accessibilityDialogWasShowing));
 
         if (accessibilityDialogWasShowing) {
             showAccessibilityServiceDialog();

@@ -19,8 +19,12 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
     private AppCompatDelegate mDelegate;
     private PrefsCarConnectedFragment prefsCarConnectedFragment;
 
-    private static final String KEY_MUSIC_PLAYER_LIST_WAS_SHOWING = "app_list_was_showing";
+    private static final String KEY_MUSIC_PLAYER_LIST_WAS_SHOWING = "music_player_list_was_showing";
+    private static final String KEY_ROTATION_EXCLUDED_APPS_LIST_WAS_SHOWING =
+            "rotation_excluded_apps_list_was_showing";
+
     private boolean musicPlayerListWasShowing;
+    private boolean rotationExcludedAppListWasShowing;
 
 
     @Override
@@ -36,6 +40,7 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
         } else {
             prefsCarConnectedFragment = (PrefsCarConnectedFragment) getSupportFragmentManager().findFragmentByTag(TAG_APP_CREATOR_FRAGMENT);
             musicPlayerListWasShowing = savedInstanceState.getBoolean(KEY_MUSIC_PLAYER_LIST_WAS_SHOWING);
+            rotationExcludedAppListWasShowing = savedInstanceState.getBoolean(KEY_ROTATION_EXCLUDED_APPS_LIST_WAS_SHOWING);
         }
 
 
@@ -72,6 +77,9 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
             if (prefsCarConnectedFragment.getMusicPlayerList().isShowing())
                 prefsCarConnectedFragment.getMusicPlayerList().dismiss();
 
+        if (prefsCarConnectedFragment.getRotationExcludedAppsList() != null)
+            if (prefsCarConnectedFragment.getRotationExcludedAppsList().isShowing())
+                prefsCarConnectedFragment.getRotationExcludedAppsList().dismiss();
 
         if (prefsCarConnectedFragment.getDialog() != null)
             if (prefsCarConnectedFragment.getDialog().isShowing())
@@ -92,6 +100,14 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
                 if (musicPlayerListWasShowing && prefsCarConnectedFragment.getMusicPlayerList() != null)
                     prefsCarConnectedFragment.getMusicPlayerList().show();
             }
+
+            if (prefsCarConnectedFragment.getRotationExcludedAppsListCreator() != null) {
+                if (prefsCarConnectedFragment.getRotationExcludedAppsListCreatorStatus() == AsyncTask.Status.RUNNING)
+                    prefsCarConnectedFragment.getDialog().show();
+
+                if (rotationExcludedAppListWasShowing && prefsCarConnectedFragment.getRotationExcludedAppsList() != null)
+                    prefsCarConnectedFragment.getRotationExcludedAppsList().show();
+            }
         }
     }
 
@@ -100,6 +116,11 @@ public class PrefsCarConnected extends AppCompatActivity implements Constants.AP
         if (prefsCarConnectedFragment.getMusicPlayerList() != null)
             savedInstanceState.putBoolean(KEY_MUSIC_PLAYER_LIST_WAS_SHOWING,
                     prefsCarConnectedFragment.getMusicPlayerList().isShowing());
+
+        if (prefsCarConnectedFragment.getRotationExcludedAppsList() != null)
+            savedInstanceState.putBoolean(KEY_ROTATION_EXCLUDED_APPS_LIST_WAS_SHOWING,
+                    prefsCarConnectedFragment.getRotationExcludedAppsList().isShowing());
+
         super.onSaveInstanceState(savedInstanceState);
     }
 }

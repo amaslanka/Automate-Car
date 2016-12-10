@@ -4,7 +4,7 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
 
-    <PreferenceCategory android:title="@string/car_connected">
+    <PreferenceCategory android:title="@string/trigger">
 
         <MultiSelectListPreference
             android:title="@string/select_bluetooth_devices"
@@ -12,28 +12,22 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:title="@string/disable_lock_screen"
-            android:key="disable_lock_screen" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:title="@string/force_auto_rotation"
-            android:key="force_auto_rotation" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:title="@string/check_if_in_pocket"
-            android:key="check_if_in_pocket" />
+            android:title="@string/check_nfc_tag"
+            android:key="check_nfc_tag" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:title="@string/check_wireless_power_supply"
             android:key="check_wireless_power_supply" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:title="@string/check_nfc_tag"
-            android:key="check_nfc_tag" />
+    </PreferenceCategory>
+
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/cancellation_dialog">
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -55,6 +49,14 @@
             android:title="@string/action_dialog_timeout"
             android:key="action_dialog_timeout" />
 
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/launch_apps">
+
         <Preference
             android:title="@string/apps_to_launch"
             android:key="apps_to_launch" />
@@ -66,10 +68,13 @@
             android:title="@string/sleep_times"
             android:key="sleep_times" />
 
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:title="@string/max_volume"
-            android:key="max_volume" />
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/control_media">
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -78,15 +83,53 @@
 
         <Preference
             android:dependency="play_music"
-            android:title="@string/choose_music_player"
-            android:key="choose_music_player" />
+            android:title="@string/select_music_player"
+            android:key="select_music_player" />
 
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+
+    <PreferenceCategory android:title="@string/auto_rotation">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/force_auto_rotation"
+            android:key="force_auto_rotation" />
+
+
+        <Preference
+            android:dependency="force_auto_rotation"
+            android:title="@string/rotation_excluded_apps"
+            android:key="rotation_excluded_apps" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+
+    <PreferenceCategory  android:title="@string/other_features">
+
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/check_if_in_pocket"
+            android:key="check_if_in_pocket" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/disable_lock_screen"
+            android:key="disable_lock_screen" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:title="@string/show_navigation"
             android:key="show_navi" />
-
 
     </PreferenceCategory>
 

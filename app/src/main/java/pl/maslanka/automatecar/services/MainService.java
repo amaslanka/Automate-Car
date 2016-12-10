@@ -33,6 +33,7 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
         mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
         mIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        mIntentFilter.addAction(FORCE_ROTATION_COMPLETED);
         mIntentFilter.addAction(POPUP_ACTION);
         mIntentFilter.addAction(CONTINUE_ACTION);
         mIntentFilter.addAction(DISCONTINUE_ACTION);
