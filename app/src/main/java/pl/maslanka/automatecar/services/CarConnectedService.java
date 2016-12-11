@@ -1,31 +1,40 @@
 package pl.maslanka.automatecar.services;
 
+import android.app.Activity;
+import android.app.Application;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.view.KeyEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.LinkedList;
-import java.util.List;
 
+import pl.maslanka.automatecar.connected.PopupConnectedActivity;
+import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
+import pl.maslanka.automatecar.callbackmessages.MessagePopupConnected;
+import pl.maslanka.automatecar.utils.Actions;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.utils.Logic;
-import pl.maslanka.automatecar.connected.PopupConnectedActivity;
+import pl.maslanka.automatecar.utils.MyApplication;
 
 /**
  * Created by Artur on 22.11.2016.
  */
 
-public class CarConnectedService extends Service implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS, Constants.DEFAULT_VALUES {
+public class CarConnectedService extends Service
+        implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS, Constants.DEFAULT_VALUES,
+        Constants.CALLBACK_ACTIONS, Application.ActivityLifecycleCallbacks {
 
     private final String LOG_TAG = this.getClass().getSimpleName();
 
@@ -49,6 +58,30 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
+    public void callback(String action) {
+        Log.d(LOG_TAG, "Received callback - " + action);
+        switch (action) {
+            case FORCE_ROTATION_COMPLETED:
+                sendBroadcastAction(POPUP_ACTION);
+                break;
+            case POPUP_FINISH_CONTINUE:
+                sendBroadcastAction(CONTINUE_ACTION);
+                break;
+            case POPUP_FINISH_DISCONTINUE:
+                sendBroadcastAction(DISCONTINUE_ACTION);
+                break;
+            case LAUNCH_APPS_COMPLETED:
+                sendBroadcastAction(PLAY_MUSIC_ACTION);
+                break;
+            case PLAY_MUSIC_COMPLETED:
+                sendBroadcastAction(DISMISS_LOCK_SCREEN_ACTION);
+                break;
+            case DISMISS_LOCK_SCREEN_COMPLETED:
+                break;
+
+        }
+    }
+
     private final class ServiceHandler extends Handler {
         ServiceHandler(Looper looper) {
             super(looper);
@@ -57,11 +90,11 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         public void handleMessage(Message msg) {
             switch (action) {
                 case FORCE_ROTATION_ACTION:
-                    startForcingAutoRotation();
+                    Actions.startForcingAutoRotation(CarConnectedService.this, mConnection);
                     stopSelf(msg.arg1);
                     break;
                 case POPUP_ACTION:
-                    showPopup();
+                    Actions.showConnectedPopup(CarConnectedService.this);
                     stopSelf(msg.arg1);
                     break;
                 case DISCONTINUE_ACTION:
@@ -69,17 +102,15 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
                     stopSelf(msg.arg1);
                     break;
                 case CONTINUE_ACTION:
-                    launchApps();
-                    sendBroadcastAction(PLAY_MUSIC_ACTION);
+                    Actions.launchApps(CarConnectedService.this);
                     stopSelf(msg.arg1);
                     break;
                 case PLAY_MUSIC_ACTION:
-                    playMusic();
-                    sendBroadcastAction(DISABLE_LOCK_SCREEN_ACTION);
+                    Actions.playMusic(CarConnectedService.this);
                     stopSelf(msg.arg1);
                     break;
-                case DISABLE_LOCK_SCREEN_ACTION:
-                    disableLockScreen();
+                case DISMISS_LOCK_SCREEN_ACTION:
+                    Actions.dismissLockScreen(CarConnectedService.this);
                     stopSelf(msg.arg1);
                     break;
                 default:
@@ -142,132 +173,77 @@ public class CarConnectedService extends Service implements Constants.PREF_KEYS,
         showNavi = Logic.getSharedPrefBoolean(this, KEY_SHOW_NAVI, SHOW_NAVI_DEFAULT_VALUE);
     }
 
-
-    protected void startForcingAutoRotation() {
-        Log.d(LOG_TAG, "starting: forceAutoRotationService");
-        forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION, FORCE_AUTO_ROTATION_DEFAULT_VALUE);
-
-        if (forceAutoRotation)
-            startNewService(CarConnectedService.this, ForceAutoRotationService.class);
-
-        sendBroadcastAction(FORCE_ROTATION_COMPLETED);
-    }
-
-    protected void showPopup() {
-        showCancelDialog = Logic.getSharedPrefBoolean(
-                CarConnectedService.this, KEY_SHOW_CANCEL_DIALOG, SHOW_CANCEL_DIALOG_DEFAULT_VALUE);
-        dialogTimeout = Integer.parseInt(Logic.getSharedPrefString(
-                CarConnectedService.this, KEY_DIALOG_TIMEOUT, Integer.toString(DIALOG_TIMEOUT_DEFAULT_VALUE)));
-        actionDialogTimeout = Logic.getSharedPrefBoolean(
-                CarConnectedService.this, KEY_ACTION_DIALOG_TIMEOUT, ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
-        if (showCancelDialog) {
-            Log.d(LOG_TAG, "showCancelDialog");
-            Intent popup = new Intent(this, PopupConnectedActivity.class);
-            popup.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            popup.putExtra(KEY_DIALOG_TIMEOUT, dialogTimeout);
-            popup.putExtra(KEY_ACTION_DIALOG_TIMEOUT, actionDialogTimeout);
-            startActivity(popup);
-        } else {
-            sendBroadcastAction(CONTINUE_ACTION);
-        }
-    }
-
-    protected void launchApps() {
-        appList = Logic.readList(CarConnectedService.this);
-        sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
-                CarConnectedService.this, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
-
-        Log.d(LOG_TAG, "continue - launchApps");
-        try {
-            Thread.sleep(1000);
-            for (PairObject<String, String> app: appList) {
-
-                Intent launchIntent = getPackageManager().getLaunchIntentForPackage(app.getPackageName());
-
-                if (launchIntent != null) {
-                    launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(launchIntent);
-                    Thread.sleep(sleepTimes*1000);
-                } else {
-                    Log.e("AppLaunchingError", "Package " + app.getPackageName() + " not found!");
-                }
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected void playMusic() {
-        playMusic = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
-        musicPlayer = Logic.getSharedPrefString(this, KEY_SELECT_MUSIC_PLAYER, null);
-
-        if (playMusic) {
-            if (musicPlayer != null) {
-
-                List<ActivityInfo> musicPlayersActivityInfo = Logic.getListOfMediaBroadcastReceivers(this);
-                ActivityInfo musicPlayerInfo = new ActivityInfo();
-
-                for (ActivityInfo activityInfo: musicPlayersActivityInfo) {
-                    if (activityInfo.packageName.equals(musicPlayer)) {
-                        musicPlayerInfo = activityInfo;
-                    }
-                }
-
-                ComponentName component = new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
-
-                Log.d(LOG_TAG, "broadcastName: " + musicPlayerInfo.name);
-
-                sendOrderedPlayBroadcast(component, KeyEvent.ACTION_DOWN);
-                sendOrderedPlayBroadcast(component, KeyEvent.ACTION_UP);
-
-            } else {
-                Log.d(LOG_TAG, "musicPlayer: no Music Player defined");
-                sendPlayBroadcast(KeyEvent.ACTION_DOWN);
-                sendPlayBroadcast(KeyEvent.ACTION_UP);
-            }
-        }
-    }
-
-    protected void sendOrderedPlayBroadcast(ComponentName component, int action) {
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.setComponent(component);
-        intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
-        sendOrderedBroadcast(intent, null);
-    }
-
-    protected void sendPlayBroadcast(int action) {
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
-        sendBroadcast(intent);
-    }
-
-    protected void disableLockScreen() {
-//        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-//        final KeyguardManager.KeyguardLock kl = km .newKeyguardLock("MyKeyguardLock");
-//        kl.disableKeyguard();
-//
-//        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-//        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK
-//                | PowerManager.ACQUIRE_CAUSES_WAKEUP
-//                | PowerManager.ON_AFTER_RELEASE, "MyWakeLock");
-//        wakeLock.acquire();
-    }
-
-    protected void startNewService(Context context, Class<?> cls) {
-        Intent intent = new Intent(context, cls);
-        context.startService(intent);
-    }
-
     protected void stopRunningService(Context context, Class<?> cls) {
         Intent intent = new Intent(context, cls);
         context.stopService(intent);
-        Log.d("stop", "stop serivce called");
+        Log.d(LOG_TAG, "Following service will be stopped - " + cls.getSimpleName());
     }
 
     protected void sendBroadcastAction(String action) {
         Intent intent = new Intent();
         intent.setAction(action);
-        sendBroadcast(intent);
+        MyApplication.getAppContext().sendBroadcast(intent);
+    }
+
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+
+            if (className.getClassName().equals(ForceAutoRotationService.class.getName())) {
+                Log.d(LOG_TAG, "Service " + className.getClass().getSimpleName()
+                        + " connected - posting message");
+                EventBus.getDefault().post(new MessageForceAutoRotation(CarConnectedService.this));
+                CarConnectedService.this.unbindService(mConnection);
+            }
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+        }
+    };
+
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity) {
+        if (activity instanceof PopupConnectedActivity) {
+            Log.d(LOG_TAG, "Activity " + activity.getClass().getSimpleName() + " started." +
+                    "This service will post message to this activity.");
+            EventBus.getDefault().post(new MessagePopupConnected(CarConnectedService.this));
+        }
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+
     }
 
 }

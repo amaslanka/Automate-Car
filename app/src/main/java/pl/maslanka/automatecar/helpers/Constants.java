@@ -76,11 +76,19 @@ public class Constants {
 
     public interface BROADCAST_NOTIFICATIONS {
         String FORCE_ROTATION_ACTION = "com.maslanka.automatecar.force.rotation.action";
-        String FORCE_ROTATION_COMPLETED = "com.maslanka.automatecar.force.rotation.completed";
         String POPUP_ACTION = "com.maslanka.automatecar.popup.action";
         String CONTINUE_ACTION = "com.maslanka.automatecar.continue.action";
         String DISCONTINUE_ACTION = "com.maslanka.automatecar.discontinue.action";
         String PLAY_MUSIC_ACTION = "com.maslanka.automatecar.play.music.action";
-        String DISABLE_LOCK_SCREEN_ACTION = "com.maslanka.automatecar.disable.lock.screen.action";
+        String DISMISS_LOCK_SCREEN_ACTION = "com.maslanka.automatecar.dismiss.lock.screen.action";
+    }
+
+    public interface CALLBACK_ACTIONS {
+        String FORCE_ROTATION_COMPLETED = "com.maslanka.automatecar.force.rotation.completed";
+        String POPUP_FINISH_CONTINUE = "com.maslanka.automatecar.popup.finish.continue";
+        String POPUP_FINISH_DISCONTINUE = "com.maslanka.automatecar.popup.finish.discontinue";
+        String LAUNCH_APPS_COMPLETED = "com.maslanka.automatecar.launch.apps.completed";
+        String PLAY_MUSIC_COMPLETED = "com.maslanka.automatecar.play.music.completed";
+        String DISMISS_LOCK_SCREEN_COMPLETED = "com.maslanka.automatecar.dismiss.lock.screen.completed";
     }
 }

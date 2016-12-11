@@ -13,6 +13,7 @@ import android.view.WindowManager;
 
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.services.CarConnectedService;
 
 import static android.view.KeyEvent.KEYCODE_BACK;
 
@@ -20,11 +21,14 @@ import static android.view.KeyEvent.KEYCODE_BACK;
  * Created by Artur on 29.11.2016.
  */
 
-public class PopupConnectedFragment extends Fragment implements Constants.PREF_KEYS, Constants.DEFAULT_VALUES, Constants.BROADCAST_NOTIFICATIONS {
+public class PopupConnectedFragment extends Fragment
+        implements Constants.PREF_KEYS, Constants.DEFAULT_VALUES, Constants.BROADCAST_NOTIFICATIONS,
+        Constants.CALLBACK_ACTIONS{
 
     private AlertDialog alertDialog;
     private CountDownTimer counter;
     private int timeoutLeft;
+    private Context contextToCallback;
 
     public AlertDialog getAlertDialog() {
         return alertDialog;
@@ -37,6 +41,7 @@ public class PopupConnectedFragment extends Fragment implements Constants.PREF_K
         setRetainInstance(true);
 
         try {
+            contextToCallback = ((PopupConnectedActivity) getActivity()).getContextToCallback();
 
             createAlertDialog();
             setAlertDialogParameters();
@@ -58,15 +63,20 @@ public class PopupConnectedFragment extends Fragment implements Constants.PREF_K
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         counter.cancel();
-                        sendBroadcastWithAction(getActivity(), CONTINUE_ACTION);
-                        Log.d("send", "positive broadcast1");
+                        if (contextToCallback instanceof CarConnectedService){
+                            ((CarConnectedService) contextToCallback)
+                                    .callback(POPUP_FINISH_CONTINUE);
+                        }
                         getActivity().finish();
                     }
                 })
                 .setNegativeButton(getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         counter.cancel();
-                        sendBroadcastWithAction(getActivity(), DISCONTINUE_ACTION);
+                        if (contextToCallback instanceof CarConnectedService){
+                            ((CarConnectedService) contextToCallback)
+                                    .callback(POPUP_FINISH_DISCONTINUE);
+                        }
                         getActivity().finish();
                     }
                 }).create();
@@ -83,7 +93,10 @@ public class PopupConnectedFragment extends Fragment implements Constants.PREF_K
             @Override
             public void onCancel(DialogInterface dialog) {
                 counter.cancel();
-                sendBroadcastWithAction(getActivity(), DISCONTINUE_ACTION);
+                if (contextToCallback instanceof CarConnectedService){
+                    ((CarConnectedService) contextToCallback)
+                            .callback(POPUP_FINISH_DISCONTINUE);
+                }
                 getActivity().finish();
             }
         });
@@ -92,7 +105,10 @@ public class PopupConnectedFragment extends Fragment implements Constants.PREF_K
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KEYCODE_BACK) {
                     counter.cancel();
-                    sendBroadcastWithAction(getActivity(), DISCONTINUE_ACTION);
+                    if (contextToCallback instanceof CarConnectedService){
+                        ((CarConnectedService) contextToCallback)
+                                .callback(POPUP_FINISH_DISCONTINUE);
+                    }
                     getActivity().finish();
                     return true;
                 }
@@ -115,10 +131,15 @@ public class PopupConnectedFragment extends Fragment implements Constants.PREF_K
             @Override
             public void onFinish() throws NullPointerException {
                 if (PopupConnectedActivity.actionDialogTimeout && timeoutLeft == 1 && getActivity() != null) {
-                    sendBroadcastWithAction(getActivity(), CONTINUE_ACTION);
-                    Log.d("send", "positive broadcast2");
+                    if (contextToCallback instanceof CarConnectedService){
+                        ((CarConnectedService) contextToCallback)
+                                .callback(POPUP_FINISH_CONTINUE);
+                    }
                 } else {
-                    sendBroadcastWithAction(getActivity(), DISCONTINUE_ACTION);
+                    if (contextToCallback instanceof CarConnectedService){
+                        ((CarConnectedService) contextToCallback)
+                                .callback(POPUP_FINISH_DISCONTINUE);
+                    }
                 }
 
                 if (getActivity() != null) {
@@ -126,12 +147,6 @@ public class PopupConnectedFragment extends Fragment implements Constants.PREF_K
                 }
             }
         }.start();
-    }
-
-    protected void sendBroadcastWithAction (Context context, String action) {
-        Intent intent = new Intent();
-        intent.setAction(action);
-        context.sendBroadcast(intent);
     }
 
 }

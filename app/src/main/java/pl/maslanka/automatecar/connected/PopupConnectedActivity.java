@@ -1,6 +1,6 @@
 package pl.maslanka.automatecar.connected;
 
-import android.content.res.Configuration;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -8,8 +8,12 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.callbackmessages.MessagePopupConnected;
 
 /**
  * Created by Artur on 22.11.2016.
@@ -23,15 +27,27 @@ public class PopupConnectedActivity extends AppCompatActivity implements Constan
     public static boolean isInFront = false;
     public static int dialogTimeout;
     public static boolean actionDialogTimeout;
-    public static boolean popupConnectedActive = false;
 
+    private Context contextToCallback;
     private PopupConnectedFragment popupFragment;
     private boolean popupWasShowing;
+
+    public Context getContextToCallback() {
+        return contextToCallback;
+    }
+
+    @Subscribe
+    public void onMessagePopupConnected(MessagePopupConnected event) {
+        Log.d(LOG_TAG, "MessagePopupConnected received");
+        this.contextToCallback = event.context;
+    }
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        EventBus.getDefault().register(this);
 
         turnScreenOn();
 
@@ -55,6 +71,10 @@ public class PopupConnectedActivity extends AppCompatActivity implements Constan
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
     @Override
     protected void onResume() {
@@ -67,7 +87,6 @@ public class PopupConnectedActivity extends AppCompatActivity implements Constan
 
 
     }
-
 
     @Override
     public void finish() {
@@ -89,6 +108,12 @@ public class PopupConnectedActivity extends AppCompatActivity implements Constan
             }
         }
 
+    }
+
+    @Override
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override

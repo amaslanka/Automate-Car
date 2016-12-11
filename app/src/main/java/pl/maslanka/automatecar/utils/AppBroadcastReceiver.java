@@ -49,11 +49,6 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
 
                 break;
 
-            case FORCE_ROTATION_COMPLETED:
-                Log.d(LOG_TAG, "force rotation complete received");
-                sendBroadcastAction(context, POPUP_ACTION);
-                break;
-
 
             case POPUP_ACTION:
                 Log.d(LOG_TAG, "popup action");
@@ -76,9 +71,9 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                 startServiceWithAction(context, PLAY_MUSIC_ACTION, CarConnectedService.class);
                 break;
 
-            case DISABLE_LOCK_SCREEN_ACTION:
+            case DISMISS_LOCK_SCREEN_ACTION:
                 Log.d(LOG_TAG, "disable lock screen action");
-                startServiceWithAction(context, DISABLE_LOCK_SCREEN_ACTION, CarConnectedService.class);
+                startServiceWithAction(context, DISMISS_LOCK_SCREEN_ACTION, CarConnectedService.class);
                 break;
 
             case BluetoothDevice.ACTION_ACL_DISCONNECTED:

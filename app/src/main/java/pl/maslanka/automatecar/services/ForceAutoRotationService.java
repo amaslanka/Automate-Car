@@ -5,10 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
@@ -16,47 +16,68 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
 
 /**
  * Created by Artur on 01.12.2016.
  */
 
-public class ForceAutoRotationService extends Service implements Constants.BROADCAST_NOTIFICATIONS {
+public class ForceAutoRotationService extends Service implements Constants.BROADCAST_NOTIFICATIONS,
+        Constants.CALLBACK_ACTIONS {
 
     private final String LOG_TAG = this.getClass().getSimpleName();
+
+    private final IBinder mBinder = new LocalBinder();
 
     private LinearLayout orientationChanger;
     private Handler mHandler = null;
     private HandlerThread mHandlerThread = null;
+    private Context contextToCallback;
 
+    public class LocalBinder extends Binder {
+        public ForceAutoRotationService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return ForceAutoRotationService.this;
+        }
+    }
 
-    public void startHandlerThread(){
-        mHandlerThread = new HandlerThread("HandlerThread");
-        mHandlerThread.start();
-        mHandler = new Handler(Looper.getMainLooper());
+    @Subscribe
+    public void onMessageContext(MessageForceAutoRotation event) {
+        Log.d(LOG_TAG, "MessageForceAutoRotation received");
+        this.contextToCallback = event.context;
+
+        enableAutoRotation();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(LOG_TAG, "onCreate");
+        EventBus.getDefault().register(this);
 
-        startHandlerThread();
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                enableAutoRotation(ForceAutoRotationService.this);
-            }
-        });
+//        startHandlerThread();
+//        mHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        });
     }
+
+//    public void startHandlerThread() {
+//        mHandlerThread = new HandlerThread("HandlerThread");
+//        mHandlerThread.start();
+//        mHandler = new Handler(Looper.getMainLooper());
+//    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, "onStartCommand");
-
         return START_STICKY;
 
     }
@@ -64,13 +85,15 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
     @Override
     public void onDestroy() {
         Log.d(LOG_TAG, "onDestroy");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                disableAutoRotation(ForceAutoRotationService.this);
-            }
-        });
+        disableAutoRotation();
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
+//        mHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        });
     }
 
     @Nullable
@@ -78,32 +101,38 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
     public IBinder onBind(Intent intent) {
         Log.d(LOG_TAG, "onBind");
 
-        return null;
+        return mBinder;
     }
 
-    protected void enableAutoRotation(Context context) {
+    public void enableAutoRotation() {
         try {
-            orientationChanger = new LinearLayout(context);
+            orientationChanger = new LinearLayout(this);
             // Using TYPE_SYSTEM_OVERLAY is crucial to make window appear on top
             // Need the permission android.permission.SYSTEM_ALERT_WINDOW
             WindowManager.LayoutParams orientationLayout = new WindowManager
                     .LayoutParams(WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY, 0, PixelFormat.RGBA_8888);
             orientationLayout.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR;
 
-            WindowManager wm = (WindowManager) context.getSystemService(Service.WINDOW_SERVICE);
+            WindowManager wm = (WindowManager) this.getSystemService(Service.WINDOW_SERVICE);
             wm.addView(orientationChanger, orientationLayout);
             orientationChanger.setVisibility(View.VISIBLE);
 
-            Log.d(LOG_TAG, "enabled auto rotation");
+            if (contextToCallback instanceof CarConnectedService) {
+                ((CarConnectedService) contextToCallback).callback(FORCE_ROTATION_COMPLETED);
+            }
+
 
         } catch (SecurityException ex) {
             Log.e(LOG_TAG, "No needed permissions granted! Auto rotation will not work.");
-            Toast.makeText(context, getString(R.string.no_system_overlay_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_system_overlay_permission), Toast.LENGTH_SHORT).show();
+            if (contextToCallback instanceof CarConnectedService) {
+                ((CarConnectedService) contextToCallback).callback(FORCE_ROTATION_COMPLETED);
+            }
         }
 
     }
 
-    protected void disableAutoRotation(Context context) {
+    public void disableAutoRotation() {
         try {
             if (orientationChanger != null) {
                 orientationChanger.setVisibility(View.GONE);
@@ -111,15 +140,9 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
             }
         } catch (SecurityException ex) {
             Log.e(LOG_TAG, "No needed permissions granted! Auto rotation will not work.");
-            Toast.makeText(context, getString(R.string.no_system_overlay_permission), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.no_system_overlay_permission), Toast.LENGTH_LONG).show();
         }
 
-    }
-
-    protected void sendBroadcastAction(String action) {
-        Intent intent = new Intent();
-        intent.setAction(action);
-        sendBroadcast(intent);
     }
 
 

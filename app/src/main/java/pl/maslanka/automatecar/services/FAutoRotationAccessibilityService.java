@@ -1,14 +1,19 @@
 package pl.maslanka.automatecar.services;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
-import java.util.HashSet;
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Set;
 
 import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
 import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
 import pl.maslanka.automatecar.utils.Logic;
 
@@ -73,6 +78,7 @@ public class FAutoRotationAccessibilityService extends AccessibilityService impl
                                 "Service has not been running before.");
 
                         Intent autoRotation = new Intent(this, ForceAutoRotationService.class);
+                        bindService(autoRotation, mConnection, BIND_AUTO_CREATE);
                         startService(autoRotation);
                     }
 
@@ -89,4 +95,22 @@ public class FAutoRotationAccessibilityService extends AccessibilityService impl
     public void onInterrupt() {
 
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            if (className.getClassName().equals(ForceAutoRotationService.class.getName())) {
+                Log.d(LOG_TAG, "Service " + className.getClass().getSimpleName()
+                        + " connected - posting message");
+                EventBus.getDefault().post(new MessageForceAutoRotation(FAutoRotationAccessibilityService.this));
+                FAutoRotationAccessibilityService.this.unbindService(mConnection);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+        }
+    };
 }
