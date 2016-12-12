@@ -38,7 +38,6 @@ public class CarConnectedService extends Service
 
     private final String LOG_TAG = this.getClass().getSimpleName();
 
-    private Intent intent;
     private boolean disableLockScreen;
     private boolean forceAutoRotation;
     private boolean checkIfInPocket;
@@ -58,28 +57,45 @@ public class CarConnectedService extends Service
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
-    public void callback(String action) {
+    public void callback(String action, int startId) {
         Log.d(LOG_TAG, "Received callback - " + action);
-        switch (action) {
-            case FORCE_ROTATION_COMPLETED:
-                sendBroadcastAction(POPUP_ACTION);
-                break;
-            case POPUP_FINISH_CONTINUE:
-                sendBroadcastAction(CONTINUE_ACTION);
-                break;
-            case POPUP_FINISH_DISCONTINUE:
-                sendBroadcastAction(DISCONTINUE_ACTION);
-                break;
-            case LAUNCH_APPS_COMPLETED:
-                sendBroadcastAction(PLAY_MUSIC_ACTION);
-                break;
-            case PLAY_MUSIC_COMPLETED:
-                sendBroadcastAction(DISMISS_LOCK_SCREEN_ACTION);
-                break;
-            case DISMISS_LOCK_SCREEN_COMPLETED:
-                break;
-
+        if (startId != START_ID_NO_VALUE) {
+            switch (action) {
+                case FORCE_ROTATION_COMPLETED:
+                    sendBroadcastAction(POPUP_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case POPUP_FINISH_CONTINUE:
+                    sendBroadcastAction(CONTINUE_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case POPUP_FINISH_DISCONTINUE:
+                    sendBroadcastAction(DISCONTINUE_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case LAUNCH_APPS_COMPLETED:
+                    sendBroadcastAction(PLAY_MUSIC_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case PLAY_MUSIC_COMPLETED:
+                    sendBroadcastAction(DISMISS_LOCK_SCREEN_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case DISMISS_LOCK_SCREEN_COMPLETED:
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+            }
+        } else {
+            Log.d(LOG_TAG, "stopped! (stoppedSelf)");
+            stopSelf();
         }
+
     }
 
     private final class ServiceHandler extends Handler {
@@ -90,34 +106,29 @@ public class CarConnectedService extends Service
         public void handleMessage(Message msg) {
             switch (action) {
                 case FORCE_ROTATION_ACTION:
-                    Actions.startForcingAutoRotation(CarConnectedService.this, mConnection);
-                    stopSelf(msg.arg1);
+                    Actions.startForcingAutoRotation(CarConnectedService.this, mConnection, msg.arg1);
                     break;
                 case POPUP_ACTION:
-                    Actions.showConnectedPopup(CarConnectedService.this);
-                    stopSelf(msg.arg1);
+                    Actions.showConnectedPopup(CarConnectedService.this, msg.arg1);
                     break;
                 case DISCONTINUE_ACTION:
                     stopRunningService(CarConnectedService.this, ForceAutoRotationService.class);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(msg.arg1));
                     stopSelf(msg.arg1);
                     break;
                 case CONTINUE_ACTION:
-                    Actions.launchApps(CarConnectedService.this);
-                    stopSelf(msg.arg1);
+                    Actions.launchApps(CarConnectedService.this, msg.arg1);
                     break;
                 case PLAY_MUSIC_ACTION:
-                    Actions.playMusic(CarConnectedService.this);
-                    stopSelf(msg.arg1);
+                    Actions.playMusic(CarConnectedService.this, msg.arg1);
                     break;
                 case DISMISS_LOCK_SCREEN_ACTION:
-                    Actions.dismissLockScreen(CarConnectedService.this);
-                    stopSelf(msg.arg1);
+                    Actions.dismissLockScreen(CarConnectedService.this, msg.arg1);
                     break;
                 default:
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(msg.arg1));
                     stopSelf(msg.arg1);
             }
-
-            Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(msg.arg1));
 
         }
     }

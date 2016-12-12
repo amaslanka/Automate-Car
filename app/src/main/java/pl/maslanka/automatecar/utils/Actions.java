@@ -26,20 +26,20 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     private static final String LOG_TAG = Actions.class.getSimpleName();
 
-    public static void startForcingAutoRotation(Context context, ServiceConnection mConnection) {
+    public static void startForcingAutoRotation(Context context, ServiceConnection mConnection, int startId) {
         Log.d(LOG_TAG, "starting: forceAutoRotationService");
         boolean forceAutoRotation = Logic.getSharedPrefBoolean(context, KEY_FORCE_AUTO_ROTATION, FORCE_AUTO_ROTATION_DEFAULT_VALUE);
 
         if (forceAutoRotation) {
-            bindNewService(context, ForceAutoRotationService.class, mConnection);
+            bindNewService(context, ForceAutoRotationService.class, mConnection, startId);
 
         } else if (context instanceof CarConnectedService) {
-            ((CarConnectedService) context).callback(FORCE_ROTATION_COMPLETED);
+            ((CarConnectedService) context).callback(FORCE_ROTATION_COMPLETED, startId);
         }
 
     }
 
-    public static void showConnectedPopup(Context context) {
+    public static void showConnectedPopup(Context context, int startId) {
 
         boolean showCancelDialog = Logic.getSharedPrefBoolean(
                 context, KEY_SHOW_CANCEL_DIALOG, SHOW_CANCEL_DIALOG_DEFAULT_VALUE);
@@ -51,15 +51,16 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         if (showCancelDialog) {
             Intent popup = new Intent(context, PopupConnectedActivity.class);
             popup.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            popup.putExtra(START_ID, startId);
             popup.putExtra(KEY_DIALOG_TIMEOUT, dialogTimeout);
             popup.putExtra(KEY_ACTION_DIALOG_TIMEOUT, actionDialogTimeout);
             context.startActivity(popup);
         } else if (context instanceof CarConnectedService){
-            ((CarConnectedService) context).callback(POPUP_FINISH_CONTINUE);
+            ((CarConnectedService) context).callback(POPUP_FINISH_CONTINUE, startId);
         }
     }
 
-    public static void launchApps(Context context) {
+    public static void launchApps(Context context, int startId) {
 
         LinkedList<PairObject<String, String>> appList = Logic.readList(context);
         int sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
@@ -86,13 +87,13 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         }
 
         if (context instanceof CarConnectedService){
-            ((CarConnectedService) context).callback(LAUNCH_APPS_COMPLETED);
+            ((CarConnectedService) context).callback(LAUNCH_APPS_COMPLETED, startId);
         }
 
     }
 
 
-    public static void playMusic(Context context) {
+    public static void playMusic(Context context, int startId) {
 
         boolean playMusic = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
         String musicPlayer = Logic.getSharedPrefString(context, KEY_SELECT_MUSIC_PLAYER, null);
@@ -124,15 +125,15 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         }
 
         if (context instanceof CarConnectedService){
-            ((CarConnectedService) context).callback(PLAY_MUSIC_COMPLETED);
+            ((CarConnectedService) context).callback(PLAY_MUSIC_COMPLETED, startId);
         }
     }
 
-    public static void dismissLockScreen(Context context) {
+    public static void dismissLockScreen(Context context, int startId) {
 
 
         if (context instanceof CarConnectedService){
-            ((CarConnectedService) context).callback(DISMISS_LOCK_SCREEN_COMPLETED);
+            ((CarConnectedService) context).callback(DISMISS_LOCK_SCREEN_COMPLETED, startId);
         }
     }
 
@@ -149,8 +150,9 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         context.sendBroadcast(intent);
     }
 
-    private static void bindNewService(Context context, Class<?> cls, ServiceConnection mConnection) {
+    private static void bindNewService(Context context, Class<?> cls, ServiceConnection mConnection, int startId) {
         Intent intent = new Intent(context, cls);
+        intent.putExtra(START_ID, startId);
         context.startService(intent);
         context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }

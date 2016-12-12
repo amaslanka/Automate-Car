@@ -19,12 +19,16 @@ import pl.maslanka.automatecar.callbackmessages.MessagePopupConnected;
  * Created by Artur on 22.11.2016.
  */
 
-public class PopupConnectedActivity extends AppCompatActivity implements Constants.PREF_KEYS, Constants.DEFAULT_VALUES, Constants.BROADCAST_NOTIFICATIONS, Constants.POPUP_CONNECTED_FRAGMENT {
+public class PopupConnectedActivity extends AppCompatActivity
+        implements Constants.PREF_KEYS, Constants.DEFAULT_VALUES,
+        Constants.BROADCAST_NOTIFICATIONS, Constants.POPUP_CONNECTED_FRAGMENT,
+        Constants.CALLBACK_ACTIONS {
 
     private final String LOG_TAG = this.getClass().getSimpleName();
     private static final String KEY_POPUP_WAS_SHOWING = "popup_was_showing";
 
     public static boolean isInFront = false;
+    public static int carConnectedServiceStartId;
     public static int dialogTimeout;
     public static boolean actionDialogTimeout;
 
@@ -54,6 +58,7 @@ public class PopupConnectedActivity extends AppCompatActivity implements Constan
             supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
 
+            carConnectedServiceStartId = getIntent().getIntExtra(START_ID, START_ID_NO_VALUE);
             dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT, DIALOG_TIMEOUT_DEFAULT_VALUE);
             actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT,
                     ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);

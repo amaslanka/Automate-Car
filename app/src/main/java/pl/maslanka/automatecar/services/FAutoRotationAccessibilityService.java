@@ -30,7 +30,7 @@ public class FAutoRotationAccessibilityService extends AccessibilityService impl
 
     public static void setRotationExcludedApps(Set<String> newRotationExcludedApps) {
         rotationExcludedApps = newRotationExcludedApps;
-        Log.e(LOG_TAG, "Set new rotation excluded apps list: " + rotationExcludedApps.toString());
+        Log.d(LOG_TAG, "Set new rotation excluded apps list: " + rotationExcludedApps.toString());
     }
 
     @Override

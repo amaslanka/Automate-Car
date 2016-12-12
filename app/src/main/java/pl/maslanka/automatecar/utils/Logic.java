@@ -4,21 +4,18 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -39,12 +36,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.connected.DeviceAdminLock;
-import pl.maslanka.automatecar.helpers.ActivityForResult;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
-import pl.maslanka.automatecar.services.FAutoRotationAccessibilityService;
 
 /**
  * Created by Artur on 09.11.2016.

@@ -28,7 +28,7 @@ import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
  */
 
 public class ForceAutoRotationService extends Service implements Constants.BROADCAST_NOTIFICATIONS,
-        Constants.CALLBACK_ACTIONS {
+        Constants.CALLBACK_ACTIONS, Constants.DEFAULT_VALUES {
 
     private final String LOG_TAG = this.getClass().getSimpleName();
 
@@ -38,6 +38,7 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
     private Handler mHandler = null;
     private HandlerThread mHandlerThread = null;
     private Context contextToCallback;
+    private int carConnectedServiceStartId;
 
     public class LocalBinder extends Binder {
         public ForceAutoRotationService getService() {
@@ -100,7 +101,7 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(LOG_TAG, "onBind");
-
+        carConnectedServiceStartId = intent.getIntExtra(START_ID, START_ID_NO_VALUE);
         return mBinder;
     }
 
@@ -118,7 +119,7 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
             orientationChanger.setVisibility(View.VISIBLE);
 
             if (contextToCallback instanceof CarConnectedService) {
-                ((CarConnectedService) contextToCallback).callback(FORCE_ROTATION_COMPLETED);
+                ((CarConnectedService) contextToCallback).callback(FORCE_ROTATION_COMPLETED, carConnectedServiceStartId);
             }
 
 
@@ -126,7 +127,7 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
             Log.e(LOG_TAG, "No needed permissions granted! Auto rotation will not work.");
             Toast.makeText(this, getString(R.string.no_system_overlay_permission), Toast.LENGTH_SHORT).show();
             if (contextToCallback instanceof CarConnectedService) {
-                ((CarConnectedService) contextToCallback).callback(FORCE_ROTATION_COMPLETED);
+                ((CarConnectedService) contextToCallback).callback(FORCE_ROTATION_COMPLETED, carConnectedServiceStartId);
             }
         }
 

@@ -26,6 +26,7 @@ public class Constants {
     }
 
     public interface DEFAULT_VALUES {
+        int START_ID_NO_VALUE = -1;
         boolean FIRST_RUN_DEFAULT_VALUE = true;
         int DIALOG_DURATION_MAX_VALUE = 600;
         int DIALOG_DURATION_MIN_VALUE = 1;
@@ -84,6 +85,7 @@ public class Constants {
     }
 
     public interface CALLBACK_ACTIONS {
+        String START_ID = "com.maslanka.automatecar.start.id";
         String FORCE_ROTATION_COMPLETED = "com.maslanka.automatecar.force.rotation.completed";
         String POPUP_FINISH_CONTINUE = "com.maslanka.automatecar.popup.finish.continue";
         String POPUP_FINISH_DISCONTINUE = "com.maslanka.automatecar.popup.finish.discontinue";

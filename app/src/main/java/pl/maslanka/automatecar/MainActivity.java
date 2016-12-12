@@ -19,7 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import pl.maslanka.automatecar.connected.DeviceAdminLock;
+import pl.maslanka.automatecar.utils.DeviceAdminLock;
 import pl.maslanka.automatecar.helpers.ActivityForResult;
 import pl.maslanka.automatecar.prefconnected.PrefsCarConnected;
 import pl.maslanka.automatecar.helpers.Constants;

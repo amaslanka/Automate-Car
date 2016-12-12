@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.connected;
+package pl.maslanka.automatecar.utils;
 
 import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;
