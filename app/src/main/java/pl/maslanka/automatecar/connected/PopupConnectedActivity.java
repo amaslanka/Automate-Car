@@ -55,24 +55,24 @@ public class PopupConnectedActivity extends AppCompatActivity
 
         turnScreenOn();
 
-            supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-            overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
 
-            carConnectedServiceStartId = getIntent().getIntExtra(START_ID, START_ID_NO_VALUE);
-            dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT, DIALOG_TIMEOUT_DEFAULT_VALUE);
-            actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT,
-                    ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
+        carConnectedServiceStartId = getIntent().getIntExtra(START_ID, START_ID_NO_VALUE);
+        dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT, DIALOG_TIMEOUT_DEFAULT_VALUE);
+        actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT,
+                ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
 
 
-            if(savedInstanceState == null && popupFragment == null) {
-                popupFragment = new PopupConnectedFragment();
-                // Display the fragment as the main content.
-                getSupportFragmentManager().beginTransaction().add(android.R.id.content, popupFragment, TAG_POPUP_CONNECTED_FRAGMENT).commit();
-            } else {
-                popupFragment = (PopupConnectedFragment) getSupportFragmentManager().findFragmentByTag(TAG_POPUP_CONNECTED_FRAGMENT);
-                popupWasShowing = savedInstanceState.getBoolean(KEY_POPUP_WAS_SHOWING);
-                Log.d(LOG_TAG, "popupWasShowing - " + Boolean.toString(popupWasShowing));
-            }
+        if(savedInstanceState == null && popupFragment == null) {
+            popupFragment = new PopupConnectedFragment();
+            // Display the fragment as the main content.
+            getSupportFragmentManager().beginTransaction().add(android.R.id.content, popupFragment, TAG_POPUP_CONNECTED_FRAGMENT).commit();
+        } else {
+            popupFragment = (PopupConnectedFragment) getSupportFragmentManager().findFragmentByTag(TAG_POPUP_CONNECTED_FRAGMENT);
+            popupWasShowing = savedInstanceState.getBoolean(KEY_POPUP_WAS_SHOWING);
+            Log.d(LOG_TAG, "popupWasShowing - " + Boolean.toString(popupWasShowing));
+        }
 
     }
 
@@ -191,7 +191,7 @@ public class PopupConnectedActivity extends AppCompatActivity
 //                    .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
 //                        public void onClick(DialogInterface dialog, int which) {
 //                            counter.cancel();
-//                            sendBroadcastWithAction(CONTINUE_ACTION);
+//                            sendBroadcastWithAction(CONTINUE_CONNECTED_ACTION);
 //                            alertDialog.dismiss();
 //                            alertDialog = null;
 //                            finish();
@@ -200,7 +200,7 @@ public class PopupConnectedActivity extends AppCompatActivity
 //                    .setNegativeButton(getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
 //                        public void onClick(DialogInterface dialog, int which) {
 //                            counter.cancel();
-//                            sendBroadcastWithAction(DISCONTINUE_ACTION);
+//                            sendBroadcastWithAction(DISCONTINUE_CONNECTED_ACTION);
 //                            alertDialog.dismiss();
 //                            alertDialog = null;
 //                            finish();
@@ -214,7 +214,7 @@ public class PopupConnectedActivity extends AppCompatActivity
 //                @Override
 //                public void onCancel(DialogInterface dialog) {
 //                    counter.cancel();
-//                    sendBroadcastWithAction(DISCONTINUE_ACTION);
+//                    sendBroadcastWithAction(DISCONTINUE_CONNECTED_ACTION);
 //                    alertDialog.dismiss();
 //                    alertDialog = null;
 //                    finish();
@@ -225,7 +225,7 @@ public class PopupConnectedActivity extends AppCompatActivity
 //                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 //                    if (keyCode == KEYCODE_BACK) {
 //                        counter.cancel();
-//                        sendBroadcastWithAction(DISCONTINUE_ACTION);
+//                        sendBroadcastWithAction(DISCONTINUE_CONNECTED_ACTION);
 //                        alertDialog.dismiss();
 //                        alertDialog = null;
 //                        finish();
@@ -249,9 +249,9 @@ public class PopupConnectedActivity extends AppCompatActivity
 //                public void onFinish() {
 //                    Log.d("timeoutLeft", Integer.toString(timeoutLeft));
 //                    if (actionDialogTimeout && timeoutLeft == 1) {
-//                        sendBroadcastWithAction(CONTINUE_ACTION);
+//                        sendBroadcastWithAction(CONTINUE_CONNECTED_ACTION);
 //                    } else {
-//                        sendBroadcastWithAction(DISCONTINUE_ACTION);
+//                        sendBroadcastWithAction(DISCONTINUE_CONNECTED_ACTION);
 //                    }
 //                    alertDialog.dismiss();
 //                    alertDialog = null;

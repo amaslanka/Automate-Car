@@ -2,7 +2,6 @@ package pl.maslanka.automatecar.prefconnected;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -19,16 +18,14 @@ import com.github.machinarius.preferencefragment.PreferenceFragment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.helpers.Constants;
-import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.prefconnected.adapters.ArrayAdapterWithIcon;
-import pl.maslanka.automatecar.services.FAutoRotationAccessibilityService;
+import pl.maslanka.automatecar.services.HelperAccessibilityService;
 import pl.maslanka.automatecar.utils.Logic;
 
 /**
@@ -96,7 +93,7 @@ public class RotationExcludedAppsListCreator extends AsyncTask<Activity, Void, V
                         public void onClick(DialogInterface dialog, int which) {
                             Log.d("appsFromPrefs", appsFromPrefs.toString());
                             Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_ROTATION_EXCLUDED_APPS);
-                            FAutoRotationAccessibilityService.setRotationExcludedApps(appsFromPrefs);
+                            HelperAccessibilityService.setRotationExcludedApps(appsFromPrefs);
                         }
                     })
                     .setNegativeButton(activity.getResources().getString(android.R.string.cancel), null);

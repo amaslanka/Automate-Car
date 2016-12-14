@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
+
 
     <application
         android:name=".utils.MyApplication"
@@ -37,14 +39,20 @@
             android:theme="@style/Transparent"
             android:showOnLockScreen="true"
             android:screenOrientation="fullSensor" />
+        <activity android:name=".helpers.TurnScreenOnActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Transparent"
+            android:showOnLockScreen="true"/>
         <activity android:name=".helpers.ActivityForResult"/>
 
 
         <service android:name=".services.MainService" />
         <service android:name=".services.CarConnectedService" />
         <service android:name=".services.ForceAutoRotationService"/>
+        <service android:name=".services.ProximitySensorService" />
         <service
-            android:name=".services.FAutoRotationAccessibilityService"
+            android:name=".services.HelperAccessibilityService"
             android:enabled="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
             <intent-filter>

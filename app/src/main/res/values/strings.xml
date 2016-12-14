@@ -65,6 +65,7 @@
     <string name="max_volume">Max media volume</string>
     <string name="control_media">Control media</string>
     <string name="play_music">Play music when connected</string>
+    <string name="play_music_on_a2dp">Play music only when connected to A2DP</string>
     <string name="other_features">Other features</string>
     <string name="show_navigation">Open navigation if it is active</string>
     <string name="service_started">Automate Car service started</string>

@@ -7,8 +7,9 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
-import pl.maslanka.automatecar.connected.PopupConnectedActivity;
+import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
+import pl.maslanka.automatecar.helpers.ProximityState;
 import pl.maslanka.automatecar.services.CarConnectedService;
 import pl.maslanka.automatecar.services.ForceAutoRotationService;
 
@@ -16,16 +17,14 @@ import pl.maslanka.automatecar.services.ForceAutoRotationService;
  * Created by Artur on 21.11.2016.
  */
 
-public class AppBroadcastReceiver extends android.content.BroadcastReceiver implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS {
+public class AppBroadcastReceiver extends android.content.BroadcastReceiver implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS, Constants.DEFAULT_VALUES {
 
     private final String LOG_TAG = this.getClass().getSimpleName();
-
     private Intent intent;
-    private static boolean inCarAlreadyPerformed;
 
-    public static boolean isInCarAlreadyPerformed() {
-        return inCarAlreadyPerformed;
-    }
+    public static CarConnectedProcessState carConnectedProcessState = CarConnectedProcessState.NOT_STARTED;
+    public static boolean startWithProximityFarPerformed;
+
 
     public AppBroadcastReceiver(){
     }
@@ -39,31 +38,42 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                 BluetoothDevice bluetoothDeviceConnected = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
                 Log.d(LOG_TAG, "bluetoothDevCon: " + bluetoothDeviceConnected.getAddress());
-                Log.d(LOG_TAG, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
+                Log.d(LOG_TAG, "SharedPrefDevice: " + Logic
+                        .getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
 
                 if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceConnected.getAddress()) &&
-                        !inCarAlreadyPerformed) {
-                    inCarAlreadyPerformed = true;
-                    startServiceWithAction(context, FORCE_ROTATION_ACTION, CarConnectedService.class);
+                        carConnectedProcessState == CarConnectedProcessState.NOT_STARTED) {
+                    carConnectedProcessState = CarConnectedProcessState.PERFORMING;
+                    startServiceWithAction(context, PROXIMITY_CHECK_ACTION, CarConnectedService.class);
                 }
 
                 break;
 
-
-            case POPUP_ACTION:
-                Log.d(LOG_TAG, "popup action");
-                startServiceWithAction(context, POPUP_ACTION, CarConnectedService.class);
+            case FORCE_ROTATION_ACTION:
+                Log.d(LOG_TAG, "force rotation action");
+                startServiceWithAction(context, FORCE_ROTATION_ACTION, CarConnectedService.class);
                 break;
 
-            case CONTINUE_ACTION:
+            case POPUP_CONNECTED_ACTION:
+                if (Logic.proximityState != ProximityState.NEAR) {
+                    Log.d(LOG_TAG, "popup connected action");
+                    startServiceWithAction(context, POPUP_CONNECTED_ACTION, CarConnectedService.class);
+                } else {
+                    sendBroadcastAction(context, PLAY_MUSIC_ACTION);
+                    startWithProximityFarPerformed = false;
+                }
+                break;
+
+            case CONTINUE_CONNECTED_ACTION:
                 Log.d(LOG_TAG, "continue action");
-                startServiceWithAction(context, CONTINUE_ACTION, CarConnectedService.class);
+                startServiceWithAction(context, CONTINUE_CONNECTED_ACTION, CarConnectedService.class);
+                startWithProximityFarPerformed = true;
                 break;
 
-            case DISCONTINUE_ACTION:
+            case DISCONTINUE_CONNECTED_ACTION:
                 Log.d(LOG_TAG, "discontinue action");
-                startServiceWithAction(context, DISCONTINUE_ACTION, CarConnectedService.class);
-                inCarAlreadyPerformed = false;
+                startServiceWithAction(context, DISCONTINUE_CONNECTED_ACTION, CarConnectedService.class);
+                restoreDefaultValues();
                 break;
 
             case PLAY_MUSIC_ACTION:
@@ -77,15 +87,17 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                 break;
 
             case BluetoothDevice.ACTION_ACL_DISCONNECTED:
+
                 BluetoothDevice bluetoothDeviceDisconnected = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
                 Log.d(LOG_TAG, "bluetoothDevDisconnected: " + bluetoothDeviceDisconnected.getAddress());
                 Log.d(LOG_TAG, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
 
-                if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceDisconnected.getAddress()) &&
-                        inCarAlreadyPerformed && !Logic.isMyServiceRunning(CarConnectedService.class, context) &&
-                        !PopupConnectedActivity.isInFront) {
-                    inCarAlreadyPerformed = false;
+                if (Logic.getSharedPrefStringSet(context,
+                        KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceDisconnected.getAddress()) &&
+                        carConnectedProcessState == CarConnectedProcessState.COMPLETED &&
+                        !Logic.isMyServiceRunning(CarConnectedService.class, context)) {
+                    restoreDefaultValues();
                     context.stopService(new Intent(context, ForceAutoRotationService.class));
                 }
 
@@ -104,6 +116,7 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                         break;
                 }
                 break;
+
         }
     }
 
@@ -117,6 +130,12 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
         Intent intent = new Intent();
         intent.setAction(action);
         context.sendBroadcast(intent);
+    }
+
+    private void restoreDefaultValues() {
+        carConnectedProcessState = CarConnectedProcessState.NOT_STARTED;
+        Logic.proximityState = ProximityState.FAR;
+        startWithProximityFarPerformed = false;
     }
 }
 

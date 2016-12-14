@@ -77,7 +77,7 @@
     <PreferenceCategory android:title="@string/control_media">
 
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:title="@string/play_music"
             android:key="play_music" />
 
@@ -85,6 +85,12 @@
             android:dependency="play_music"
             android:title="@string/select_music_player"
             android:key="select_music_player" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="play_music"
+            android:title="@string/play_music_on_a2dp"
+            android:key="play_music_on_a2dp" />
 
     </PreferenceCategory>
 

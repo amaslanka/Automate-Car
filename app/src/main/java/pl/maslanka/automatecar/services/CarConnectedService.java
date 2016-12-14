@@ -2,7 +2,6 @@ package pl.maslanka.automatecar.services;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -19,12 +18,16 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.LinkedList;
 
+import pl.maslanka.automatecar.callbackmessages.MessageProximitySensor;
 import pl.maslanka.automatecar.connected.PopupConnectedActivity;
 import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
 import pl.maslanka.automatecar.callbackmessages.MessagePopupConnected;
+import pl.maslanka.automatecar.helpers.CallbackService;
+import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
 import pl.maslanka.automatecar.utils.Actions;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
 import pl.maslanka.automatecar.utils.Logic;
 import pl.maslanka.automatecar.utils.MyApplication;
 
@@ -32,7 +35,7 @@ import pl.maslanka.automatecar.utils.MyApplication;
  * Created by Artur on 22.11.2016.
  */
 
-public class CarConnectedService extends Service
+public class CarConnectedService extends CallbackService
         implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS, Constants.DEFAULT_VALUES,
         Constants.CALLBACK_ACTIONS, Application.ActivityLifecycleCallbacks {
 
@@ -51,28 +54,35 @@ public class CarConnectedService extends Service
     private boolean maxVolume;
     private boolean playMusic;
     private String musicPlayer;
+    private boolean playMusicOnA2dp;
     private boolean showNavi;
     private String action;
 
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
+    @Override
     public void callback(String action, int startId) {
         Log.d(LOG_TAG, "Received callback - " + action);
         if (startId != START_ID_NO_VALUE) {
             switch (action) {
+                case PROXIMITY_CHECK_COMPLETED:
+                    sendBroadcastAction(FORCE_ROTATION_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
                 case FORCE_ROTATION_COMPLETED:
-                    sendBroadcastAction(POPUP_ACTION);
+                    sendBroadcastAction(POPUP_CONNECTED_ACTION);
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
                     stopSelf(startId);
                     break;
-                case POPUP_FINISH_CONTINUE:
-                    sendBroadcastAction(CONTINUE_ACTION);
+                case POPUP_CONNECTED_FINISH_CONTINUE:
+                    sendBroadcastAction(CONTINUE_CONNECTED_ACTION);
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
                     stopSelf(startId);
                     break;
-                case POPUP_FINISH_DISCONTINUE:
-                    sendBroadcastAction(DISCONTINUE_ACTION);
+                case POPUP_CONNECTED_FINISH_DISCONTINUE:
+                    sendBroadcastAction(DISCONTINUE_CONNECTED_ACTION);
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
                     stopSelf(startId);
                     break;
@@ -88,6 +98,7 @@ public class CarConnectedService extends Service
                     break;
                 case DISMISS_LOCK_SCREEN_COMPLETED:
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    AppBroadcastReceiver.carConnectedProcessState = CarConnectedProcessState.COMPLETED;
                     stopSelf(startId);
                     break;
             }
@@ -105,18 +116,21 @@ public class CarConnectedService extends Service
         @Override
         public void handleMessage(Message msg) {
             switch (action) {
+                case PROXIMITY_CHECK_ACTION:
+                    Actions.proximityCheck(CarConnectedService.this, mConnection, msg.arg1);
+                    break;
                 case FORCE_ROTATION_ACTION:
                     Actions.startForcingAutoRotation(CarConnectedService.this, mConnection, msg.arg1);
                     break;
-                case POPUP_ACTION:
+                case POPUP_CONNECTED_ACTION:
                     Actions.showConnectedPopup(CarConnectedService.this, msg.arg1);
                     break;
-                case DISCONTINUE_ACTION:
+                case DISCONTINUE_CONNECTED_ACTION:
                     stopRunningService(CarConnectedService.this, ForceAutoRotationService.class);
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(msg.arg1));
                     stopSelf(msg.arg1);
                     break;
-                case CONTINUE_ACTION:
+                case CONTINUE_CONNECTED_ACTION:
                     Actions.launchApps(CarConnectedService.this, msg.arg1);
                     break;
                 case PLAY_MUSIC_ACTION:
@@ -165,6 +179,7 @@ public class CarConnectedService extends Service
 
     @Override
     public void onDestroy() {
+
     }
 
 
@@ -180,6 +195,7 @@ public class CarConnectedService extends Service
         appList = Logic.readList(this);
         sleepTimes = Integer.parseInt(Logic.getSharedPrefString(this, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
         playMusic = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
+        playMusicOnA2dp = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC_ON_A2DP, PLAY_MUSIC_ON_A2DP_DEFAULT_VALUE);
         musicPlayer = Logic.getSharedPrefString(this, KEY_SELECT_MUSIC_PLAYER, null);
         showNavi = Logic.getSharedPrefBoolean(this, KEY_SHOW_NAVI, SHOW_NAVI_DEFAULT_VALUE);
     }
@@ -196,7 +212,6 @@ public class CarConnectedService extends Service
         MyApplication.getAppContext().sendBroadcast(intent);
     }
 
-
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
@@ -204,10 +219,21 @@ public class CarConnectedService extends Service
                                        IBinder service) {
 
             if (className.getClassName().equals(ForceAutoRotationService.class.getName())) {
+
                 Log.d(LOG_TAG, "Service " + className.getClass().getSimpleName()
                         + " connected - posting message");
+
                 EventBus.getDefault().post(new MessageForceAutoRotation(CarConnectedService.this));
                 CarConnectedService.this.unbindService(mConnection);
+
+            } else if (className.getClassName().equals(ProximitySensorService.class.getName())) {
+
+                Log.d(LOG_TAG, "Service " + className.getClass().getSimpleName()
+                        + " connected - posting message");
+
+                EventBus.getDefault().post(new MessageProximitySensor(CarConnectedService.this));
+                CarConnectedService.this.unbindService(mConnection);
+
             }
 
         }
@@ -226,7 +252,7 @@ public class CarConnectedService extends Service
     @Override
     public void onActivityStarted(Activity activity) {
         if (activity instanceof PopupConnectedActivity) {
-            Log.d(LOG_TAG, "Activity " + activity.getClass().getSimpleName() + " started." +
+            Log.d(LOG_TAG, "Activity " + activity.getClass().getSimpleName() + " started. " +
                     "This service will post message to this activity.");
             EventBus.getDefault().post(new MessagePopupConnected(CarConnectedService.this));
         }

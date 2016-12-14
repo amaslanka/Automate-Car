@@ -3,7 +3,6 @@ package pl.maslanka.automatecar.connected;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
@@ -64,7 +63,7 @@ public class PopupConnectedFragment extends Fragment
                     public void onClick(DialogInterface dialog, int which) {
                         counter.cancel();
                         if (contextToCallback instanceof CarConnectedService){
-                            ((CarConnectedService) contextToCallback).callback(POPUP_FINISH_CONTINUE,
+                            ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_CONTINUE,
                                     PopupConnectedActivity.carConnectedServiceStartId);
                         }
                         getActivity().finish();
@@ -74,7 +73,7 @@ public class PopupConnectedFragment extends Fragment
                     public void onClick(DialogInterface dialog, int which) {
                         counter.cancel();
                         if (contextToCallback instanceof CarConnectedService){
-                            ((CarConnectedService) contextToCallback).callback(POPUP_FINISH_DISCONTINUE,
+                            ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_DISCONTINUE,
                                     PopupConnectedActivity.carConnectedServiceStartId);
                         }
                         getActivity().finish();
@@ -94,7 +93,7 @@ public class PopupConnectedFragment extends Fragment
             public void onCancel(DialogInterface dialog) {
                 counter.cancel();
                 if (contextToCallback instanceof CarConnectedService){
-                    ((CarConnectedService) contextToCallback).callback(POPUP_FINISH_DISCONTINUE,
+                    ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_DISCONTINUE,
                             PopupConnectedActivity.carConnectedServiceStartId);
                 }
                 getActivity().finish();
@@ -106,7 +105,7 @@ public class PopupConnectedFragment extends Fragment
                 if (keyCode == KEYCODE_BACK) {
                     counter.cancel();
                     if (contextToCallback instanceof CarConnectedService){
-                        ((CarConnectedService) contextToCallback).callback(POPUP_FINISH_DISCONTINUE,
+                        ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_DISCONTINUE,
                                 PopupConnectedActivity.carConnectedServiceStartId);
                     }
                     getActivity().finish();
@@ -132,12 +131,12 @@ public class PopupConnectedFragment extends Fragment
             public void onFinish() throws NullPointerException {
                 if (PopupConnectedActivity.actionDialogTimeout && timeoutLeft == 1 && getActivity() != null) {
                     if (contextToCallback instanceof CarConnectedService){
-                        ((CarConnectedService) contextToCallback).callback(POPUP_FINISH_CONTINUE,
+                        ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_CONTINUE,
                                 PopupConnectedActivity.carConnectedServiceStartId);
                     }
                 } else {
                     if (contextToCallback instanceof CarConnectedService){
-                        ((CarConnectedService) contextToCallback).callback(POPUP_FINISH_DISCONTINUE,
+                        ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_DISCONTINUE,
                                 PopupConnectedActivity.carConnectedServiceStartId);
                     }
                 }

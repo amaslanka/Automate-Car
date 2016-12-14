@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.os.Binder;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -35,8 +33,6 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
     private final IBinder mBinder = new LocalBinder();
 
     private LinearLayout orientationChanger;
-    private Handler mHandler = null;
-    private HandlerThread mHandlerThread = null;
     private Context contextToCallback;
     private int carConnectedServiceStartId;
 
@@ -61,20 +57,7 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
         Log.d(LOG_TAG, "onCreate");
         EventBus.getDefault().register(this);
 
-//        startHandlerThread();
-//        mHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//            }
-//        });
     }
-
-//    public void startHandlerThread() {
-//        mHandlerThread = new HandlerThread("HandlerThread");
-//        mHandlerThread.start();
-//        mHandler = new Handler(Looper.getMainLooper());
-//    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -89,12 +72,7 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
         disableAutoRotation();
         EventBus.getDefault().unregister(this);
         super.onDestroy();
-//        mHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//            }
-//        });
+
     }
 
     @Nullable

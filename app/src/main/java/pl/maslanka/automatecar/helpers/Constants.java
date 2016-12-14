@@ -42,6 +42,7 @@ public class Constants {
         boolean ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE = true;
         int SLEEP_TIMES_DEFAULT_VALUE = 8;
         boolean PLAY_MUSIC_DEFAULT_VALUE = false;
+        boolean PLAY_MUSIC_ON_A2DP_DEFAULT_VALUE = false;
         boolean SHOW_NAVI_DEFAULT_VALUE =  true;
     }
 
@@ -60,6 +61,7 @@ public class Constants {
         String KEY_APPS_TO_LAUNCH = "apps_to_launch";
         String KEY_SLEEP_TIMES = "sleep_times";
         String KEY_PLAY_MUSIC = "play_music";
+        String KEY_PLAY_MUSIC_ON_A2DP = "play_music_on_a2dp";
         String KEY_SELECT_MUSIC_PLAYER = "select_music_player";
         String KEY_SHOW_NAVI = "show_navi";
     }
@@ -76,19 +78,21 @@ public class Constants {
     }
 
     public interface BROADCAST_NOTIFICATIONS {
+        String PROXIMITY_CHECK_ACTION = "com.maslanka.automatecar.proximity.check.action";
         String FORCE_ROTATION_ACTION = "com.maslanka.automatecar.force.rotation.action";
-        String POPUP_ACTION = "com.maslanka.automatecar.popup.action";
-        String CONTINUE_ACTION = "com.maslanka.automatecar.continue.action";
-        String DISCONTINUE_ACTION = "com.maslanka.automatecar.discontinue.action";
+        String POPUP_CONNECTED_ACTION = "com.maslanka.automatecar.popup.connected.action";
+        String CONTINUE_CONNECTED_ACTION = "com.maslanka.automatecar.continue.connected.action";
+        String DISCONTINUE_CONNECTED_ACTION = "com.maslanka.automatecar.discontinue.action";
         String PLAY_MUSIC_ACTION = "com.maslanka.automatecar.play.music.action";
         String DISMISS_LOCK_SCREEN_ACTION = "com.maslanka.automatecar.dismiss.lock.screen.action";
     }
 
     public interface CALLBACK_ACTIONS {
         String START_ID = "com.maslanka.automatecar.start.id";
+        String PROXIMITY_CHECK_COMPLETED = "com.maslanka.automatecar.proximity.check.completed";
         String FORCE_ROTATION_COMPLETED = "com.maslanka.automatecar.force.rotation.completed";
-        String POPUP_FINISH_CONTINUE = "com.maslanka.automatecar.popup.finish.continue";
-        String POPUP_FINISH_DISCONTINUE = "com.maslanka.automatecar.popup.finish.discontinue";
+        String POPUP_CONNECTED_FINISH_CONTINUE = "com.maslanka.automatecar.popup.connected.finish.continue";
+        String POPUP_CONNECTED_FINISH_DISCONTINUE = "com.maslanka.automatecar.popup.connected.finish.discontinue";
         String LAUNCH_APPS_COMPLETED = "com.maslanka.automatecar.launch.apps.completed";
         String PLAY_MUSIC_COMPLETED = "com.maslanka.automatecar.play.music.completed";
         String DISMISS_LOCK_SCREEN_COMPLETED = "com.maslanka.automatecar.dismiss.lock.screen.completed";

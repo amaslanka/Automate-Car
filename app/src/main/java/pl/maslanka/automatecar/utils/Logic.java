@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -16,10 +18,14 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.hardware.display.DisplayManager;
 import android.os.Build;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -35,15 +41,22 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.helpers.ProximityState;
+
+import static android.content.Context.POWER_SERVICE;
 
 /**
  * Created by Artur on 09.11.2016.
  */
 
 public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
+
+    public static ProximityState proximityState = ProximityState.FAR;
 
     public static boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
@@ -306,6 +319,66 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
             }
         }
 
+        return false;
+    }
+
+    public static boolean isScreenOn(Context context) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            DisplayManager dm = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+            for (Display display : dm.getDisplays()) {
+                if (display.getState() != Display.STATE_OFF) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            PowerManager powerManager = (PowerManager) context.getSystemService(POWER_SERVICE);
+            if (powerManager.isScreenOn()){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Nullable
+    public static List<UsageStats> getForegroundTasksApiAtLeast22(Context context) {
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+            long endTime = System.currentTimeMillis();
+            long msInMonth = 2592000000L;
+            long beginTime = endTime - msInMonth;
+            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  beginTime, endTime);
+            if (appList != null && appList.size() > 0) {
+                for (UsageStats usageStats : appList) {
+                    Log.e("ForegroundTask", "Current App in foreground is: " + usageStats.getPackageName());
+                }
+            }
+            return appList;
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public static List<ActivityManager.RunningAppProcessInfo> getForegroundTasksApiLowerThan22(Context context) {
+
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
+            ActivityManager am = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+            return am.getRunningAppProcesses();
+        }
+
+        return null;
+    }
+
+    public static boolean isAppInactive(Context context, String packageName) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+            Log.e(packageName, Boolean.toString(usm.isAppInactive(packageName)));
+            return usm.isAppInactive(packageName);
+        }
         return false;
     }
 

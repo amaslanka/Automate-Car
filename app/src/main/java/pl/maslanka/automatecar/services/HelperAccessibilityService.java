@@ -12,6 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Set;
 
+import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
 import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
@@ -21,10 +22,10 @@ import pl.maslanka.automatecar.utils.Logic;
  * Created by Artur on 07.12.2016.
  */
 
-public class FAutoRotationAccessibilityService extends AccessibilityService implements
+public class HelperAccessibilityService extends AccessibilityService implements
         Constants.PREF_KEYS, Constants.DEFAULT_VALUES {
 
-    private static final String LOG_TAG = FAutoRotationAccessibilityService.class.getSimpleName();
+    private static final String LOG_TAG = HelperAccessibilityService.class.getSimpleName();
     private static Set<String> rotationExcludedApps;
     private boolean forceAutoRotation;
 
@@ -56,7 +57,7 @@ public class FAutoRotationAccessibilityService extends AccessibilityService impl
 
             Log.d(LOG_TAG, event.getPackageName().toString());
 
-            if (forceAutoRotation && AppBroadcastReceiver.isInCarAlreadyPerformed()) {
+            if (forceAutoRotation && AppBroadcastReceiver.carConnectedProcessState == CarConnectedProcessState.COMPLETED) {
                 if (rotationExcludedApps.contains(event.getPackageName().toString())) {
 
                     if (Logic.isMyServiceRunning(ForceAutoRotationService.class, this)) {
@@ -104,8 +105,8 @@ public class FAutoRotationAccessibilityService extends AccessibilityService impl
             if (className.getClassName().equals(ForceAutoRotationService.class.getName())) {
                 Log.d(LOG_TAG, "Service " + className.getClass().getSimpleName()
                         + " connected - posting message");
-                EventBus.getDefault().post(new MessageForceAutoRotation(FAutoRotationAccessibilityService.this));
-                FAutoRotationAccessibilityService.this.unbindService(mConnection);
+                EventBus.getDefault().post(new MessageForceAutoRotation(HelperAccessibilityService.this));
+                HelperAccessibilityService.this.unbindService(mConnection);
             }
         }
 

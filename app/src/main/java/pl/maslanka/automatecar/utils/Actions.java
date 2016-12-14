@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.media.AudioManager;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -14,8 +15,10 @@ import java.util.List;
 import pl.maslanka.automatecar.connected.PopupConnectedActivity;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.helpers.TurnScreenOnActivity;
 import pl.maslanka.automatecar.services.CarConnectedService;
 import pl.maslanka.automatecar.services.ForceAutoRotationService;
+import pl.maslanka.automatecar.services.ProximitySensorService;
 
 /**
  * Created by Artur on 10.12.2016.
@@ -26,13 +29,24 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     private static final String LOG_TAG = Actions.class.getSimpleName();
 
+    public static void proximityCheck(Context context, ServiceConnection mConnection, int startId) {
+        boolean checkIfInPocket = Logic.getSharedPrefBoolean(context, KEY_CHECK_IF_IN_POCKET, CHECK_IF_IN_POCKET_DEFAULT_VALUE);
+
+        if (checkIfInPocket) {
+            bindNewService(context, ProximitySensorService.class, mConnection, startId);
+        } else if (context instanceof CarConnectedService) {
+            ((CarConnectedService) context).callback(PROXIMITY_CHECK_COMPLETED, startId);
+        }
+
+    }
+
     public static void startForcingAutoRotation(Context context, ServiceConnection mConnection, int startId) {
         Log.d(LOG_TAG, "starting: forceAutoRotationService");
         boolean forceAutoRotation = Logic.getSharedPrefBoolean(context, KEY_FORCE_AUTO_ROTATION, FORCE_AUTO_ROTATION_DEFAULT_VALUE);
 
+
         if (forceAutoRotation) {
             bindNewService(context, ForceAutoRotationService.class, mConnection, startId);
-
         } else if (context instanceof CarConnectedService) {
             ((CarConnectedService) context).callback(FORCE_ROTATION_COMPLETED, startId);
         }
@@ -56,7 +70,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
             popup.putExtra(KEY_ACTION_DIALOG_TIMEOUT, actionDialogTimeout);
             context.startActivity(popup);
         } else if (context instanceof CarConnectedService){
-            ((CarConnectedService) context).callback(POPUP_FINISH_CONTINUE, startId);
+            ((CarConnectedService) context).callback(POPUP_CONNECTED_FINISH_CONTINUE, startId);
         }
     }
 
@@ -67,6 +81,15 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
                 context, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
 
         Log.d(LOG_TAG, "continue - launchApps");
+
+
+        if (appList.size() > 0 && !Logic.isScreenOn(context)) {
+            Log.d(LOG_TAG, "screen is turned off - it will be invoked.");
+            Intent turnScreenOn = new Intent(context, TurnScreenOnActivity.class);
+            turnScreenOn.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(turnScreenOn);
+        }
+
         try {
             Thread.sleep(1000);
             for (PairObject<String, String> app: appList) {
@@ -95,33 +118,91 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     public static void playMusic(Context context, int startId) {
 
+        final int SLEEP_BETWEEN_MEDIA_BUTTON_PRESS = 500;
+        int sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
+                context, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
+
+        LinkedList<PairObject<String, String>> appList = Logic.readList(context);
         boolean playMusic = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
+        boolean playMusicOnA2dp = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC_ON_A2DP, PLAY_MUSIC_ON_A2DP_DEFAULT_VALUE);
         String musicPlayer = Logic.getSharedPrefString(context, KEY_SELECT_MUSIC_PLAYER, null);
+        AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-        if (playMusic) {
-            if (musicPlayer != null) {
+        try {
+            if (playMusic) {
+                if (musicPlayer != null) {
 
-                List<ActivityInfo> musicPlayersActivityInfo = Logic.getListOfMediaBroadcastReceivers(context);
-                ActivityInfo musicPlayerInfo = new ActivityInfo();
+                    List<ActivityInfo> musicPlayersActivityInfo = Logic.getListOfMediaBroadcastReceivers(context);
+                    ActivityInfo musicPlayerInfo = new ActivityInfo();
 
-                for (ActivityInfo activityInfo: musicPlayersActivityInfo) {
-                    if (activityInfo.packageName.equals(musicPlayer)) {
-                        musicPlayerInfo = activityInfo;
+                    for (ActivityInfo activityInfo: musicPlayersActivityInfo) {
+                        if (activityInfo.packageName.equals(musicPlayer)) {
+                            musicPlayerInfo = activityInfo;
+                        }
                     }
+
+                    ComponentName component = new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
+
+                    Log.d(LOG_TAG, "broadcastName: " + musicPlayerInfo.name);
+//
+//                    Log.e("if1", Boolean.toString(!appList.contains(new PairObject<>(musicPlayerInfo.loadLabel(context.getPackageManager()).toString(), musicPlayerInfo.packageName))));
+//                    Log.e("if2", Boolean.toString(!AppBroadcastReceiver.startWithProximityFarPerformed));
+
+
+//                    if (!appList.contains(new PairObject<>(musicPlayerInfo.loadLabel(context.getPackageManager()).toString(), musicPlayerInfo.packageName)) ||
+//                            !AppBroadcastReceiver.startWithProximityFarPerformed) {
+//                        Intent launchIntent =
+//                                context.getPackageManager().getLaunchIntentForPackage(musicPlayerInfo.packageName);
+//                        if (launchIntent != null) {
+//                            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                            context.startActivity(launchIntent);
+//                            Thread.sleep(sleepTimes*1000);
+//                        } else {
+//                            Log.e("MusicPlayerLaunchError", "Package " + musicPlayerInfo.packageName + " not found!");
+//                        }
+//                    }
+
+
+                    if (playMusicOnA2dp) {
+
+                        waitForA2dp(manager);
+
+                        if (manager.isBluetoothA2dpOn()) {
+                            Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
+                            sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_DOWN);
+                            Thread.sleep(SLEEP_BETWEEN_MEDIA_BUTTON_PRESS);
+                            sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_UP);
+                        }
+
+                    } else {
+                        sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_DOWN);
+                        Thread.sleep(SLEEP_BETWEEN_MEDIA_BUTTON_PRESS);
+                        sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_UP);
+                    }
+
+                } else {
+                    Log.d(LOG_TAG, "musicPlayer: no Music Player defined");
+                    if (playMusicOnA2dp) {
+
+                        waitForA2dp(manager);
+
+                        if (manager.isBluetoothA2dpOn()) {
+                            Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
+                            sendPlayBroadcast(context, KeyEvent.ACTION_DOWN);
+                            Thread.sleep(SLEEP_BETWEEN_MEDIA_BUTTON_PRESS);
+                            sendPlayBroadcast(context, KeyEvent.ACTION_UP);
+                        }
+
+                    } else {
+                        sendPlayBroadcast(context, KeyEvent.ACTION_DOWN);
+                        Thread.sleep(SLEEP_BETWEEN_MEDIA_BUTTON_PRESS);
+                        sendPlayBroadcast(context, KeyEvent.ACTION_UP);
+                    }
+
                 }
-
-                ComponentName component = new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
-
-                Log.d(LOG_TAG, "broadcastName: " + musicPlayerInfo.name);
-
-                sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_DOWN);
-                sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_UP);
-
-            } else {
-                Log.d(LOG_TAG, "musicPlayer: no Music Player defined");
-                sendPlayBroadcast(context, KeyEvent.ACTION_DOWN);
-                sendPlayBroadcast(context, KeyEvent.ACTION_UP);
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         if (context instanceof CarConnectedService){
@@ -137,7 +218,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         }
     }
 
-    private static void sendOrderedPlayBroadcast(Context context, ComponentName component, int action) {
+    private static synchronized void sendOrderedPlayBroadcast(Context context, ComponentName component, int action) {
         Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         intent.setComponent(component);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
@@ -157,4 +238,14 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
+    private static void waitForA2dp(AudioManager manager) throws InterruptedException {
+        final int MAX_LOOP_NUMBER = 100;
+        final int SLEEP_BETWEEN_CHECK = 100;
+        int counter = 0;
+        while (!manager.isBluetoothA2dpOn() && counter < MAX_LOOP_NUMBER) {
+            Log.d(LOG_TAG, "isBluetoothA2dpOn?: " + Boolean.toString(manager.isBluetoothA2dpOn()));
+            Thread.sleep(SLEEP_BETWEEN_CHECK);
+            counter++;
+        }
+    }
 }
