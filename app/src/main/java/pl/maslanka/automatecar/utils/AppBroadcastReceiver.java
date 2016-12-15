@@ -22,9 +22,6 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
     private final String LOG_TAG = this.getClass().getSimpleName();
     private Intent intent;
 
-    public static CarConnectedProcessState carConnectedProcessState = CarConnectedProcessState.NOT_STARTED;
-    public static boolean startWithProximityFarPerformed;
-
 
     public AppBroadcastReceiver(){
     }
@@ -42,8 +39,7 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                         .getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
 
                 if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceConnected.getAddress()) &&
-                        carConnectedProcessState == CarConnectedProcessState.NOT_STARTED) {
-                    carConnectedProcessState = CarConnectedProcessState.PERFORMING;
+                        Logic.getCarConnectedProcessState() == CarConnectedProcessState.NOT_STARTED) {
                     startServiceWithAction(context, PROXIMITY_CHECK_ACTION, CarConnectedService.class);
                 }
 
@@ -55,35 +51,23 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                 break;
 
             case POPUP_CONNECTED_ACTION:
-                if (Logic.proximityState != ProximityState.NEAR) {
-                    Log.d(LOG_TAG, "popup connected action");
-                    startServiceWithAction(context, POPUP_CONNECTED_ACTION, CarConnectedService.class);
-                } else {
-                    sendBroadcastAction(context, PLAY_MUSIC_ACTION);
-                    startWithProximityFarPerformed = false;
-                }
+                Log.d(LOG_TAG, "popup connected action");
+                startServiceWithAction(context, POPUP_CONNECTED_ACTION, CarConnectedService.class);
                 break;
 
             case CONTINUE_CONNECTED_ACTION:
                 Log.d(LOG_TAG, "continue action");
                 startServiceWithAction(context, CONTINUE_CONNECTED_ACTION, CarConnectedService.class);
-                startWithProximityFarPerformed = true;
                 break;
 
             case DISCONTINUE_CONNECTED_ACTION:
                 Log.d(LOG_TAG, "discontinue action");
                 startServiceWithAction(context, DISCONTINUE_CONNECTED_ACTION, CarConnectedService.class);
-                restoreDefaultValues();
                 break;
 
             case PLAY_MUSIC_ACTION:
                 Log.d(LOG_TAG, "play music action");
                 startServiceWithAction(context, PLAY_MUSIC_ACTION, CarConnectedService.class);
-                break;
-
-            case DISMISS_LOCK_SCREEN_ACTION:
-                Log.d(LOG_TAG, "disable lock screen action");
-                startServiceWithAction(context, DISMISS_LOCK_SCREEN_ACTION, CarConnectedService.class);
                 break;
 
             case BluetoothDevice.ACTION_ACL_DISCONNECTED:
@@ -95,7 +79,7 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
 
                 if (Logic.getSharedPrefStringSet(context,
                         KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceDisconnected.getAddress()) &&
-                        carConnectedProcessState == CarConnectedProcessState.COMPLETED &&
+                        Logic.getCarConnectedProcessState() == CarConnectedProcessState.COMPLETED &&
                         !Logic.isMyServiceRunning(CarConnectedService.class, context)) {
                     restoreDefaultValues();
                     context.stopService(new Intent(context, ForceAutoRotationService.class));
@@ -117,6 +101,11 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                 }
                 break;
 
+            case Intent.ACTION_SCREEN_ON:
+                Log.d(LOG_TAG, "screen on action");
+                Actions.dismissLockScreen(MyApplication.getAppContext());
+                break;
+
         }
     }
 
@@ -133,9 +122,9 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
     }
 
     private void restoreDefaultValues() {
-        carConnectedProcessState = CarConnectedProcessState.NOT_STARTED;
-        Logic.proximityState = ProximityState.FAR;
-        startWithProximityFarPerformed = false;
+        Logic.setCarConnectedProcessState(CarConnectedProcessState.NOT_STARTED);
+        Logic.setProximityState(ProximityState.NOT_TESTED);
+        Logic.setStartWithProximityFarPerformed(false);
     }
 }
 

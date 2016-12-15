@@ -24,10 +24,10 @@ import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
 import pl.maslanka.automatecar.callbackmessages.MessagePopupConnected;
 import pl.maslanka.automatecar.helpers.CallbackService;
 import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
+import pl.maslanka.automatecar.helpers.ProximityState;
 import pl.maslanka.automatecar.utils.Actions;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
-import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
 import pl.maslanka.automatecar.utils.Logic;
 import pl.maslanka.automatecar.utils.MyApplication;
 
@@ -41,7 +41,6 @@ public class CarConnectedService extends CallbackService
 
     private final String LOG_TAG = this.getClass().getSimpleName();
 
-    private boolean disableLockScreen;
     private boolean forceAutoRotation;
     private boolean checkIfInPocket;
     private boolean checkWirelessPowerSupply;
@@ -55,6 +54,7 @@ public class CarConnectedService extends CallbackService
     private boolean playMusic;
     private String musicPlayer;
     private boolean playMusicOnA2dp;
+    private boolean dismissLockScreen;
     private boolean showNavi;
     private String action;
 
@@ -72,7 +72,13 @@ public class CarConnectedService extends CallbackService
                     stopSelf(startId);
                     break;
                 case FORCE_ROTATION_COMPLETED:
-                    sendBroadcastAction(POPUP_CONNECTED_ACTION);
+                    if (Logic.getProximityState() != ProximityState.NEAR) {
+                        sendBroadcastAction(POPUP_CONNECTED_ACTION);
+                        Logic.setStartWithProximityFarPerformed(true);
+                    } else {
+                        sendBroadcastAction(PLAY_MUSIC_ACTION);
+                        Logic.setStartWithProximityFarPerformed(false);
+                    }
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
                     stopSelf(startId);
                     break;
@@ -92,13 +98,8 @@ public class CarConnectedService extends CallbackService
                     stopSelf(startId);
                     break;
                 case PLAY_MUSIC_COMPLETED:
-                    sendBroadcastAction(DISMISS_LOCK_SCREEN_ACTION);
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
-                    stopSelf(startId);
-                    break;
-                case DISMISS_LOCK_SCREEN_COMPLETED:
-                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
-                    AppBroadcastReceiver.carConnectedProcessState = CarConnectedProcessState.COMPLETED;
+                    Logic.setCarConnectedProcessState(CarConnectedProcessState.COMPLETED);
                     stopSelf(startId);
                     break;
             }
@@ -117,6 +118,7 @@ public class CarConnectedService extends CallbackService
         public void handleMessage(Message msg) {
             switch (action) {
                 case PROXIMITY_CHECK_ACTION:
+                    Logic.setCarConnectedProcessState(CarConnectedProcessState.PERFORMING);
                     Actions.proximityCheck(CarConnectedService.this, mConnection, msg.arg1);
                     break;
                 case FORCE_ROTATION_ACTION:
@@ -127,6 +129,7 @@ public class CarConnectedService extends CallbackService
                     break;
                 case DISCONTINUE_CONNECTED_ACTION:
                     stopRunningService(CarConnectedService.this, ForceAutoRotationService.class);
+                    restoreDefaultValues();
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(msg.arg1));
                     stopSelf(msg.arg1);
                     break;
@@ -135,9 +138,6 @@ public class CarConnectedService extends CallbackService
                     break;
                 case PLAY_MUSIC_ACTION:
                     Actions.playMusic(CarConnectedService.this, msg.arg1);
-                    break;
-                case DISMISS_LOCK_SCREEN_ACTION:
-                    Actions.dismissLockScreen(CarConnectedService.this, msg.arg1);
                     break;
                 default:
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(msg.arg1));
@@ -184,7 +184,6 @@ public class CarConnectedService extends CallbackService
 
 
     protected void getPreferencesData() {
-        disableLockScreen = Logic.getSharedPrefBoolean(this, KEY_DISABLE_LOCK_SCREEN, DISABLE_LOCK_SCREEN_DEFAULT_VALUE);
         forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION, FORCE_AUTO_ROTATION_DEFAULT_VALUE);
         checkIfInPocket = Logic.getSharedPrefBoolean(this, KEY_CHECK_IF_IN_POCKET, CHECK_IF_IN_POCKET_DEFAULT_VALUE);
         checkWirelessPowerSupply = Logic.getSharedPrefBoolean(this, KEY_CHECK_WIRELESS_POWER_SUPPLY, CHECK_WIRELESS_POWER_SUPPLY_DEFAULT_VALUE);
@@ -195,8 +194,9 @@ public class CarConnectedService extends CallbackService
         appList = Logic.readList(this);
         sleepTimes = Integer.parseInt(Logic.getSharedPrefString(this, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
         playMusic = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
-        playMusicOnA2dp = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC_ON_A2DP, PLAY_MUSIC_ON_A2DP_DEFAULT_VALUE);
         musicPlayer = Logic.getSharedPrefString(this, KEY_SELECT_MUSIC_PLAYER, null);
+        playMusicOnA2dp = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC_ON_A2DP, PLAY_MUSIC_ON_A2DP_DEFAULT_VALUE);
+        dismissLockScreen = Logic.getSharedPrefBoolean(this, KEY_DISMISS_LOCK_SCREEN, DISMISS_LOCK_SCREEN_DEFAULT_VALUE);
         showNavi = Logic.getSharedPrefBoolean(this, KEY_SHOW_NAVI, SHOW_NAVI_DEFAULT_VALUE);
     }
 
@@ -281,6 +281,12 @@ public class CarConnectedService extends CallbackService
     @Override
     public void onActivityDestroyed(Activity activity) {
 
+    }
+
+    private void restoreDefaultValues() {
+        Logic.setCarConnectedProcessState(CarConnectedProcessState.NOT_STARTED);
+        Logic.setProximityState(ProximityState.NOT_TESTED);
+        Logic.setStartWithProximityFarPerformed(false);
     }
 
 }

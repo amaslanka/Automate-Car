@@ -15,7 +15,6 @@ import java.util.Set;
 import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
-import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
 import pl.maslanka.automatecar.utils.Logic;
 
 /**
@@ -27,11 +26,15 @@ public class HelperAccessibilityService extends AccessibilityService implements
 
     private static final String LOG_TAG = HelperAccessibilityService.class.getSimpleName();
     private static Set<String> rotationExcludedApps;
-    private boolean forceAutoRotation;
+    private static boolean forceAutoRotation;
 
     public static void setRotationExcludedApps(Set<String> newRotationExcludedApps) {
         rotationExcludedApps = newRotationExcludedApps;
         Log.d(LOG_TAG, "Set new rotation excluded apps list: " + rotationExcludedApps.toString());
+    }
+
+    public static void setForceAutoRotation(boolean forceAutoRotation) {
+        HelperAccessibilityService.forceAutoRotation = forceAutoRotation;
     }
 
     @Override
@@ -39,8 +42,8 @@ public class HelperAccessibilityService extends AccessibilityService implements
 
         setRotationExcludedApps(Logic.getSharedPrefStringSet(this, KEY_ROTATION_EXCLUDED_APPS));
 
-        forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION,
-                FORCE_AUTO_ROTATION_DEFAULT_VALUE);
+        setForceAutoRotation(Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION,
+                FORCE_AUTO_ROTATION_DEFAULT_VALUE));
 
         super.onServiceConnected();
     }
@@ -57,7 +60,10 @@ public class HelperAccessibilityService extends AccessibilityService implements
 
             Log.d(LOG_TAG, event.getPackageName().toString());
 
-            if (forceAutoRotation && AppBroadcastReceiver.carConnectedProcessState == CarConnectedProcessState.COMPLETED) {
+            Logic.setCurrentForegroundAppPackage(event.getPackageName().toString());
+            
+
+            if (forceAutoRotation && Logic.getCarConnectedProcessState() == CarConnectedProcessState.COMPLETED) {
                 if (rotationExcludedApps.contains(event.getPackageName().toString())) {
 
                     if (Logic.isMyServiceRunning(ForceAutoRotationService.class, this)) {

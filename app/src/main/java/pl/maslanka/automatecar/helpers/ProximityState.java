@@ -5,5 +5,5 @@ package pl.maslanka.automatecar.helpers;
  */
 
 public enum ProximityState {
-    NEAR, FAR;
+    NEAR, FAR, NOT_TESTED;
 }

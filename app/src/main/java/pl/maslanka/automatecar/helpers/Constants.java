@@ -6,7 +6,11 @@ package pl.maslanka.automatecar.helpers;
 
 public class Constants {
 
+    public static final String DISMISS_LOCK_SCREEN_SU_COMMAND = "su -c input keyevent USER";
+    public static final String DISMISS_LOCK_SCREEN_SU_COMMAND_ALTERNATIVE = "su -c input keyevent 82";
     public static final String INTENT_EXTRA_RESULT_CODE = "intent_extra_result_code";
+    public static final String SYSTEM_UI_PACKAGE_NAME = "com.android.systemui";
+    public static final int SLEEP_BETWEEN_BUTTON_PRESS = 500;
 
     public interface FILE_NAMES {
         String PATH = "appList";
@@ -32,7 +36,7 @@ public class Constants {
         int DIALOG_DURATION_MIN_VALUE = 1;
         int SLEEP_TIMES_MIN_VALUE = 1;
         int SLEEP_TIMES_MAX_VALUE = 20;
-        boolean DISABLE_LOCK_SCREEN_DEFAULT_VALUE = false;
+        boolean DISMISS_LOCK_SCREEN_DEFAULT_VALUE = false;
         boolean FORCE_AUTO_ROTATION_DEFAULT_VALUE = false;
         boolean CHECK_IF_IN_POCKET_DEFAULT_VALUE = false;
         boolean CHECK_WIRELESS_POWER_SUPPLY_DEFAULT_VALUE = false;
@@ -49,7 +53,7 @@ public class Constants {
     public interface PREF_KEYS {
         String KEY_FIRST_RUN = "first_run";
         String KEY_SELECT_BLUETOOTH_DEVICES = "select_bluetooth_devices";
-        String KEY_DISABLE_LOCK_SCREEN = "disable_lock_screen";
+        String KEY_DISMISS_LOCK_SCREEN = "dismiss_lock_screen";
         String KEY_FORCE_AUTO_ROTATION = "force_auto_rotation";
         String KEY_ROTATION_EXCLUDED_APPS = "rotation_excluded_apps";
         String KEY_CHECK_IF_IN_POCKET = "check_if_in_pocket";

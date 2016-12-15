@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
+import android.provider.DocumentsContract;
 import android.text.InputFilter;
 import android.util.Log;
 import android.widget.Toast;
@@ -18,10 +19,12 @@ import android.widget.Toast;
 import java.util.List;
 
 import pl.maslanka.automatecar.R;
+import pl.maslanka.automatecar.services.HelperAccessibilityService;
 import pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference;
 import pl.maslanka.automatecar.userinputfilter.InputFilterMinMax;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.utils.Logic;
+import pl.maslanka.automatecar.utils.RootUtil;
 
 /**
  * Created by Artur on 09.11.2016.
@@ -55,8 +58,8 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     private CheckBoxPreference forceAutoRotation;
     private Preference rotationExcludedApps;
 
-    private CheckBoxPreference disableLockScreen;
     private CheckBoxPreference checkIfInPocket;
+    private CheckBoxPreference dismissLockScreen;
     private CheckBoxPreference showNavi;
 
     private ProgressDialog dialog;
@@ -90,7 +93,7 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         selectMusicPlayer = findPreference(KEY_SELECT_MUSIC_PLAYER);
         forceAutoRotation = (CheckBoxPreference) findPreference(KEY_FORCE_AUTO_ROTATION);
         rotationExcludedApps = findPreference(KEY_ROTATION_EXCLUDED_APPS);
-        disableLockScreen = (CheckBoxPreference) findPreference(KEY_DISABLE_LOCK_SCREEN);
+        dismissLockScreen = (CheckBoxPreference) findPreference(KEY_DISMISS_LOCK_SCREEN);
         checkIfInPocket = (CheckBoxPreference) findPreference(KEY_CHECK_IF_IN_POCKET);
         showNavi = (CheckBoxPreference) findPreference(KEY_SHOW_NAVI);
     }
@@ -136,12 +139,35 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
             }
         });
 
+        forceAutoRotation.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean isNowChecked = Boolean.parseBoolean(newValue.toString());
+                HelperAccessibilityService.setForceAutoRotation(isNowChecked);
+                return true;
+            }
+        });
+
         rotationExcludedApps.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 rotationExcludedAppsListCreator = new RotationExcludedAppsListCreator(PrefsCarConnectedFragment.this);
                 rotationExcludedAppsListCreator.execute(getActivity());
                 return false;
+            }
+        });
+
+        dismissLockScreen.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean isNowChecked = Boolean.parseBoolean(newValue.toString());
+                boolean isRooted = RootUtil.isDeviceRooted();
+                Log.d(LOG_TAG, "isRooted" + Boolean.toString(isRooted));
+                if (isNowChecked) {
+                    return isRooted;
+                }
+
+                return true;
             }
         });
 

@@ -1,5 +1,7 @@
 package pl.maslanka.automatecar.utils;
 
+import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,10 +11,12 @@ import android.media.AudioManager;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import pl.maslanka.automatecar.connected.PopupConnectedActivity;
+import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.helpers.TurnScreenOnActivity;
@@ -28,6 +32,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         Constants.CALLBACK_ACTIONS, Constants.DEFAULT_VALUES {
 
     private static final String LOG_TAG = Actions.class.getSimpleName();
+
 
     public static void proximityCheck(Context context, ServiceConnection mConnection, int startId) {
         boolean checkIfInPocket = Logic.getSharedPrefBoolean(context, KEY_CHECK_IF_IN_POCKET, CHECK_IF_IN_POCKET_DEFAULT_VALUE);
@@ -118,7 +123,6 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     public static void playMusic(Context context, int startId) {
 
-        final int SLEEP_BETWEEN_MEDIA_BUTTON_PRESS = 500;
         int sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
                 context, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
 
@@ -169,15 +173,15 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
                         if (manager.isBluetoothA2dpOn()) {
                             Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
-                            sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_DOWN);
-                            Thread.sleep(SLEEP_BETWEEN_MEDIA_BUTTON_PRESS);
-                            sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_UP);
+                            sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_DOWN);
+                            Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
+                            sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_UP);
                         }
 
                     } else {
-                        sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_DOWN);
-                        Thread.sleep(SLEEP_BETWEEN_MEDIA_BUTTON_PRESS);
-                        sendOrderedPlayBroadcast(context, component, KeyEvent.ACTION_UP);
+                        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_DOWN);
+                        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
+                        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_UP);
                     }
 
                 } else {
@@ -188,15 +192,15 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
                         if (manager.isBluetoothA2dpOn()) {
                             Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
-                            sendPlayBroadcast(context, KeyEvent.ACTION_DOWN);
-                            Thread.sleep(SLEEP_BETWEEN_MEDIA_BUTTON_PRESS);
-                            sendPlayBroadcast(context, KeyEvent.ACTION_UP);
+                            sendPlayButtonEvent(context, KeyEvent.ACTION_DOWN);
+                            Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
+                            sendPlayButtonEvent(context, KeyEvent.ACTION_UP);
                         }
 
                     } else {
-                        sendPlayBroadcast(context, KeyEvent.ACTION_DOWN);
-                        Thread.sleep(SLEEP_BETWEEN_MEDIA_BUTTON_PRESS);
-                        sendPlayBroadcast(context, KeyEvent.ACTION_UP);
+                        sendPlayButtonEvent(context, KeyEvent.ACTION_DOWN);
+                        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
+                        sendPlayButtonEvent(context, KeyEvent.ACTION_UP);
                     }
 
                 }
@@ -210,22 +214,46 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         }
     }
 
-    public static void dismissLockScreen(Context context, int startId) {
+    public static void dismissLockScreen(Context context) {
+
+        boolean dismissLockScreen = Logic.getSharedPrefBoolean(context,
+                KEY_DISMISS_LOCK_SCREEN, DISMISS_LOCK_SCREEN_DEFAULT_VALUE);
 
 
-        if (context instanceof CarConnectedService){
-            ((CarConnectedService) context).callback(DISMISS_LOCK_SCREEN_COMPLETED, startId);
+        KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Activity.KEYGUARD_SERVICE);
+
+        //Dismiss lock screen only when accessibility service provides info that it is on top
+        //Check also whether device is locked or other system ui event is shown
+        try {
+
+            if (Logic.getCarConnectedProcessState() != CarConnectedProcessState.NOT_STARTED
+                    && Logic.getCurrentForegroundAppPackage().equals(Constants.SYSTEM_UI_PACKAGE_NAME)
+                    && keyguardManager.inKeyguardRestrictedInputMode()
+                    && dismissLockScreen) {
+
+                    Log.d(LOG_TAG, "Dismiss lock screen key event sent!");
+                    Process process1 = Runtime.getRuntime().exec(Constants.DISMISS_LOCK_SCREEN_SU_COMMAND);
+                    Process process2 = Runtime.getRuntime().exec(Constants.DISMISS_LOCK_SCREEN_SU_COMMAND_ALTERNATIVE);
+
+                }
+
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Device not rooted! Dismiss lock screen action cannot be done!");
+            e.printStackTrace();
         }
+
+
+
     }
 
-    private static synchronized void sendOrderedPlayBroadcast(Context context, ComponentName component, int action) {
+    private static void sendOrderedPlayButtonEvent(Context context, ComponentName component, int action) {
         Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         intent.setComponent(component);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
         context.sendOrderedBroadcast(intent, null);
     }
 
-    private static void sendPlayBroadcast(Context context, int action) {
+    private static void sendPlayButtonEvent(Context context, int action) {
         Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
         context.sendBroadcast(intent);

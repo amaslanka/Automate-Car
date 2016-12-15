@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.helpers.ProximityState;
@@ -56,7 +57,42 @@ import static android.content.Context.POWER_SERVICE;
 
 public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
 
-    public static ProximityState proximityState = ProximityState.FAR;
+    private static ProximityState proximityState = ProximityState.NOT_TESTED;
+    private static CarConnectedProcessState carConnectedProcessState = CarConnectedProcessState.NOT_STARTED;
+    private static boolean startWithProximityFarPerformed;
+    private static String currentForegroundAppPackage = "";
+
+    public static ProximityState getProximityState() {
+        return proximityState;
+    }
+
+    public static void setProximityState(ProximityState proximityState) {
+        Logic.proximityState = proximityState;
+    }
+
+    public static CarConnectedProcessState getCarConnectedProcessState() {
+        return carConnectedProcessState;
+    }
+
+    public static void setCarConnectedProcessState(CarConnectedProcessState carConnectedProcessState) {
+        Logic.carConnectedProcessState = carConnectedProcessState;
+    }
+
+    public static String getCurrentForegroundAppPackage() {
+        return currentForegroundAppPackage;
+    }
+
+    public static void setCurrentForegroundAppPackage(String currentForegroundAppPackage) {
+        Logic.currentForegroundAppPackage = currentForegroundAppPackage;
+    }
+
+    public static boolean isStartWithProximityFarPerformed() {
+        return startWithProximityFarPerformed;
+    }
+
+    public static void setStartWithProximityFarPerformed(boolean startWithProximityFarPerformed) {
+        Logic.startWithProximityFarPerformed = startWithProximityFarPerformed;
+    }
 
     public static boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

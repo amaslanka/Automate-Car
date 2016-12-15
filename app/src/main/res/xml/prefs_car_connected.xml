@@ -129,8 +129,8 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:title="@string/disable_lock_screen"
-            android:key="disable_lock_screen" />
+            android:title="@string/dismiss_lock_screen"
+            android:key="dismiss_lock_screen" />
 
         <CheckBoxPreference
             android:defaultValue="true"

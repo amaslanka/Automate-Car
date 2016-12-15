@@ -87,9 +87,9 @@ public class ProximitySensorService extends Service implements SensorEventListen
         float distance = event.values[0];
         Log.d(LOG_TAG, "Proximity sensor distance = " + Float.toString(distance));
         if (distance < 2.5) {
-            Logic.proximityState = ProximityState.NEAR;
+            Logic.setProximityState(ProximityState.NEAR);
         } else {
-            Logic.proximityState = ProximityState.FAR;
+            Logic.setProximityState(ProximityState.FAR);
         }
 
         if (contextToCallback instanceof CarConnectedService) {

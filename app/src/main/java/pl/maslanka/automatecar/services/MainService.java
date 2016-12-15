@@ -40,7 +40,6 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
         mIntentFilter.addAction(CONTINUE_CONNECTED_ACTION);
         mIntentFilter.addAction(DISCONTINUE_CONNECTED_ACTION);
         mIntentFilter.addAction(PLAY_MUSIC_ACTION);
-        mIntentFilter.addAction(DISMISS_LOCK_SCREEN_ACTION);
 
     }
 
