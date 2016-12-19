@@ -24,6 +24,8 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
@@ -35,6 +37,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -56,6 +60,9 @@ import static android.content.Context.POWER_SERVICE;
  */
 
 public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
+
+    private static final String LOG_TAG = Actions.class.getSimpleName();
+
 
     private static ProximityState proximityState = ProximityState.NOT_TESTED;
     private static CarConnectedProcessState carConnectedProcessState = CarConnectedProcessState.NOT_STARTED;
@@ -376,6 +383,112 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         }
 
         return false;
+    }
+
+
+    public static void setMobileDataStateBelowLollipop(Context context, boolean mobileDataEnabled) {
+        try {
+            TelephonyManager telephonyService = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            Method setMobileDataEnabledMethod = telephonyService.getClass().getDeclaredMethod("setDataEnabled", boolean.class);
+
+            if (setMobileDataEnabledMethod != null) {
+                setMobileDataEnabledMethod.invoke(telephonyService, mobileDataEnabled);
+            }
+        }
+        catch (Exception ex) {
+            Log.e(LOG_TAG, "Error setting mobile data state", ex);
+        }
+    }
+
+    public static boolean getMobileDataStateBelowLollipop(Context context) {
+        try {
+            TelephonyManager telephonyService = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            Method getMobileDataEnabledMethod = telephonyService.getClass().getDeclaredMethod("getDataEnabled");
+
+            if (getMobileDataEnabledMethod != null) {
+                return (Boolean) getMobileDataEnabledMethod.invoke(telephonyService);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.e(LOG_TAG, "Error getting mobile data state", ex);
+        }
+
+        return false;
+    }
+
+    public static void setMobileDataStateFromLollipop(Context context, int state) throws Exception {
+        String command = null;
+        try {
+            String transactionCode = getTransactionCode(context);
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                SubscriptionManager mSubscriptionManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+                // Loop through the subscription list i.e. SIM list.
+                for (int i = 0; i < mSubscriptionManager.getActiveSubscriptionInfoCountMax(); i++) {
+                    if (transactionCode.length() > 0) {
+                        // Get the active subscription ID for a given SIM card.
+                        int subscriptionId = mSubscriptionManager.getActiveSubscriptionInfoList().get(i).getSubscriptionId();
+
+                        command = "service call phone " + transactionCode + " i32 " + subscriptionId + " i32 " + state;
+                        executeCommandViaSu(context, "-c", command);
+                    }
+                }
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
+                if (transactionCode.length() > 0) {
+                    command = "service call phone " + transactionCode + " i32 " + state;
+                    executeCommandViaSu(context, "-c", command);
+                }
+            }
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "Exception occurred while changing mobile data state!" + "\n" + e);
+        }
+    }
+
+    private static String getTransactionCode(Context context) throws Exception {
+        try {
+            final TelephonyManager mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            final Class<?> mTelephonyClass = Class.forName(mTelephonyManager.getClass().getName());
+            final Method mTelephonyMethod = mTelephonyClass.getDeclaredMethod("getITelephony");
+            mTelephonyMethod.setAccessible(true);
+            final Object mTelephonyStub = mTelephonyMethod.invoke(mTelephonyManager);
+            final Class<?> mTelephonyStubClass = Class.forName(mTelephonyStub.getClass().getName());
+            final Class<?> mClass = mTelephonyStubClass.getDeclaringClass();
+            final Field field = mClass.getDeclaredField("TRANSACTION_setDataEnabled");
+            field.setAccessible(true);
+            return String.valueOf(field.getInt(null));
+        } catch (Exception e) {
+            // The "TRANSACTION_setDataEnabled" field is not available,
+            // or named differently in the current API level, so we throw
+            // an exception and inform users that the method is not available.
+            throw e;
+        }
+    }
+
+    private static void executeCommandViaSu(Context context, String option, String command) {
+        boolean success = false;
+        String su = "su";
+        for (int i=0; i < 3; i++) {
+            // Default "su" command executed successfully, then quit.
+            if (success) {
+                break;
+            }
+            // Else, execute other "su" commands.
+            if (i == 1) {
+                su = "/system/xbin/su";
+            } else if (i == 2) {
+                su = "/system/bin/su";
+            }
+            try {
+                // Execute command as "su".
+                Runtime.getRuntime().exec(new String[]{su, option, command});
+            } catch (IOException e) {
+                success = false;
+                Log.e(LOG_TAG, "Cannot execute su command!\n" + e);
+            } finally {
+                success = true;
+            }
+        }
     }
 
     @Nullable

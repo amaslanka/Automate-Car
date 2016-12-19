@@ -91,7 +91,7 @@
     <string name="exclude_from_forcing_auto_rotation">Exclude from forcing auto rotation</string>
     <string name="no_player_selected">No specified player selected</string>
     <string name="connectivity">Connectivity</string>
-    <string name="connectivity_root_required">Connectivity (ROOT required)</string>
+    <string name="connectivity_root_required">Connectivity (ROOT required on Android 5.0 and higher)</string>
     <string name="root_features">Root features</string>
     <string name="dock_trigger">Dock trigger</string>
     <string name="wireless_loading">Wireless loading</string>

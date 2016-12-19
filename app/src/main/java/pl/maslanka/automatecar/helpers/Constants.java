@@ -111,8 +111,11 @@ public class Constants {
         String POPUP_CONNECTED_ACTION = "com.maslanka.automatecar.popup.connected.action";
         String CONTINUE_CONNECTED_ACTION = "com.maslanka.automatecar.continue.connected.action";
         String DISCONTINUE_CONNECTED_ACTION = "com.maslanka.automatecar.discontinue.action";
+        String CHANGE_WIFI_STATE_ACTION = "com.maslanka.automatecar.change.wifi.state.action";
+        String CHANGE_MOBILE_DATA_STATE_ACTION = "com.maslanka.automatecar.change.mobile.data.state.action";
+        String SET_MEDIA_VOLUME_ACTION = "com.maslanka.automatecar.set.media.volume.action";
         String PLAY_MUSIC_ACTION = "com.maslanka.automatecar.play.music.action";
-        String DISMISS_LOCK_SCREEN_ACTION = "com.maslanka.automatecar.dismiss.lock.screen.action";
+        String SHOW_NAVI_ACTION = "com.maslanka.automatecar.show.navi.action";
     }
 
     public interface CALLBACK_ACTIONS {
@@ -122,7 +125,10 @@ public class Constants {
         String POPUP_CONNECTED_FINISH_CONTINUE = "com.maslanka.automatecar.popup.connected.finish.continue";
         String POPUP_CONNECTED_FINISH_DISCONTINUE = "com.maslanka.automatecar.popup.connected.finish.discontinue";
         String LAUNCH_APPS_COMPLETED = "com.maslanka.automatecar.launch.apps.completed";
+        String CHANGE_WIFI_STATE_COMPLETED = "com.maslanka.automatecar.change.wifi.state.completed";
+        String CHANGE_MOBILE_DATA_STATE_COMPLETED = "com.maslanka.automatecar.change.mobile.data.state.completed";
+        String SET_MEDIA_VOLUME_COMPLETED = "com.maslanka.automatecar.set.media.volume.completed";
         String PLAY_MUSIC_COMPLETED = "com.maslanka.automatecar.play.music.completed";
-        String DISMISS_LOCK_SCREEN_COMPLETED = "com.maslanka.automatecar.dismiss.lock.screen.completed";
+        String SHOW_NAVI_COMPLETED = "com.maslanka.automatecar.show.navi.completed";
     }
 }

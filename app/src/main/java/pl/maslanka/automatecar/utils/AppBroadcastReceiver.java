@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
@@ -63,19 +62,39 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                 startServiceWithAction(context, POPUP_CONNECTED_ACTION, CarConnectedService.class);
                 break;
 
-            case CONTINUE_CONNECTED_ACTION:
-                Log.d(LOG_TAG, "continue action");
-                startServiceWithAction(context, CONTINUE_CONNECTED_ACTION, CarConnectedService.class);
-                break;
-
             case DISCONTINUE_CONNECTED_ACTION:
                 Log.d(LOG_TAG, "discontinue action");
                 startServiceWithAction(context, DISCONTINUE_CONNECTED_ACTION, CarConnectedService.class);
                 break;
 
+            case CONTINUE_CONNECTED_ACTION:
+                Log.d(LOG_TAG, "continue action");
+                startServiceWithAction(context, CONTINUE_CONNECTED_ACTION, CarConnectedService.class);
+                break;
+
+            case CHANGE_WIFI_STATE_ACTION:
+                Log.d(LOG_TAG, "change wifi state action");
+                startServiceWithAction(context, CHANGE_WIFI_STATE_ACTION, CarConnectedService.class);
+                break;
+
+            case CHANGE_MOBILE_DATA_STATE_ACTION:
+                Log.d(LOG_TAG, "change mobile data state action");
+                startServiceWithAction(context, CHANGE_MOBILE_DATA_STATE_ACTION, CarConnectedService.class);
+                break;
+
+            case SET_MEDIA_VOLUME_ACTION:
+                Log.d(LOG_TAG, "set media volume action");
+                startServiceWithAction(context, SET_MEDIA_VOLUME_ACTION, CarConnectedService.class);
+                break;
+
             case PLAY_MUSIC_ACTION:
                 Log.d(LOG_TAG, "play music action");
                 startServiceWithAction(context, PLAY_MUSIC_ACTION, CarConnectedService.class);
+                break;
+
+            case SHOW_NAVI_ACTION:
+                Log.d(LOG_TAG, "show navi action");
+                startServiceWithAction(context, SHOW_NAVI_ACTION, CarConnectedService.class);
                 break;
 
             case BluetoothDevice.ACTION_ACL_DISCONNECTED:

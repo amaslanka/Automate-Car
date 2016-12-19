@@ -45,20 +45,27 @@ public class PrefsOtherFragment extends com.github.machinarius.preferencefragmen
     }
 
     protected void setPreferencesFeatures() {
+        boolean isDeviceRooted = RootUtil.isDeviceRooted();
 
-        dismissLockScreen.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                boolean isNowChecked = Boolean.parseBoolean(newValue.toString());
-                boolean isRooted = RootUtil.isDeviceRooted();
-                Log.d(LOG_TAG, "isRooted" + Boolean.toString(isRooted));
-                if (isNowChecked) {
-                    return isRooted;
+        if (!isDeviceRooted) {
+            dismissLockScreen.setEnabled(false);
+            dismissLockScreen.setChecked(false);
+        } else {
+            dismissLockScreen.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    boolean isNowChecked = Boolean.parseBoolean(newValue.toString());
+                    if (!isNowChecked) {
+                        return true;
+                    }
+
+                    boolean askRootPermissions = RootUtil.askRootPermissions();
+                    Log.d(LOG_TAG, "askRootPermissions" + Boolean.toString(askRootPermissions));
+                    return askRootPermissions;
+
                 }
-
-                return true;
-            }
-        });
+            });
+        }
 
     }
 

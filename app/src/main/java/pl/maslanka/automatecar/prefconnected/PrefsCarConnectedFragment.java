@@ -1,5 +1,6 @@
 package pl.maslanka.automatecar.prefconnected;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -7,25 +8,22 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.InputFilter;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.util.List;
 
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.prefother.MediaVolumeLevelPref;
-import pl.maslanka.automatecar.prefother.PrefsOther;
 import pl.maslanka.automatecar.services.HelperAccessibilityService;
 import pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference;
 import pl.maslanka.automatecar.userinputfilter.InputFilterMinMax;
@@ -41,6 +39,7 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         implements SharedPreferences.OnSharedPreferenceChangeListener,
         Constants.PREF_KEYS, Constants.DEFAULT_VALUES {
 
+    public static final int PERMISSIONS_REQUEST_PHONE_STATE = 3697;
     private final String LOG_TAG = this.getClass().getSimpleName();
 
     private List<String[]> bluetoothDevicesArray;
@@ -81,6 +80,10 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     private AlertDialog musicPlayerList;
     private RotationExcludedAppsListCreator rotationExcludedAppsListCreator;
     private AlertDialog rotationExcludedAppsList;
+
+    public CheckBoxPreference getChangeMobileDataState() {
+        return changeMobileDataState;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -175,7 +178,7 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         });
 
         setWifiEnableText();
-
+        setChangeMobileDataStateFeatures();
         setMobileDataEnableText();
 
 
@@ -281,14 +284,59 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
 
     }
 
+    protected void setChangeMobileDataStateFeatures() {
+        boolean isDeviceRooted = RootUtil.isDeviceRooted();
+
+        if (!isDeviceRooted) {
+            changeMobileDataState.setEnabled(false);
+            changeMobileDataState.setChecked(false);
+        } else {
+            changeMobileDataState.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    boolean isNowChecked = Boolean.parseBoolean(newValue.toString());
+                    if (!isNowChecked) {
+                        return true;
+                    }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        boolean askRootPermissions = RootUtil.askRootPermissions();
+                        Log.d(LOG_TAG, "askRootPermissions" + Boolean.toString(askRootPermissions));
+
+                        boolean isReadPhoneStateGranted = ContextCompat.checkSelfPermission(getActivity(),
+                                Manifest.permission.READ_PHONE_STATE)
+                                == PackageManager.PERMISSION_GRANTED;
+
+                        Log.d(LOG_TAG, "isReadPhoneStateGranted" + Boolean.toString(isReadPhoneStateGranted));
+
+                        if (isReadPhoneStateGranted && askRootPermissions) {
+                            return true;
+                        } else if (!isReadPhoneStateGranted) {
+                            ActivityCompat.requestPermissions(getActivity(),
+                                    new String[]{Manifest.permission.READ_PHONE_STATE},
+                                    PERMISSIONS_REQUEST_PHONE_STATE);
+                            return false;
+                        }
+
+                        return false;
+                    }
+
+                    return true;
+
+                }
+            });
+        }
+
+    }
+
     protected void setMobileDataEnableText() {
         boolean isEnabled = Logic.getSharedPrefBoolean(getActivity(), KEY_MOBILE_DATA_ENABLE_IN_CAR,
                 KEY_MOBILE_DATA_ENABLE_IN_CAR_DEFAULT_VALUE);
 
         if (isEnabled)
-            mobileDataEnable.setTitle(getString(R.string.wifi_on));
+            mobileDataEnable.setTitle(getString(R.string.mobile_data_on));
         else
-            mobileDataEnable.setTitle(getString(R.string.wifi_off));
+            mobileDataEnable.setTitle(getString(R.string.mobile_data_off));
 
     }
 

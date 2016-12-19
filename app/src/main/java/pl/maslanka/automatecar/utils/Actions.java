@@ -8,10 +8,17 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
+import android.net.wifi.WifiManager;
+import android.os.Build;
+import android.provider.Settings;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -117,6 +124,71 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     }
 
+    public static void changeWifiState(Context context, int startId) {
+
+        boolean changeWifiStateInCar = Logic.getSharedPrefBoolean(context,
+                KEY_CHANGE_WIFI_STATE_IN_CAR, CHANGE_WIFI_STATE_IN_CAR_DEFAULT_VALUE);
+        boolean wifiEnableInCar = Logic.getSharedPrefBoolean(context,
+                KEY_WIFI_ENABLE_IN_CAR, WIFI_ENABLE_IN_CAR_DEFAULT_VALUE);
+
+        if (changeWifiStateInCar) {
+            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            wifiManager.setWifiEnabled(wifiEnableInCar);
+        }
+
+        if (context instanceof CarConnectedService) {
+            ((CarConnectedService) context).callback(CHANGE_WIFI_STATE_COMPLETED, startId);
+        }
+    }
+
+    public static void changeMobileDataState(Context context, int startId) {
+
+        boolean changeMobileDataStateInCar = Logic.getSharedPrefBoolean(context,
+                KEY_CHANGE_MOBILE_DATA_STATE_IN_CAR, KEY_CHANGE_MOBILE_DATA_STATE_IN_CAR_DEFAULT_VALUE);
+        boolean mobileDataEnableInCar = Logic.getSharedPrefBoolean(context,
+                KEY_MOBILE_DATA_ENABLE_IN_CAR, KEY_MOBILE_DATA_ENABLE_IN_CAR_DEFAULT_VALUE);
+        int mobileDataEnableInCarAsInt = (mobileDataEnableInCar) ? 1 : 0;
+
+        if (changeMobileDataStateInCar && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try {
+                int isDataOn = Settings.Global.getInt(context.getContentResolver(), "mobile_data");
+                Log.e("isDataOn", Integer.toString(isDataOn));
+                Log.e("mobileDataEnableInCar", Integer.toString(mobileDataEnableInCarAsInt));
+
+                if (isDataOn != mobileDataEnableInCarAsInt) {
+                    Logic.setMobileDataStateFromLollipop(context, mobileDataEnableInCarAsInt);
+                }
+
+            } catch (Settings.SettingNotFoundException e) {
+                Log.e(LOG_TAG, "Setting not found!" + e);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Failed to change mobile data state!" + e);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Failed to change mobile data state!" + e);
+                e.printStackTrace();
+            }
+        } else if (changeMobileDataStateInCar) {
+            boolean isDataOn = Logic.getMobileDataStateBelowLollipop(context);
+            Log.e("isDataOn", Boolean.toString(isDataOn));
+            Log.e("mobileDataEnableInCar", Boolean.toString(mobileDataEnableInCar));
+
+            if (isDataOn != mobileDataEnableInCar) {
+                Logic.setMobileDataStateBelowLollipop(context, mobileDataEnableInCar);
+            }
+        }
+
+        if (context instanceof CarConnectedService) {
+            ((CarConnectedService) context).callback(CHANGE_MOBILE_DATA_STATE_COMPLETED, startId);
+        }
+    }
+
+    public static void setMediaVolume(Context context, int startId) {
+
+        if (context instanceof CarConnectedService) {
+            ((CarConnectedService) context).callback(SET_MEDIA_VOLUME_COMPLETED, startId);
+        }
+    }
+
 
     public static void playMusic(Context context, int startId) {
 
@@ -191,6 +263,13 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
         if (context instanceof CarConnectedService){
             ((CarConnectedService) context).callback(PLAY_MUSIC_COMPLETED, startId);
+        }
+    }
+
+    public static void showNavi(Context context, int startId) {
+
+        if (context instanceof CarConnectedService) {
+            ((CarConnectedService) context).callback(SHOW_NAVI_COMPLETED, startId);
         }
     }
 
@@ -293,4 +372,6 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
             counter++;
         }
     }
+
+
 }

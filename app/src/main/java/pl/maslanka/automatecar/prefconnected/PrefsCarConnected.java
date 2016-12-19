@@ -1,7 +1,10 @@
 package pl.maslanka.automatecar.prefconnected;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
@@ -121,5 +124,29 @@ public class PrefsCarConnected extends AppCompatActivity {
                     prefsCarConnectedFragment.getRotationExcludedAppsList().isShowing());
 
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PrefsCarConnectedFragment.PERMISSIONS_REQUEST_PHONE_STATE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (prefsCarConnectedFragment != null)
+                        if (prefsCarConnectedFragment.getChangeMobileDataState() != null)
+                            prefsCarConnectedFragment.getChangeMobileDataState().setChecked(true);
+
+                } else {
+                    if (prefsCarConnectedFragment != null)
+                        if (prefsCarConnectedFragment.getChangeMobileDataState() != null)
+                            prefsCarConnectedFragment.getChangeMobileDataState().setChecked(false);
+
+                }
+            }
+
+        }
     }
 }

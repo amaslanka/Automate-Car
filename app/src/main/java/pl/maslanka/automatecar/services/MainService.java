@@ -39,7 +39,11 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
         mIntentFilter.addAction(POPUP_CONNECTED_ACTION);
         mIntentFilter.addAction(CONTINUE_CONNECTED_ACTION);
         mIntentFilter.addAction(DISCONTINUE_CONNECTED_ACTION);
+        mIntentFilter.addAction(CHANGE_WIFI_STATE_ACTION);
+        mIntentFilter.addAction(CHANGE_MOBILE_DATA_STATE_ACTION);
+        mIntentFilter.addAction(SET_MEDIA_VOLUME_ACTION);
         mIntentFilter.addAction(PLAY_MUSIC_ACTION);
+        mIntentFilter.addAction(SHOW_NAVI_ACTION);
 
     }
 

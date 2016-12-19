@@ -74,7 +74,7 @@ public class CarConnectedService extends CallbackService
                         sendBroadcastAction(POPUP_CONNECTED_ACTION);
                         Logic.setStartWithProximityFarPerformed(true);
                     } else {
-                        sendBroadcastAction(PLAY_MUSIC_ACTION);
+                        sendBroadcastAction(CHANGE_WIFI_STATE_ACTION);
                         Logic.setStartWithProximityFarPerformed(false);
                     }
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
@@ -91,13 +91,33 @@ public class CarConnectedService extends CallbackService
                     stopSelf(startId);
                     break;
                 case LAUNCH_APPS_COMPLETED:
+                    sendBroadcastAction(CHANGE_WIFI_STATE_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case CHANGE_WIFI_STATE_COMPLETED:
+                    sendBroadcastAction(CHANGE_MOBILE_DATA_STATE_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case CHANGE_MOBILE_DATA_STATE_COMPLETED:
+                    sendBroadcastAction(SET_MEDIA_VOLUME_ACTION);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case SET_MEDIA_VOLUME_COMPLETED:
                     sendBroadcastAction(PLAY_MUSIC_ACTION);
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
                     stopSelf(startId);
                     break;
                 case PLAY_MUSIC_COMPLETED:
+                    sendBroadcastAction(SHOW_NAVI_ACTION);
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
+                    stopSelf(startId);
+                    break;
+                case SHOW_NAVI_COMPLETED:
                     Logic.setCarConnectedProcessState(CarConnectedProcessState.COMPLETED);
+                    Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(startId));
                     stopSelf(startId);
                     break;
             }
@@ -134,8 +154,20 @@ public class CarConnectedService extends CallbackService
                 case CONTINUE_CONNECTED_ACTION:
                     Actions.launchApps(CarConnectedService.this, msg.arg1);
                     break;
+                case CHANGE_WIFI_STATE_ACTION:
+                    Actions.changeWifiState(CarConnectedService.this, msg.arg1);
+                    break;
+                case CHANGE_MOBILE_DATA_STATE_ACTION:
+                    Actions.changeMobileDataState(CarConnectedService.this, msg.arg1);
+                    break;
+                case SET_MEDIA_VOLUME_ACTION:
+                    Actions.setMediaVolume(CarConnectedService.this, msg.arg1);
+                    break;
                 case PLAY_MUSIC_ACTION:
                     Actions.playMusic(CarConnectedService.this, msg.arg1);
+                    break;
+                case SHOW_NAVI_ACTION:
+                    Actions.showNavi(CarConnectedService.this, msg.arg1);
                     break;
                 default:
                     Log.d(LOG_TAG, "stopped! StopID: " + Integer.toString(msg.arg1));

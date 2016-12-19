@@ -14,7 +14,11 @@ import java.io.InputStreamReader;
 
 public class RootUtil {
     public static boolean isDeviceRooted() {
-        return checkRootMethod4() && (checkRootMethod1() || checkRootMethod2() || checkRootMethod3());
+        return checkRootMethod1() || checkRootMethod2() || checkRootMethod3();
+    }
+
+    public static boolean askRootPermissions() {
+        return checkRootMethod4();
     }
 
     private static boolean checkRootMethod1() {
