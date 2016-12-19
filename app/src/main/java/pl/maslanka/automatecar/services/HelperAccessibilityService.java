@@ -40,10 +40,10 @@ public class HelperAccessibilityService extends AccessibilityService implements
     @Override
     protected void onServiceConnected() {
 
-        setRotationExcludedApps(Logic.getSharedPrefStringSet(this, KEY_ROTATION_EXCLUDED_APPS));
+        setRotationExcludedApps(Logic.getSharedPrefStringSet(this, KEY_ROTATION_EXCLUDED_APPS_IN_CAR));
 
-        setForceAutoRotation(Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION,
-                FORCE_AUTO_ROTATION_DEFAULT_VALUE));
+        setForceAutoRotation(Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION_IN_CAR,
+                FORCE_AUTO_ROTATION_IN_CAR_DEFAULT_VALUE));
 
         super.onServiceConnected();
     }

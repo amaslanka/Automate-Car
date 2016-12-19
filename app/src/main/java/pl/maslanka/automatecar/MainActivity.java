@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import pl.maslanka.automatecar.prefother.PrefsOther;
 import pl.maslanka.automatecar.utils.DeviceAdminLock;
 import pl.maslanka.automatecar.helpers.ActivityForResult;
 import pl.maslanka.automatecar.prefconnected.PrefsCarConnected;
@@ -147,7 +148,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.other_options:
-
+                Log.d(LOG_TAG, "other options card clicked");
+                Intent otherOptions = new Intent(MainActivity.this, PrefsOther.class);
+                startActivity(otherOptions);
                 break;
 
             default:

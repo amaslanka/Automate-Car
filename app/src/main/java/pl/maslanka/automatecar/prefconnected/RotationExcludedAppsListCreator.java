@@ -76,7 +76,7 @@ public class RotationExcludedAppsListCreator extends AsyncTask<Activity, Void, V
 
             installedApps = Logic.getListOfAllInstalledApps(activity);
 
-            appsFromPrefs.addAll(Logic.getSharedPrefStringSet(activity, KEY_ROTATION_EXCLUDED_APPS));
+            appsFromPrefs.addAll(Logic.getSharedPrefStringSet(activity, KEY_ROTATION_EXCLUDED_APPS_IN_CAR));
 
             createAppListData();
             checkForUninstalledApps(activity);
@@ -92,7 +92,7 @@ public class RotationExcludedAppsListCreator extends AsyncTask<Activity, Void, V
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Log.d("appsFromPrefs", appsFromPrefs.toString());
-                            Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_ROTATION_EXCLUDED_APPS);
+                            Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_ROTATION_EXCLUDED_APPS_IN_CAR);
                             HelperAccessibilityService.setRotationExcludedApps(appsFromPrefs);
                         }
                     })
@@ -180,7 +180,7 @@ public class RotationExcludedAppsListCreator extends AsyncTask<Activity, Void, V
             appsFromPrefs.remove(uninstalledApp);
         }
 
-        Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_ROTATION_EXCLUDED_APPS);
+        Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_ROTATION_EXCLUDED_APPS_IN_CAR);
     }
 
     private void setCheckStateToCheckBoxes(Activity activity) {

@@ -111,7 +111,7 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
 
         mDragListView = (DragListView) findViewById(R.id.drag_list_view);
         appPackages = new ArrayList<>();
-        appPackages.addAll(Logic.getSharedPrefStringSet(this, KEY_APPS_TO_LAUNCH));
+        appPackages.addAll(Logic.getSharedPrefStringSet(this, KEY_APPS_TO_LAUNCH_IN_CAR));
         appList = Logic.readList(this);
 
         setFloatingActionButton();
@@ -267,7 +267,7 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
 
     protected void saveLists() {
         Logic.setSharedPrefStringSet(
-                AppsToLaunch.this, new HashSet<>(appPackages), KEY_APPS_TO_LAUNCH);
+                AppsToLaunch.this, new HashSet<>(appPackages), KEY_APPS_TO_LAUNCH_IN_CAR);
         Logic.saveListToInternalStorage(AppsToLaunch.this, appList);
     }
 

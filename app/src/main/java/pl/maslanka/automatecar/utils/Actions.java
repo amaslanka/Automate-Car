@@ -35,7 +35,8 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
 
     public static void proximityCheck(Context context, ServiceConnection mConnection, int startId) {
-        boolean checkIfInPocket = Logic.getSharedPrefBoolean(context, KEY_CHECK_IF_IN_POCKET, CHECK_IF_IN_POCKET_DEFAULT_VALUE);
+        boolean checkIfInPocket = Logic.getSharedPrefBoolean(context,
+                KEY_CHECK_IF_IN_POCKET_IN_CAR, CHECK_IF_IN_POCKET_IN_CAR_DEFAULT_VALUE);
 
         if (checkIfInPocket) {
             bindNewService(context, ProximitySensorService.class, mConnection, startId);
@@ -45,9 +46,11 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     }
 
-    public static void startForcingAutoRotation(Context context, ServiceConnection mConnection, int startId) {
+    public static void startForcingAutoRotation(Context context, ServiceConnection mConnection,
+                                                int startId) {
         Log.d(LOG_TAG, "starting: forceAutoRotationService");
-        boolean forceAutoRotation = Logic.getSharedPrefBoolean(context, KEY_FORCE_AUTO_ROTATION, FORCE_AUTO_ROTATION_DEFAULT_VALUE);
+        boolean forceAutoRotation = Logic.getSharedPrefBoolean(context,
+                KEY_FORCE_AUTO_ROTATION_IN_CAR, FORCE_AUTO_ROTATION_IN_CAR_DEFAULT_VALUE);
 
 
         if (forceAutoRotation) {
@@ -61,18 +64,18 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
     public static void showConnectedPopup(Context context, int startId) {
 
         boolean showCancelDialog = Logic.getSharedPrefBoolean(
-                context, KEY_SHOW_CANCEL_DIALOG, SHOW_CANCEL_DIALOG_DEFAULT_VALUE);
+                context, KEY_SHOW_CANCEL_DIALOG_IN_CAR, SHOW_CANCEL_DIALOG_IN_CAR_DEFAULT_VALUE);
         int dialogTimeout = Integer.parseInt(Logic.getSharedPrefString(
-                context, KEY_DIALOG_TIMEOUT, Integer.toString(DIALOG_TIMEOUT_DEFAULT_VALUE)));
+                context, KEY_DIALOG_TIMEOUT_IN_CAR, Integer.toString(DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE)));
         boolean actionDialogTimeout = Logic.getSharedPrefBoolean(
-                context, KEY_ACTION_DIALOG_TIMEOUT, ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
+                context, KEY_ACTION_DIALOG_TIMEOUT_IN_CAR, ACTION_DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE);
 
         if (showCancelDialog) {
             Intent popup = new Intent(context, PopupConnectedActivity.class);
             popup.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             popup.putExtra(START_ID, startId);
-            popup.putExtra(KEY_DIALOG_TIMEOUT, dialogTimeout);
-            popup.putExtra(KEY_ACTION_DIALOG_TIMEOUT, actionDialogTimeout);
+            popup.putExtra(KEY_DIALOG_TIMEOUT_IN_CAR, dialogTimeout);
+            popup.putExtra(KEY_ACTION_DIALOG_TIMEOUT_IN_CAR, actionDialogTimeout);
             context.startActivity(popup);
         } else if (context instanceof CarConnectedService){
             ((CarConnectedService) context).callback(POPUP_CONNECTED_FINISH_CONTINUE, startId);
@@ -83,7 +86,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
         LinkedList<PairObject<String, String>> appList = Logic.readList(context);
         int sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
-                context, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
+                context, KEY_SLEEP_TIMES_IN_CAR, Integer.toString(SLEEP_TIMES_IN_CAR_DEFAULT_VALUE)));
 
         Log.d(LOG_TAG, "continue - launchApps");
 
@@ -99,16 +102,10 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
             Thread.sleep(1000);
             for (PairObject<String, String> app: appList) {
 
-                Intent launchIntent =
-                        context.getPackageManager().getLaunchIntentForPackage(app.getPackageName());
+                launchIntentFromPackage(context, app.getPackageName());
 
-                if (launchIntent != null) {
-                    launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(launchIntent);
-                    Thread.sleep(sleepTimes*1000);
-                } else {
-                    Log.e("AppLaunchingError", "Package " + app.getPackageName() + " not found!");
-                }
+                Thread.sleep(sleepTimes*1000);
+
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -124,19 +121,19 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
     public static void playMusic(Context context, int startId) {
 
         int sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
-                context, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
-
-        LinkedList<PairObject<String, String>> appList = Logic.readList(context);
-        boolean playMusic = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
-        boolean playMusicOnA2dp = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC_ON_A2DP, PLAY_MUSIC_ON_A2DP_DEFAULT_VALUE);
-        String musicPlayer = Logic.getSharedPrefString(context, KEY_SELECT_MUSIC_PLAYER, null);
+                context, KEY_SLEEP_TIMES_IN_CAR, Integer.toString(SLEEP_TIMES_IN_CAR_DEFAULT_VALUE)));
+        boolean playMusic = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC_IN_CAR, PLAY_MUSIC_IN_CAR_DEFAULT_VALUE);
+        boolean playMusicOnA2dp = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC_ON_A2DP_IN_CAR,
+                PLAY_MUSIC_ON_A2DP_IN_CAR_DEFAULT_VALUE);
+        String musicPlayer = Logic.getSharedPrefString(context, KEY_SELECT_MUSIC_PLAYER_IN_CAR, null);
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         try {
             if (playMusic) {
                 if (musicPlayer != null) {
 
-                    List<ActivityInfo> musicPlayersActivityInfo = Logic.getListOfMediaBroadcastReceivers(context);
+                    List<ActivityInfo> musicPlayersActivityInfo =
+                            Logic.getListOfMediaBroadcastReceivers(context);
                     ActivityInfo musicPlayerInfo = new ActivityInfo();
 
                     for (ActivityInfo activityInfo: musicPlayersActivityInfo) {
@@ -145,27 +142,10 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
                         }
                     }
 
-                    ComponentName component = new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
+                    ComponentName component =
+                            new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
 
                     Log.d(LOG_TAG, "broadcastName: " + musicPlayerInfo.name);
-//
-//                    Log.e("if1", Boolean.toString(!appList.contains(new PairObject<>(musicPlayerInfo.loadLabel(context.getPackageManager()).toString(), musicPlayerInfo.packageName))));
-//                    Log.e("if2", Boolean.toString(!AppBroadcastReceiver.startWithProximityFarPerformed));
-
-
-//                    if (!appList.contains(new PairObject<>(musicPlayerInfo.loadLabel(context.getPackageManager()).toString(), musicPlayerInfo.packageName)) ||
-//                            !AppBroadcastReceiver.startWithProximityFarPerformed) {
-//                        Intent launchIntent =
-//                                context.getPackageManager().getLaunchIntentForPackage(musicPlayerInfo.packageName);
-//                        if (launchIntent != null) {
-//                            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                            context.startActivity(launchIntent);
-//                            Thread.sleep(sleepTimes*1000);
-//                        } else {
-//                            Log.e("MusicPlayerLaunchError", "Package " + musicPlayerInfo.packageName + " not found!");
-//                        }
-//                    }
-
 
                     if (playMusicOnA2dp) {
 
@@ -173,15 +153,20 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
                         if (manager.isBluetoothA2dpOn()) {
                             Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
-                            sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_DOWN);
-                            Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
-                            sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_UP);
+
+                            startPlayingMusicOnComponent(context, component);
+                            Log.v(LOG_TAG, "Waiting for music to play...");
+                            Thread.sleep(Constants.WAIT_FOR_MUSIC_PLAY);
+                            if (!manager.isMusicActive())
+                                retryPlayingMusicOnComponent(context, sleepTimes*1000, component);
                         }
 
                     } else {
-                        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_DOWN);
-                        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
-                        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_UP);
+                        startPlayingMusicOnComponent(context, component);
+
+                        Thread.sleep(Constants.WAIT_FOR_MUSIC_PLAY);
+                        if (!manager.isMusicActive())
+                            retryPlayingMusicOnComponent(context, sleepTimes*1000, component);
                     }
 
                 } else {
@@ -192,17 +177,12 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
                         if (manager.isBluetoothA2dpOn()) {
                             Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
-                            sendPlayButtonEvent(context, KeyEvent.ACTION_DOWN);
-                            Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
-                            sendPlayButtonEvent(context, KeyEvent.ACTION_UP);
+                            startPlayingMusic(context);
                         }
 
                     } else {
-                        sendPlayButtonEvent(context, KeyEvent.ACTION_DOWN);
-                        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
-                        sendPlayButtonEvent(context, KeyEvent.ACTION_UP);
+                        startPlayingMusic(context);
                     }
-
                 }
             }
         } catch (InterruptedException e) {
@@ -217,10 +197,11 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
     public static void dismissLockScreen(Context context) {
 
         boolean dismissLockScreen = Logic.getSharedPrefBoolean(context,
-                KEY_DISMISS_LOCK_SCREEN, DISMISS_LOCK_SCREEN_DEFAULT_VALUE);
+                KEY_DISMISS_LOCK_SCREEN, DISMISS_LOCK_SCREEN_IN_CAR_DEFAULT_VALUE);
 
 
-        KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Activity.KEYGUARD_SERVICE);
+        KeyguardManager keyguardManager =
+                (KeyguardManager) context.getSystemService(Activity.KEYGUARD_SERVICE);
 
         //Dismiss lock screen only when accessibility service provides info that it is on top
         //Check also whether device is locked or other system ui event is shown
@@ -232,8 +213,10 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
                     && dismissLockScreen) {
 
                     Log.d(LOG_TAG, "Dismiss lock screen key event sent!");
-                    Process process1 = Runtime.getRuntime().exec(Constants.DISMISS_LOCK_SCREEN_SU_COMMAND);
-                    Process process2 = Runtime.getRuntime().exec(Constants.DISMISS_LOCK_SCREEN_SU_COMMAND_ALTERNATIVE);
+                    Process process1 = Runtime.getRuntime()
+                            .exec(Constants.DISMISS_LOCK_SCREEN_SU_COMMAND);
+                    Process process2 = Runtime.getRuntime()
+                            .exec(Constants.DISMISS_LOCK_SCREEN_SU_COMMAND_ALTERNATIVE);
 
                 }
 
@@ -246,9 +229,42 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     }
 
+    private static void launchIntentFromPackage(Context context, String packageName) {
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+
+        if (launchIntent != null) {
+            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(launchIntent);
+        } else {
+            Log.e("AppLaunchingError", "Package " + packageName + " not found!");
+        }
+    }
+
+    private static void startPlayingMusicOnComponent(Context context, ComponentName component)
+            throws InterruptedException {
+        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_DOWN);
+        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
+        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_UP);
+    }
+
+    private static void retryPlayingMusicOnComponent(Context context, int sleepAfterComponentLaunch,
+                                                     ComponentName component) throws InterruptedException {
+        Log.d(LOG_TAG, "Music still not active! Launching music player to retry to play music.");
+        launchIntentFromPackage(context, component.getPackageName());
+        Thread.sleep(sleepAfterComponentLaunch);
+        startPlayingMusicOnComponent(context, component);
+    }
+
+    private static void startPlayingMusic(Context context) throws InterruptedException {
+        sendPlayButtonEvent(context, KeyEvent.ACTION_DOWN);
+        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
+        sendPlayButtonEvent(context, KeyEvent.ACTION_UP);
+    }
+
     private static void sendOrderedPlayButtonEvent(Context context, ComponentName component, int action) {
         Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         intent.setComponent(component);
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
         context.sendOrderedBroadcast(intent, null);
     }
@@ -259,7 +275,8 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         context.sendBroadcast(intent);
     }
 
-    private static void bindNewService(Context context, Class<?> cls, ServiceConnection mConnection, int startId) {
+    private static void bindNewService(Context context, Class<?> cls, ServiceConnection mConnection,
+                                       int startId) {
         Intent intent = new Intent(context, cls);
         intent.putExtra(START_ID, startId);
         context.startService(intent);
@@ -271,7 +288,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         final int SLEEP_BETWEEN_CHECK = 100;
         int counter = 0;
         while (!manager.isBluetoothA2dpOn() && counter < MAX_LOOP_NUMBER) {
-            Log.d(LOG_TAG, "isBluetoothA2dpOn?: " + Boolean.toString(manager.isBluetoothA2dpOn()));
+            Log.d(LOG_TAG, "Is A2DP profile on?: " + Boolean.toString(manager.isBluetoothA2dpOn()));
             Thread.sleep(SLEEP_BETWEEN_CHECK);
             counter++;
         }

@@ -43,8 +43,6 @@ public class CarConnectedService extends CallbackService
 
     private boolean forceAutoRotation;
     private boolean checkIfInPocket;
-    private boolean checkWirelessPowerSupply;
-    private boolean checkNfcTag;
     private boolean showCancelDialog;
     private int dialogTimeout;
     private boolean actionDialogTimeout;
@@ -184,20 +182,18 @@ public class CarConnectedService extends CallbackService
 
 
     protected void getPreferencesData() {
-        forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION, FORCE_AUTO_ROTATION_DEFAULT_VALUE);
-        checkIfInPocket = Logic.getSharedPrefBoolean(this, KEY_CHECK_IF_IN_POCKET, CHECK_IF_IN_POCKET_DEFAULT_VALUE);
-        checkWirelessPowerSupply = Logic.getSharedPrefBoolean(this, KEY_CHECK_WIRELESS_POWER_SUPPLY, CHECK_WIRELESS_POWER_SUPPLY_DEFAULT_VALUE);
-        checkNfcTag = Logic.getSharedPrefBoolean(this, KEY_CHECK_NFC_TAG, CHECK_NFC_TAG_DEFAULT_VALUE);
-        showCancelDialog = Logic.getSharedPrefBoolean(this, KEY_SHOW_CANCEL_DIALOG, SHOW_CANCEL_DIALOG_DEFAULT_VALUE);
-        dialogTimeout = Integer.parseInt(Logic.getSharedPrefString(this, KEY_DIALOG_TIMEOUT, Integer.toString(DIALOG_TIMEOUT_DEFAULT_VALUE)));
-        actionDialogTimeout = Logic.getSharedPrefBoolean(this, KEY_ACTION_DIALOG_TIMEOUT, ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
+        forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION_IN_CAR, FORCE_AUTO_ROTATION_IN_CAR_DEFAULT_VALUE);
+        checkIfInPocket = Logic.getSharedPrefBoolean(this, KEY_CHECK_IF_IN_POCKET_IN_CAR, CHECK_IF_IN_POCKET_IN_CAR_DEFAULT_VALUE);
+        showCancelDialog = Logic.getSharedPrefBoolean(this, KEY_SHOW_CANCEL_DIALOG_IN_CAR, SHOW_CANCEL_DIALOG_IN_CAR_DEFAULT_VALUE);
+        dialogTimeout = Integer.parseInt(Logic.getSharedPrefString(this, KEY_DIALOG_TIMEOUT_IN_CAR, Integer.toString(DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE)));
+        actionDialogTimeout = Logic.getSharedPrefBoolean(this, KEY_ACTION_DIALOG_TIMEOUT_IN_CAR, ACTION_DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE);
         appList = Logic.readList(this);
-        sleepTimes = Integer.parseInt(Logic.getSharedPrefString(this, KEY_SLEEP_TIMES, Integer.toString(SLEEP_TIMES_DEFAULT_VALUE)));
-        playMusic = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC, PLAY_MUSIC_DEFAULT_VALUE);
-        musicPlayer = Logic.getSharedPrefString(this, KEY_SELECT_MUSIC_PLAYER, null);
-        playMusicOnA2dp = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC_ON_A2DP, PLAY_MUSIC_ON_A2DP_DEFAULT_VALUE);
-        dismissLockScreen = Logic.getSharedPrefBoolean(this, KEY_DISMISS_LOCK_SCREEN, DISMISS_LOCK_SCREEN_DEFAULT_VALUE);
-        showNavi = Logic.getSharedPrefBoolean(this, KEY_SHOW_NAVI, SHOW_NAVI_DEFAULT_VALUE);
+        sleepTimes = Integer.parseInt(Logic.getSharedPrefString(this, KEY_SLEEP_TIMES_IN_CAR, Integer.toString(SLEEP_TIMES_IN_CAR_DEFAULT_VALUE)));
+        playMusic = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC_IN_CAR, PLAY_MUSIC_IN_CAR_DEFAULT_VALUE);
+        musicPlayer = Logic.getSharedPrefString(this, KEY_SELECT_MUSIC_PLAYER_IN_CAR, null);
+        playMusicOnA2dp = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC_ON_A2DP_IN_CAR, PLAY_MUSIC_ON_A2DP_IN_CAR_DEFAULT_VALUE);
+        dismissLockScreen = Logic.getSharedPrefBoolean(this, KEY_DISMISS_LOCK_SCREEN, DISMISS_LOCK_SCREEN_IN_CAR_DEFAULT_VALUE);
+        showNavi = Logic.getSharedPrefBoolean(this, KEY_SHOW_NAVI_IN_CAR, SHOW_NAVI_IN_CAR_DEFAULT_VALUE);
     }
 
     protected void stopRunningService(Context context, Class<?> cls) {

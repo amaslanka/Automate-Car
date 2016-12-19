@@ -59,9 +59,9 @@ public class PopupConnectedActivity extends AppCompatActivity
         overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
 
         carConnectedServiceStartId = getIntent().getIntExtra(START_ID, START_ID_NO_VALUE);
-        dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT, DIALOG_TIMEOUT_DEFAULT_VALUE);
-        actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT,
-                ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
+        dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT_IN_CAR, DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE);
+        actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT_IN_CAR,
+                ACTION_DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE);
 
 
         if(savedInstanceState == null && popupFragment == null) {
@@ -180,9 +180,9 @@ public class PopupConnectedActivity extends AppCompatActivity
 //        overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
 //
 //        if (savedInstanceState == null) {
-//            dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT, DIALOG_TIMEOUT_DEFAULT_VALUE);
-//            actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT,
-//                    ACTION_DIALOG_TIMEOUT_DEFAULT_VALUE);
+//            dialogTimeout = getIntent().getIntExtra(KEY_DIALOG_TIMEOUT_IN_CAR, DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE);
+//            actionDialogTimeout = getIntent().getBooleanExtra(KEY_ACTION_DIALOG_TIMEOUT_IN_CAR,
+//                    ACTION_DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE);
 //
 //            alertDialog = new AlertDialog.Builder(this)
 //                    .setTitle(getString(R.string.car_connected) + " - " + dialogTimeout + "s")

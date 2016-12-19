@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="triggers_entries">
+        <item>Bluetooth</item>
+        <item>NFC</item>
+    </string-array>
+    <string-array name="triggers_entryValues">
+        <item>trigger_in_car_bluetooth</item>
+        <item>trigger_in_car_nfc</item>
+    </string-array>
+</resources>

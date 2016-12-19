@@ -45,6 +45,8 @@
             android:theme="@style/Transparent"
             android:showOnLockScreen="true"/>
         <activity android:name=".helpers.ActivityForResult"/>
+        <activity android:name=".prefother.PrefsOther"
+            android:label="@string/other_options"/>
 
 
         <service android:name=".services.MainService" />

@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.ProximityState;
@@ -34,12 +37,17 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
             case BluetoothDevice.ACTION_ACL_CONNECTED:
                 BluetoothDevice bluetoothDeviceConnected = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                Log.d(LOG_TAG, "bluetoothDevCon: " + bluetoothDeviceConnected.getAddress());
-                Log.d(LOG_TAG, "SharedPrefDevice: " + Logic
-                        .getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
+                Set triggerType = Logic.getSharedPrefStringSet(context, KEY_TRIGGER_TYPE_IN_CAR);
 
-                if (Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceConnected.getAddress()) &&
-                        Logic.getCarConnectedProcessState() == CarConnectedProcessState.NOT_STARTED) {
+                Set<String> sharedPrefBtDeviceAddresses =
+                        Logic.getSharedPrefStringSet(context, KEY_BLUETOOTH_DEVICES_ADDRESSES_IN_CAR);
+
+                Log.d(LOG_TAG, "bluetoothDevCon: " + bluetoothDeviceConnected.getAddress());
+                Log.d(LOG_TAG, "SharedPrefDevice: " + sharedPrefBtDeviceAddresses.toString());
+
+                if (triggerType.contains(Constants.TRIGGER_BLUETOOTH)
+                        && sharedPrefBtDeviceAddresses.contains(bluetoothDeviceConnected.getAddress())
+                        && Logic.getCarConnectedProcessState() == CarConnectedProcessState.NOT_STARTED) {
                     startServiceWithAction(context, PROXIMITY_CHECK_ACTION, CarConnectedService.class);
                 }
 
@@ -75,10 +83,10 @@ public class AppBroadcastReceiver extends android.content.BroadcastReceiver impl
                 BluetoothDevice bluetoothDeviceDisconnected = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
                 Log.d(LOG_TAG, "bluetoothDevDisconnected: " + bluetoothDeviceDisconnected.getAddress());
-                Log.d(LOG_TAG, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_SELECT_BLUETOOTH_DEVICES).toString());
+                Log.d(LOG_TAG, "SharedPrefDevice: " + Logic.getSharedPrefStringSet(context, KEY_BLUETOOTH_DEVICES_ADDRESSES_IN_CAR).toString());
 
                 if (Logic.getSharedPrefStringSet(context,
-                        KEY_SELECT_BLUETOOTH_DEVICES).contains(bluetoothDeviceDisconnected.getAddress()) &&
+                        KEY_BLUETOOTH_DEVICES_ADDRESSES_IN_CAR).contains(bluetoothDeviceDisconnected.getAddress()) &&
                         Logic.getCarConnectedProcessState() == CarConnectedProcessState.COMPLETED &&
                         !Logic.isMyServiceRunning(CarConnectedService.class, context)) {
                     restoreDefaultValues();

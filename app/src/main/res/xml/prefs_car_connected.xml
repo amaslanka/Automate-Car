@@ -7,18 +7,20 @@
     <PreferenceCategory android:title="@string/trigger">
 
         <MultiSelectListPreference
+            android:title="@string/select_trigger"
+            android:entries="@array/triggers_entries"
+            android:entryValues="@array/triggers_entryValues"
+            android:key="trigger_type_in_car"/>
+
+        <MultiSelectListPreference
             android:title="@string/select_bluetooth_devices"
-            android:key="select_bluetooth_devices" />
+            android:key="bluetooth_devices_addresses_in_car" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:title="@string/check_nfc_tag"
-            android:key="check_nfc_tag" />
+        <Preference
+            android:title="@string/select_nfc_tags"
+            android:key="nfc_tags_in_car" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:title="@string/check_wireless_power_supply"
-            android:key="check_wireless_power_supply" />
+
 
     </PreferenceCategory>
 
@@ -32,22 +34,79 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:title="@string/show_cancel_dialog"
-            android:key="show_cancel_dialog" />
+            android:key="show_cancel_dialog_in_car" />
 
         <pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference
-            android:dependency="show_cancel_dialog"
+            android:dependency="show_cancel_dialog_in_car"
             android:defaultValue="10"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:inputType="number"
             android:title="@string/dialog_timeout"
-            android:key="dialog_timeout" />
+            android:key="dialog_timeout_in_car" />
 
         <CheckBoxPreference
-            android:dependency="show_cancel_dialog"
+            android:dependency="show_cancel_dialog_in_car"
             android:defaultValue="true"
             android:title="@string/action_dialog_timeout"
-            android:key="action_dialog_timeout" />
+            android:key="action_dialog_timeout_in_car" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/auto_rotation">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/force_auto_rotation"
+            android:key="force_auto_rotation_in_car" />
+
+
+        <Preference
+            android:dependency="force_auto_rotation_in_car"
+            android:title="@string/rotation_excluded_apps"
+            android:key="rotation_excluded_apps_in_car" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/connectivity">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/change_wifi_state_in_car"
+            android:key="change_wifi_state_in_car" />
+
+        <SwitchPreference
+            android:dependency="change_wifi_state_in_car"
+            android:defaultValue="false"
+            android:title="@string/wifi_off"
+            android:key="wifi_enable_in_car" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/connectivity_root_required">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/change_mobile_data_state_in_car"
+            android:key="change_mobile_data_state_in_car" />
+
+        <SwitchPreference
+            android:dependency="change_mobile_data_state_in_car"
+            android:defaultValue="false"
+            android:title="@string/mobile_data_off"
+            android:key="mobile_data_enable_in_car" />
 
     </PreferenceCategory>
 
@@ -59,14 +118,14 @@
 
         <Preference
             android:title="@string/apps_to_launch"
-            android:key="apps_to_launch" />
+            android:key="apps_to_launch_in_car" />
 
         <pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference
             android:defaultValue="8"
             android:selectAllOnFocus="true"
             android:inputType="number"
             android:title="@string/sleep_times"
-            android:key="sleep_times" />
+            android:key="sleep_times_in_car" />
 
     </PreferenceCategory>
 
@@ -79,38 +138,29 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:title="@string/play_music"
-            android:key="play_music" />
+            android:key="play_music_in_car" />
 
         <Preference
-            android:dependency="play_music"
+            android:dependency="play_music_in_car"
             android:title="@string/select_music_player"
-            android:key="select_music_player" />
+            android:key="select_music_player_in_car" />
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:dependency="play_music"
+            android:dependency="play_music_in_car"
             android:title="@string/play_music_on_a2dp"
-            android:key="play_music_on_a2dp" />
-
-    </PreferenceCategory>
-
-    <Preference
-        android:layout="@layout/preference_divider"
-        android:selectable="false"/>
-
-
-    <PreferenceCategory android:title="@string/auto_rotation">
+            android:key="play_music_on_a2dp_in_car" />
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:title="@string/force_auto_rotation"
-            android:key="force_auto_rotation" />
+            android:title="@string/set_media_volume_in_car"
+            android:key="set_media_volume_in_car" />
 
-
-        <Preference
-            android:dependency="force_auto_rotation"
-            android:title="@string/rotation_excluded_apps"
-            android:key="rotation_excluded_apps" />
+        <pl.maslanka.automatecar.prefother.MediaVolumeLevelPref
+            android:layout="@layout/preference_volume_seek_bar"
+            android:dependency="set_media_volume_in_car"
+            android:defaultValue="false"
+            android:key="media_volume_level_in_car" />
 
     </PreferenceCategory>
 
@@ -125,19 +175,18 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:title="@string/check_if_in_pocket"
-            android:key="check_if_in_pocket" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:title="@string/dismiss_lock_screen"
-            android:key="dismiss_lock_screen" />
+            android:key="check_if_in_pocket_in_car" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:title="@string/show_navigation"
-            android:key="show_navi" />
+            android:key="show_navi_in_car" />
 
     </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
 
 
 </PreferenceScreen>

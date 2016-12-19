@@ -32,29 +32,31 @@
     <string name="basic_options">Basic options</string>
     <string name="other_options">Other options</string>
     <string name="change_other_options">Change other options</string>
-    <string name="mobile_data">Mobile data</string>
+    <string name="change_mobile_data_state_in_car">Change mobile data state</string>
     <string name="mobile_data_on">Turn on mobile data</string>
     <string name="mobile_data_off">Turn off mobile data</string>
-    <string name="wifi">Wi-Fi</string>
+    <string name="change_wifi_state_in_car">Change Wi-Fi state</string>
     <string name="wifi_on">Turn on Wi-Fi</string>
     <string name="wifi_off">Turn off Wi-Fi</string>
     <string name="mobile_networks">Mobile networks</string>
     <string name="network_mode_in">Set network mode when in car</string>
     <string name="network_mode_out">Set network mode after leaving car</string>
-    <string name="media_volume">Media volume</string>
+    <string name="set_media_volume_in_car">Set media volume</string>
     <string name="set_volume_in">Set media volume when in car</string>
     <string name="set_volume_in_level">Choose in car volume level</string>
     <string name="set_volume_out">Set media volume after leaving car</string>
     <string name="set_volume_out_level">Choose volume level after leaving car</string>
     <string name="trigger">Trigger</string>
+    <string name="select_trigger">Select trigger</string>
     <string name="select_bluetooth_devices">Select Bluetooth devices</string>
+    <string name="select_nfc_tags">Select NFC tags</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="nfc">NFC</string>
     <string name="dismiss_lock_screen">Dismiss lock screen</string>
     <string name="auto_rotation">Auto rotation</string>
     <string name="force_auto_rotation">Force auto-rotation</string>
     <string name="rotation_excluded_apps">Excluded apps</string>
-    <string name="check_if_in_pocket">Check if the device is in pocket</string>
-    <string name="check_wireless_power_supply">Check if device is connected to a wireless power supply</string>
-    <string name="check_nfc_tag">Check if NFC tag has been recognized</string>
+    <string name="check_if_in_pocket">Check if device is in pocket</string>
     <string name="cancellation_dialog">Cancellation dialog</string>
     <string name="show_cancel_dialog">Show dialog to cancel operation</string>
     <string name="dialog_timeout">Dialog duration</string>
@@ -88,6 +90,12 @@
     <string name="no_system_overlay_permission">No system overlay permission! Auto rotation will not work!</string>
     <string name="exclude_from_forcing_auto_rotation">Exclude from forcing auto rotation</string>
     <string name="no_player_selected">No specified player selected</string>
+    <string name="connectivity">Connectivity</string>
+    <string name="connectivity_root_required">Connectivity (ROOT required)</string>
+    <string name="root_features">Root features</string>
+    <string name="dock_trigger">Dock trigger</string>
+    <string name="wireless_loading">Wireless loading</string>
+    <string name="current_level">Current level: %1$d\u002F100</string>
 
 
 </resources>

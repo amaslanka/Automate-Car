@@ -119,7 +119,7 @@ public class MusicPlayerListCreator extends AsyncTask<Activity, Void, Void> impl
                     Log.d("clicked", appPackages.get(position));
 
                 Logic.setSharedPrefString(prefsCarConnectedFragment.getActivity(),
-                            appPackages.get(position), KEY_SELECT_MUSIC_PLAYER);
+                            appPackages.get(position), KEY_SELECT_MUSIC_PLAYER_IN_CAR);
 
                 ((PrefsCarConnectedFragment) prefsCarConnectedFragment)
                         .setMusicPlayerSummary(appPackages.get(position));
