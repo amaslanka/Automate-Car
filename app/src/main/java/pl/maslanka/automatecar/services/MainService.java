@@ -50,6 +50,7 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent.getAction().equals(Constants.ACTION.START_FOREGROUND_ACTION)) {
+
             Log.i(LOG_TAG, "Received Start Foreground Intent ");
             Intent notificationIntent = new Intent(this, MainActivity.class);
             notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
@@ -71,12 +72,13 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
 
             registerReceiver(mReceiver, mIntentFilter);
 
-        } else if (intent.getAction().equals(
-                Constants.ACTION.STOP_FOREGROUND_ACTION)) {
+        } else if (intent.getAction().equals(Constants.ACTION.STOP_FOREGROUND_ACTION)) {
+
             Log.i(LOG_TAG, "Received Stop Foreground Intent");
             stopForeground(true);
             stopSelf();
             unregisterReceiver(mReceiver);
+
         }
         return START_STICKY;
     }

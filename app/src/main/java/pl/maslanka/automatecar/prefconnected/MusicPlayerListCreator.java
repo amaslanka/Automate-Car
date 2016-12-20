@@ -28,6 +28,8 @@ import pl.maslanka.automatecar.utils.Logic;
 
 public class MusicPlayerListCreator extends AsyncTask<Activity, Void, Void> implements Constants.PREF_KEYS{
 
+    private final String LOG_TAG = this.getClass().getSimpleName();
+
     private PreferenceFragment prefsCarConnectedFragment;
     private List<ApplicationInfo> installedMusicPlayers;
     private List<Drawable> appIcons;
@@ -45,7 +47,7 @@ public class MusicPlayerListCreator extends AsyncTask<Activity, Void, Void> impl
 
     @Override
     protected void onPreExecute() {
-        ((PrefsCarConnectedFragment) prefsCarConnectedFragment).showProgressDialog();
+        ((PrefsCarConnectedFragment) prefsCarConnectedFragment).showNewProgressDialog();
     }
 
 
@@ -71,27 +73,10 @@ public class MusicPlayerListCreator extends AsyncTask<Activity, Void, Void> impl
                     .setAdapter(adapter, null);
 
         } catch (NullPointerException ex) {
-
-            boolean activityNull = true;
-            int counter = 0;
-            while (activityNull && counter < 50) {
-                counter++;
-                try {
-                    Thread.sleep(100);
-                    activity = prefsCarConnectedFragment.getActivity();
-                    if (activity != null) {
-                        activityNull = false;
-                        doInBackground(activity);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (activityNull) {
-                Log.e("Error", "Cannot show music players list - no activity");
-            }
-
+            Log.e(LOG_TAG, "Error: Fragment not attached to an activity - task cancelled");
+            ((PrefsCarConnectedFragment) prefsCarConnectedFragment).dismissProgressDialog();
+            this.cancel(true);
+            ((PrefsCarConnectedFragment) prefsCarConnectedFragment).startMusicPlayerListCreator();
         }
 
         return null;
@@ -100,7 +85,7 @@ public class MusicPlayerListCreator extends AsyncTask<Activity, Void, Void> impl
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        Log.i("Method executed", "onCancelled()!");
+        Log.i(LOG_TAG, "Method executed - onCancelled()!");
     }
 
     @Override
@@ -115,9 +100,6 @@ public class MusicPlayerListCreator extends AsyncTask<Activity, Void, Void> impl
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                if (appPackages.get(position) != null)
-                    Log.d("clicked", appPackages.get(position));
-
                 Logic.setSharedPrefString(prefsCarConnectedFragment.getActivity(),
                             appPackages.get(position), KEY_SELECT_MUSIC_PLAYER_IN_CAR);
 

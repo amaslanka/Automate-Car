@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -37,11 +38,10 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
     private LinkedList<PairObject<String, String>> appList;
     private ItemAdapter listAdapter;
 
+    private final String LOG_TAG = this.getClass().getSimpleName();
     private static final String KEY_APP_LIST_WAS_SHOWING = "app_list_was_showing";
-    private static final String KEY_FRAGMENT_WAS_SHOWING = "fragment_was_showing";
     private SelectAppsFragment selectAppsFragment;
     private boolean appListWasShowing;
-    private boolean fragmentWasShowing;
     private Bundle savedInstance;
     private FloatingActionButton fab;
 
@@ -54,9 +54,8 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
 
         mItemArray = new ArrayList<>();
 
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null)
             savedInstance = savedInstanceState;
-        }
 
     }
 
@@ -86,23 +85,19 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
         super.onResume();
         buildAndRefreshView();
 
-        if (listAdapter == null) {
+        if (listAdapter == null)
             createAndSetNewAdapter();
-        } else {
+        else
             notifyAdapterDataHasChanged();
-        }
 
         showDialogs();
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        if (selectAppsFragment != null) {
-            if (selectAppsFragment.getAppList() != null) {
+        if (selectAppsFragment != null && selectAppsFragment.getAppList() != null) {
                 savedInstanceState.putBoolean(KEY_APP_LIST_WAS_SHOWING,
                         selectAppsFragment.getAppList().isShowing());
-                savedInstanceState.putBoolean(KEY_FRAGMENT_WAS_SHOWING, selectAppsFragment.isVisible());
-            }
         }
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -141,14 +136,15 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
     }
 
     protected void getFragment() {
-        if(savedInstance != null) {
+        try {
+
             selectAppsFragment = (SelectAppsFragment) getSupportFragmentManager()
                     .findFragmentByTag(TAG_SELECT_APPS_FRAGMENT);
 
-            if (selectAppsFragment != null) {
-                appListWasShowing = savedInstance.getBoolean(KEY_APP_LIST_WAS_SHOWING);
-                fragmentWasShowing = savedInstance.getBoolean(KEY_FRAGMENT_WAS_SHOWING);
-            }
+            appListWasShowing = savedInstance.getBoolean(KEY_APP_LIST_WAS_SHOWING);
+
+        } catch (NullPointerException ex) {
+            Log.v(LOG_TAG, "No SelectAppsFragment yet!");
         }
     }
 
@@ -197,11 +193,11 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
             try {
                 long newIndex;
 
-                if (mItemArray.size() > 0) {
+                if (mItemArray.size() > 0)
                     newIndex = getNewMaxIndex();
-                } else {
+                else
                     newIndex = i;
-                }
+
 
                 QuattroObject<Long, String, String, Drawable> appItem = new QuattroObject<>(newIndex,
                         appList.get(i).getName(), appList.get(i).getPackageName(),
@@ -272,29 +268,28 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
     }
 
     protected void dismissDialogs() {
-        if (selectAppsFragment != null) {
-            if (selectAppsFragment.getAppList() != null)
-                if (selectAppsFragment.getAppList().isShowing())
-                    selectAppsFragment.getAppList().dismiss();
+        try {
+            if (selectAppsFragment.getProgressDialog().isShowing())
+                selectAppsFragment.getProgressDialog().dismiss();
 
-            if (selectAppsFragment.getDialog() != null)
-                if (selectAppsFragment.getDialog().isShowing())
-                    selectAppsFragment.getDialog().dismiss();
+            if (selectAppsFragment.getAppList().isShowing())
+                selectAppsFragment.getAppList().dismiss();
 
+        } catch (NullPointerException ex) {
+            Log.v(LOG_TAG, "No AppList or ProgressDialog - no need to dismiss it");
         }
     }
 
     protected void showDialogs() {
-        if (selectAppsFragment != null) {
-            if (selectAppsFragment.getAppListCreator() != null) {
-                if (selectAppsFragment.getAppListCreatorStatus() == AsyncTask.Status.RUNNING)
-                    selectAppsFragment.getDialog().show();
+        try {
+            if (selectAppsFragment.getAppListCreatorStatus() == AsyncTask.Status.RUNNING)
+                selectAppsFragment.getProgressDialog().show();
 
-                if ((appListWasShowing && selectAppsFragment.getAppList() != null) ||
-                        (fragmentWasShowing && selectAppsFragment.getAppList() != null))
+            if (appListWasShowing)
+                selectAppsFragment.getAppList().show();
 
-                    selectAppsFragment.getAppList().show();
-            }
+        } catch (NullPointerException ex) {
+            Log.v(LOG_TAG, "No AppList or ProgressDialog - no need to show it");
         }
     }
 

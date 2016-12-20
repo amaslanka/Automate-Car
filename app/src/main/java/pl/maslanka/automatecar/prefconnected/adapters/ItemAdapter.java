@@ -100,14 +100,14 @@ public class ItemAdapter extends
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             int position = getAdapterPosition();
-//                            removeItem(position);
                             ((AppsToLaunch) mActivity).deleteApp(position);
                         }
                     })
                     .setNegativeButton(android.R.string.cancel, null)
                     .create();
 
-            deleteConfirmDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            if (deleteConfirmDialog.getWindow() != null)
+                deleteConfirmDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
 
             deleteConfirmDialog.show();
             return true;

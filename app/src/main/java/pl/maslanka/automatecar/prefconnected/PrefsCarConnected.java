@@ -1,6 +1,5 @@
 package pl.maslanka.automatecar.prefconnected;
 
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -75,42 +74,25 @@ public class PrefsCarConnected extends AppCompatActivity {
     public void onStop() {
         super.onStop();
 
-        if (prefsCarConnectedFragment.getMusicPlayerList() != null)
-            if (prefsCarConnectedFragment.getMusicPlayerList().isShowing())
-                prefsCarConnectedFragment.getMusicPlayerList().dismiss();
-
-        if (prefsCarConnectedFragment.getRotationExcludedAppsList() != null)
-            if (prefsCarConnectedFragment.getRotationExcludedAppsList().isShowing())
-                prefsCarConnectedFragment.getRotationExcludedAppsList().dismiss();
-
-        if (prefsCarConnectedFragment.getDialog() != null)
-            if (prefsCarConnectedFragment.getDialog().isShowing())
-                prefsCarConnectedFragment.getDialog().dismiss();
-
-
+        prefsCarConnectedFragment.dismissProgressDialog();
+        prefsCarConnectedFragment.dismissRotationExcludedAppsList();
+        prefsCarConnectedFragment.dismissMusicPlayerList();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        if (prefsCarConnectedFragment != null) {
-            if (prefsCarConnectedFragment.getMusicPlayerListCreator() != null) {
-                if (prefsCarConnectedFragment.getMusicPlayerListCreatorStatus() == AsyncTask.Status.RUNNING)
-                    prefsCarConnectedFragment.getDialog().show();
+        if (prefsCarConnectedFragment.getMusicPlayerListCreatorStatus() == AsyncTask.Status.RUNNING ||
+                prefsCarConnectedFragment.getRotationExcludedAppsListCreatorStatus() == AsyncTask.Status.RUNNING)
+            prefsCarConnectedFragment.showProgressDialog();
 
-                if (musicPlayerListWasShowing && prefsCarConnectedFragment.getMusicPlayerList() != null)
-                    prefsCarConnectedFragment.getMusicPlayerList().show();
-            }
+        if (musicPlayerListWasShowing)
+            prefsCarConnectedFragment.showMusicPlayerList();
 
-            if (prefsCarConnectedFragment.getRotationExcludedAppsListCreator() != null) {
-                if (prefsCarConnectedFragment.getRotationExcludedAppsListCreatorStatus() == AsyncTask.Status.RUNNING)
-                    prefsCarConnectedFragment.getDialog().show();
+        if (rotationExcludedAppListWasShowing)
+            prefsCarConnectedFragment.showRotationExcludedAppsList();
 
-                if (rotationExcludedAppListWasShowing && prefsCarConnectedFragment.getRotationExcludedAppsList() != null)
-                    prefsCarConnectedFragment.getRotationExcludedAppsList().show();
-            }
-        }
     }
 
     @Override
@@ -132,19 +114,11 @@ public class PrefsCarConnected extends AppCompatActivity {
         switch (requestCode) {
             case PrefsCarConnectedFragment.PERMISSIONS_REQUEST_PHONE_STATE: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    prefsCarConnectedFragment.getChangeMobileDataState().setChecked(true);
+                else
+                    prefsCarConnectedFragment.getChangeMobileDataState().setChecked(false);
 
-                    if (prefsCarConnectedFragment != null)
-                        if (prefsCarConnectedFragment.getChangeMobileDataState() != null)
-                            prefsCarConnectedFragment.getChangeMobileDataState().setChecked(true);
-
-                } else {
-                    if (prefsCarConnectedFragment != null)
-                        if (prefsCarConnectedFragment.getChangeMobileDataState() != null)
-                            prefsCarConnectedFragment.getChangeMobileDataState().setChecked(false);
-
-                }
             }
 
         }

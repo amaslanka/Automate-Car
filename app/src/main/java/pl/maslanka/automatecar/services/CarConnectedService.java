@@ -41,21 +41,7 @@ public class CarConnectedService extends CallbackService
 
     private final String LOG_TAG = this.getClass().getSimpleName();
 
-    private boolean forceAutoRotation;
-    private boolean checkIfInPocket;
-    private boolean showCancelDialog;
-    private int dialogTimeout;
-    private boolean actionDialogTimeout;
-    private LinkedList<PairObject<String, String>> appList;
-    private int sleepTimes;
-    private boolean maxVolume;
-    private boolean playMusic;
-    private String musicPlayer;
-    private boolean playMusicOnA2dp;
-    private boolean dismissLockScreen;
-    private boolean showNavi;
     private String action;
-
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
@@ -207,26 +193,6 @@ public class CarConnectedService extends CallbackService
         return null;
     }
 
-    @Override
-    public void onDestroy() {
-
-    }
-
-
-    protected void getPreferencesData() {
-        forceAutoRotation = Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION_IN_CAR, FORCE_AUTO_ROTATION_IN_CAR_DEFAULT_VALUE);
-        checkIfInPocket = Logic.getSharedPrefBoolean(this, KEY_CHECK_IF_IN_POCKET_IN_CAR, CHECK_IF_IN_POCKET_IN_CAR_DEFAULT_VALUE);
-        showCancelDialog = Logic.getSharedPrefBoolean(this, KEY_SHOW_CANCEL_DIALOG_IN_CAR, SHOW_CANCEL_DIALOG_IN_CAR_DEFAULT_VALUE);
-        dialogTimeout = Integer.parseInt(Logic.getSharedPrefString(this, KEY_DIALOG_TIMEOUT_IN_CAR, Integer.toString(DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE)));
-        actionDialogTimeout = Logic.getSharedPrefBoolean(this, KEY_ACTION_DIALOG_TIMEOUT_IN_CAR, ACTION_DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE);
-        appList = Logic.readList(this);
-        sleepTimes = Integer.parseInt(Logic.getSharedPrefString(this, KEY_SLEEP_TIMES_IN_CAR, Integer.toString(SLEEP_TIMES_IN_CAR_DEFAULT_VALUE)));
-        playMusic = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC_IN_CAR, PLAY_MUSIC_IN_CAR_DEFAULT_VALUE);
-        musicPlayer = Logic.getSharedPrefString(this, KEY_SELECT_MUSIC_PLAYER_IN_CAR, null);
-        playMusicOnA2dp = Logic.getSharedPrefBoolean(this, KEY_PLAY_MUSIC_ON_A2DP_IN_CAR, PLAY_MUSIC_ON_A2DP_IN_CAR_DEFAULT_VALUE);
-        dismissLockScreen = Logic.getSharedPrefBoolean(this, KEY_DISMISS_LOCK_SCREEN, DISMISS_LOCK_SCREEN_IN_CAR_DEFAULT_VALUE);
-        showNavi = Logic.getSharedPrefBoolean(this, KEY_SHOW_NAVI_IN_CAR, SHOW_NAVI_IN_CAR_DEFAULT_VALUE);
-    }
 
     protected void stopRunningService(Context context, Class<?> cls) {
         Intent intent = new Intent(context, cls);
@@ -263,7 +229,6 @@ public class CarConnectedService extends CallbackService
                 CarConnectedService.this.unbindService(mConnection);
 
             }
-
         }
 
         @Override

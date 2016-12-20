@@ -37,6 +37,8 @@ import pl.maslanka.automatecar.utils.Logic;
 
 public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS {
 
+    private final String LOG_TAG = this.getClass().getSimpleName();
+
     private PackageManager pm;
     private List<ApplicationInfo> installedApps;
     private Map<String, Boolean> selectedApps;
@@ -48,19 +50,15 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
     private ArrayAdapterWithIcon adapter;
     private AlertDialog.Builder builder;
     private AlertDialog appList;
-    private ProgressDialog dialog;
+    private ProgressDialog progressDialog;
     private AppListCreator appListCreator;
 
-    public ProgressDialog getDialog() {
-        return dialog;
+    public ProgressDialog getProgressDialog() {
+        return progressDialog;
     }
 
     public AlertDialog getAppList() {
         return appList;
-    }
-
-    public AppListCreator getAppListCreator() {
-        return appListCreator;
     }
 
     public AsyncTask.Status getAppListCreatorStatus() {
@@ -72,7 +70,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
         super.onCreate(savedInstanceState);
 
         setRetainInstance(true);
-        Log.d("Fragment", "onCreate");
+        Log.v(LOG_TAG, "Fragment - onCreate");
         pm = getActivity().getPackageManager();
 
         if (savedInstanceState == null) {
@@ -124,10 +122,10 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
                         .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Log.d("appsFromPrefs", appsFromPrefs.toString());
-                                Log.d("appsToSave", "print");
+                                Log.v(LOG_TAG, "appsFromPrefs: " + appsFromPrefs.toString());
+                                Log.v(LOG_TAG, "appsToSave - print: ");
                                 for (PairObject<String, String> pair: appsToSave) {
-                                    Log.d("element", pair.toString());
+                                    Log.v(LOG_TAG, "element: " + pair.toString());
                                 }
                                 Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_APPS_TO_LAUNCH_IN_CAR);
                                 Logic.saveListToInternalStorage(activity, appsToSave);
@@ -138,8 +136,10 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
                         })
                         .setNegativeButton(getResources().getString(android.R.string.cancel), null);
             } catch (IllegalStateException ex) {
-                Log.e("Error", "Fragment not attached to an activity - task cancelled");
+                Log.e(LOG_TAG, "Error: Fragment not attached to an activity - task cancelled");
+                progressDialog.dismiss();
                 this.cancel(true);
+                startAppListCreator();
             }
 
 
@@ -149,7 +149,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
         @Override
         protected void onCancelled() {
             super.onCancelled();
-            Log.i("Method executed", "onCancelled()!");
+            Log.i(LOG_TAG, "Method executed - onCancelled()!");
         }
 
         @Override
@@ -190,17 +190,17 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
 
             appList.show();
 
-            dialog.dismiss();
+            progressDialog.dismiss();
         }
 
         void createAndShowDialog() {
-            dialog = new ProgressDialog(getActivity());
-            dialog.setTitle(getResources().getString(R.string.loading_app_list));
-            dialog.setMessage(getResources().getString(R.string.loading_app_list));
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            dialog.setCancelable(false);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setTitle(getResources().getString(R.string.loading_app_list));
+            progressDialog.setMessage(getResources().getString(R.string.loading_app_list));
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.show();
         }
 
         void createAppListData() {
@@ -241,7 +241,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS 
                 if (getActivity() != null) {
                     adapter.getCheckedTextViews()[i] = new CheckedTextView(getActivity());
 
-                    if (selectedApps.get(appPackages.get(i)) != null) {
+                    if (selectedApps.containsKey(appPackages.get(i))) {
                         adapter.getCheckedTextViews()[i].setChecked(selectedApps.get(appPackages.get(i)));
                     } else {
                         adapter.getCheckedTextViews()[i].setChecked(false);

@@ -152,8 +152,8 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         if (changeMobileDataStateInCar && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
                 int isDataOn = Settings.Global.getInt(context.getContentResolver(), "mobile_data");
-                Log.e("isDataOn", Integer.toString(isDataOn));
-                Log.e("mobileDataEnableInCar", Integer.toString(mobileDataEnableInCarAsInt));
+                Log.v(LOG_TAG, "isDataOn: " + Integer.toString(isDataOn));
+                Log.v(LOG_TAG, "mobileDataEnableInCar: " + Integer.toString(mobileDataEnableInCarAsInt));
 
                 if (isDataOn != mobileDataEnableInCarAsInt) {
                     Logic.setMobileDataStateFromLollipop(context, mobileDataEnableInCarAsInt);
@@ -161,16 +161,15 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
             } catch (Settings.SettingNotFoundException e) {
                 Log.e(LOG_TAG, "Setting not found!" + e);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Failed to change mobile data state!" + e);
             } catch (Exception e) {
                 Log.e(LOG_TAG, "Failed to change mobile data state!" + e);
                 e.printStackTrace();
             }
+
         } else if (changeMobileDataStateInCar) {
             boolean isDataOn = Logic.getMobileDataStateBelowLollipop(context);
-            Log.e("isDataOn", Boolean.toString(isDataOn));
-            Log.e("mobileDataEnableInCar", Boolean.toString(mobileDataEnableInCar));
+            Log.v(LOG_TAG, "isDataOn: " + Boolean.toString(isDataOn));
+            Log.v(LOG_TAG, "mobileDataEnableInCar: " + Boolean.toString(mobileDataEnableInCar));
 
             if (isDataOn != mobileDataEnableInCar) {
                 Logic.setMobileDataStateBelowLollipop(context, mobileDataEnableInCar);

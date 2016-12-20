@@ -61,7 +61,6 @@ public class HelperAccessibilityService extends AccessibilityService implements
             Log.d(LOG_TAG, event.getPackageName().toString());
 
             Logic.setCurrentForegroundAppPackage(event.getPackageName().toString());
-            
 
             if (forceAutoRotation && Logic.getCarConnectedProcessState() == CarConnectedProcessState.COMPLETED) {
                 if (rotationExcludedApps.contains(event.getPackageName().toString())) {
@@ -88,7 +87,6 @@ public class HelperAccessibilityService extends AccessibilityService implements
                         bindService(autoRotation, mConnection, BIND_AUTO_CREATE);
                         startService(autoRotation);
                     }
-
                 }
             }
 

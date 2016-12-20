@@ -55,7 +55,7 @@ public class RotationExcludedAppsListCreator extends AsyncTask<Activity, Void, V
 
     @Override
     protected void onPreExecute() {
-        ((PrefsCarConnectedFragment) prefsCarConnectedFragment).showProgressDialog();
+        ((PrefsCarConnectedFragment) prefsCarConnectedFragment).showNewProgressDialog();
     }
 
 
@@ -98,8 +98,9 @@ public class RotationExcludedAppsListCreator extends AsyncTask<Activity, Void, V
                     })
                     .setNegativeButton(activity.getResources().getString(android.R.string.cancel), null);
         }  catch (IllegalStateException ex) {
-            Log.e("Error", "Fragment not attached to an activity - task cancelled");
+            ((PrefsCarConnectedFragment) prefsCarConnectedFragment).dismissProgressDialog();
             this.cancel(true);
+            ((PrefsCarConnectedFragment) prefsCarConnectedFragment).startRotationExcludedAppsListCreator();
         }
 
 
@@ -128,15 +129,15 @@ public class RotationExcludedAppsListCreator extends AsyncTask<Activity, Void, V
                 CheckedTextView checkedTextView = (CheckedTextView) view.findViewById(R.id.checked_text_view);
                 boolean wasChecked = checkedTextView.isChecked();
 
-                    /*
-                    Set CheckedTextView check-state & update view in adapter
-                    */
+                /*
+                Set CheckedTextView check-state & update view in adapter
+                */
                 checkedTextView.setChecked(!wasChecked);
                 adapter.getCheckedTextViews()[position].setChecked(!wasChecked);
 
-                    /*
-                    Add or remove app from the "appsFromPrefs" set (depending on it has been checked or unchecked), which will be passed as an argument to save in shared prefs
-                    */
+                /*
+                Add or remove app from the "appsFromPrefs" set (depending on it has been checked or unchecked), which will be passed as an argument to save in shared prefs
+                */
                 if (wasChecked) {
                     appsFromPrefs.remove(appPackages.get(position));
                 } else {
@@ -190,7 +191,7 @@ public class RotationExcludedAppsListCreator extends AsyncTask<Activity, Void, V
             if (activity != null) {
                 adapter.getCheckedTextViews()[i] = new CheckedTextView(activity);
 
-                if (selectedApps.get(appPackages.get(i)) != null) {
+                if (selectedApps.containsKey(appPackages.get(i))) {
                     adapter.getCheckedTextViews()[i].setChecked(selectedApps.get(appPackages.get(i)));
                 } else {
                     adapter.getCheckedTextViews()[i].setChecked(false);

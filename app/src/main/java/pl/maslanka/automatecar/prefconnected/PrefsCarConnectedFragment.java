@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -18,6 +19,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.InputFilter;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.util.List;
@@ -75,11 +79,12 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     private CheckBoxPreference checkIfInPocket;
     private CheckBoxPreference showNavi;
 
-    private ProgressDialog dialog;
+    private ProgressDialog progressDialog;
     private MusicPlayerListCreator musicPlayerListCreator;
     private AlertDialog musicPlayerList;
     private RotationExcludedAppsListCreator rotationExcludedAppsListCreator;
     private AlertDialog rotationExcludedAppsList;
+    private boolean triggerTypeDialogWasShowing;
 
     public CheckBoxPreference getChangeMobileDataState() {
         return changeMobileDataState;
@@ -94,6 +99,7 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
 
         findPreferences();
         setPreferencesFeatures();
+        refreshBluetoothDevicesList();
 
     }
 
@@ -153,8 +159,7 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         selectMusicPlayer.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                musicPlayerListCreator = new MusicPlayerListCreator(PrefsCarConnectedFragment.this);
-                musicPlayerListCreator.execute(getActivity());
+                startMusicPlayerListCreator();
                 return false;
             }
         });
@@ -171,8 +176,7 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         rotationExcludedApps.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                rotationExcludedAppsListCreator = new RotationExcludedAppsListCreator(PrefsCarConnectedFragment.this);
-                rotationExcludedAppsListCreator.execute(getActivity());
+                startRotationExcludedAppsListCreator();
                 return false;
             }
         });
@@ -230,6 +234,16 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
                 selectMusicPlayer.setSummary(summary);
             }
         }
+    }
+
+    protected void startMusicPlayerListCreator() {
+        musicPlayerListCreator = new MusicPlayerListCreator(PrefsCarConnectedFragment.this);
+        musicPlayerListCreator.execute(getActivity());
+    }
+
+    protected void startRotationExcludedAppsListCreator() {
+        rotationExcludedAppsListCreator = new RotationExcludedAppsListCreator(PrefsCarConnectedFragment.this);
+        rotationExcludedAppsListCreator.execute(getActivity());
     }
 
 
@@ -370,8 +384,6 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(LOG_TAG, "Fragment: onResume");
-        refreshBluetoothDevicesList();
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
     }
@@ -384,29 +396,40 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
     }
 
 
+    public void showNewProgressDialog() {
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setTitle(getResources().getString(R.string.loading_app_list));
+        progressDialog.setMessage(getResources().getString(R.string.loading_app_list));
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.show();
+    }
+
     public void showProgressDialog() {
-        dialog = new ProgressDialog(getActivity());
-        dialog.setTitle(getResources().getString(R.string.loading_app_list));
-        dialog.setMessage(getResources().getString(R.string.loading_app_list));
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setCancelable(false);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.show();
+        if (progressDialog != null)
+            progressDialog.show();
     }
 
     public void dismissProgressDialog() {
-        if (dialog != null)
-            if (dialog.isShowing())
-                dialog.dismiss();
+        if (progressDialog != null)
+            if (progressDialog.isShowing())
+                progressDialog.dismiss();
     }
 
-    public ProgressDialog getDialog() {
-        return dialog;
+    public ProgressDialog getProgressDialog() {
+        return progressDialog;
     }
+
 
     public void showMusicPlayerList (AlertDialog musicPlayerList) {
         this.musicPlayerList = musicPlayerList;
         this.musicPlayerList.show();
+    }
+
+    public void showMusicPlayerList () {
+        if (musicPlayerList != null)
+            musicPlayerList.show();
     }
 
     public void dismissMusicPlayerList () {
@@ -419,14 +442,9 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         return musicPlayerList;
     }
 
-    public MusicPlayerListCreator getMusicPlayerListCreator() {
-        return musicPlayerListCreator;
-    }
-
     public AsyncTask.Status getMusicPlayerListCreatorStatus() {
-        return musicPlayerListCreator.getStatus();
+        return musicPlayerListCreator != null ? musicPlayerListCreator.getStatus() : AsyncTask.Status.PENDING;
     }
-
 
 
     public void showRotationExcludedAppsList (AlertDialog rotationExcludedAppsList) {
@@ -434,16 +452,24 @@ public class PrefsCarConnectedFragment extends com.github.machinarius.preference
         this.rotationExcludedAppsList.show();
     }
 
+    public void showRotationExcludedAppsList () {
+        if (rotationExcludedAppsList != null)
+            rotationExcludedAppsList.show();
+    }
+
+    public void dismissRotationExcludedAppsList() {
+        if (rotationExcludedAppsList != null)
+            if (rotationExcludedAppsList.isShowing())
+                rotationExcludedAppsList.dismiss();
+    }
+
     public AlertDialog getRotationExcludedAppsList() {
         return rotationExcludedAppsList;
     }
 
-    public RotationExcludedAppsListCreator getRotationExcludedAppsListCreator() {
-        return rotationExcludedAppsListCreator;
-    }
-
     public AsyncTask.Status getRotationExcludedAppsListCreatorStatus() {
-        return rotationExcludedAppsListCreator.getStatus();
+        return rotationExcludedAppsListCreator != null ?
+                rotationExcludedAppsListCreator.getStatus() : AsyncTask.Status.PENDING;
     }
 
 }

@@ -62,40 +62,28 @@ public class PopupConnectedFragment extends Fragment
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         counter.cancel();
-                        if (contextToCallback instanceof CarConnectedService){
-                            ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_CONTINUE,
-                                    PopupConnectedActivity.carConnectedServiceStartId);
-                        }
+                        sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_CONTINUE);
                         getActivity().finish();
                     }
                 })
                 .setNegativeButton(getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         counter.cancel();
-                        if (contextToCallback instanceof CarConnectedService){
-                            ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_DISCONTINUE,
-                                    PopupConnectedActivity.carConnectedServiceStartId);
-                        }
+                        sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_DISCONTINUE);
                         getActivity().finish();
                     }
                 }).create();
 
     }
 
-    protected void setAlertDialogParameters() {
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-        }
-
+    protected void setAlertDialogParameters() throws NullPointerException {
+        alertDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         alertDialog.setCanceledOnTouchOutside(false);
         alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
                 counter.cancel();
-                if (contextToCallback instanceof CarConnectedService){
-                    ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_DISCONTINUE,
-                            PopupConnectedActivity.carConnectedServiceStartId);
-                }
+                sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_DISCONTINUE);
                 getActivity().finish();
             }
         });
@@ -104,10 +92,7 @@ public class PopupConnectedFragment extends Fragment
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KEYCODE_BACK) {
                     counter.cancel();
-                    if (contextToCallback instanceof CarConnectedService){
-                        ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_DISCONTINUE,
-                                PopupConnectedActivity.carConnectedServiceStartId);
-                    }
+                    sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_DISCONTINUE);
                     getActivity().finish();
                     return true;
                 }
@@ -130,15 +115,9 @@ public class PopupConnectedFragment extends Fragment
             @Override
             public void onFinish() throws NullPointerException {
                 if (PopupConnectedActivity.actionDialogTimeout && timeoutLeft == 1 && getActivity() != null) {
-                    if (contextToCallback instanceof CarConnectedService){
-                        ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_CONTINUE,
-                                PopupConnectedActivity.carConnectedServiceStartId);
-                    }
+                    sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_CONTINUE);
                 } else {
-                    if (contextToCallback instanceof CarConnectedService){
-                        ((CarConnectedService) contextToCallback).callback(POPUP_CONNECTED_FINISH_DISCONTINUE,
-                                PopupConnectedActivity.carConnectedServiceStartId);
-                    }
+                    sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_DISCONTINUE);
                 }
 
                 if (getActivity() != null) {
@@ -146,6 +125,13 @@ public class PopupConnectedFragment extends Fragment
                 }
             }
         }.start();
+    }
+
+    private void sendCallbackToPopupConnectedActivity(String action) {
+        if (contextToCallback instanceof CarConnectedService){
+            ((CarConnectedService) contextToCallback).callback(action,
+                    PopupConnectedActivity.carConnectedServiceStartId);
+        }
     }
 
 }

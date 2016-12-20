@@ -61,8 +61,7 @@ import static android.content.Context.POWER_SERVICE;
 
 public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
 
-    private static final String LOG_TAG = Actions.class.getSimpleName();
-
+    private static final String LOG_TAG = Logic.class.getSimpleName();
 
     private static ProximityState proximityState = ProximityState.NOT_TESTED;
     private static CarConnectedProcessState carConnectedProcessState = CarConnectedProcessState.NOT_STARTED;
@@ -111,7 +110,7 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         return false;
     }
 
-    public static Set<BluetoothDevice> queryBluetoothDevices() {
+    private static Set<BluetoothDevice> queryBluetoothDevices() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
         Log.d("Bluetooth devices", pairedDevices.toString());
@@ -182,8 +181,9 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         List<ApplicationInfo> allApps;
         List<String> musicPlayerPackages = new ArrayList<>();
         List<ApplicationInfo> musicPlayers = new ArrayList<>();
+        Intent mediaButtonIntent;
 
-        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         musicPlayersResolveInfo = pm.queryBroadcastReceivers(mediaButtonIntent,
                 PackageManager.GET_RESOLVED_FILTER);
 
@@ -193,8 +193,6 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
             musicPlayerPackages.add(resolveInfo.activityInfo.packageName);
         }
 
-        Log.d("allPackagesSize", Integer.toString(allApps.size()));
-
         for(ApplicationInfo app : allApps) {
             if (musicPlayerPackages.contains(app.packageName))
                 musicPlayers.add(app);
@@ -202,7 +200,7 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
 
         Collections.sort(musicPlayers, new ApplicationInfo.DisplayNameComparator(pm));
 
-        Log.d("musicPlayersSize", Integer.toString(musicPlayers.size()));
+        Log.d(LOG_TAG, "musicPlayersSize: " + Integer.toString(musicPlayers.size()));
 
         return musicPlayers;
     }
@@ -211,8 +209,9 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         final PackageManager pm = activity.getPackageManager();
         List<ResolveInfo> musicPlayersResolveInfo;
         List<ActivityInfo> musicPlayersActivityInfo = new ArrayList<>();
+        Intent mediaButtonIntent;
 
-        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         musicPlayersResolveInfo = pm.queryBroadcastReceivers(mediaButtonIntent,
                 PackageManager.GET_RESOLVED_FILTER);
 
@@ -248,7 +247,7 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
 
         Set readSet  = preferences.getStringSet(key, null);
         if (readSet != null)
-            Log.d("Saved SharedPref set", readSet.toString());
+            Log.d(LOG_TAG, "Saved SharedPref set" + readSet.toString());
     }
 
     public static boolean getSharedPrefBoolean(Context context, String key, boolean defaultValue) {
@@ -319,12 +318,7 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
             ex.printStackTrace();
         }
 
-        if (appList != null) {
-            return appList;
-        } else {
-            appList = new LinkedList<>();
-            return appList;
-        }
+        return appList != null ? appList : new LinkedList<PairObject<String, String>>();
 
     }
 
@@ -423,21 +417,23 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
             String transactionCode = getTransactionCode(context);
 
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                SubscriptionManager mSubscriptionManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+                SubscriptionManager mSubscriptionManager = (SubscriptionManager)
+                        context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
                 // Loop through the subscription list i.e. SIM list.
                 for (int i = 0; i < mSubscriptionManager.getActiveSubscriptionInfoCountMax(); i++) {
                     if (transactionCode.length() > 0) {
                         // Get the active subscription ID for a given SIM card.
-                        int subscriptionId = mSubscriptionManager.getActiveSubscriptionInfoList().get(i).getSubscriptionId();
+                        int subscriptionId = mSubscriptionManager
+                                .getActiveSubscriptionInfoList().get(i).getSubscriptionId();
 
-                        command = "service call phone " + transactionCode + " i32 " + subscriptionId + " i32 " + state;
-                        executeCommandViaSu(context, "-c", command);
+                        command = "su -c service call phone " + transactionCode + " i32 " + subscriptionId + " i32 " + state;
+                        Process process1 = Runtime.getRuntime().exec(command);
                     }
                 }
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
                 if (transactionCode.length() > 0) {
-                    command = "service call phone " + transactionCode + " i32 " + state;
-                    executeCommandViaSu(context, "-c", command);
+                    command = "su -c service call phone " + transactionCode + " i32 " + state;
+                    Process process1 = Runtime.getRuntime().exec(command);
                 }
             }
         } catch(Exception e) {
@@ -462,32 +458,6 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
             // or named differently in the current API level, so we throw
             // an exception and inform users that the method is not available.
             throw e;
-        }
-    }
-
-    private static void executeCommandViaSu(Context context, String option, String command) {
-        boolean success = false;
-        String su = "su";
-        for (int i=0; i < 3; i++) {
-            // Default "su" command executed successfully, then quit.
-            if (success) {
-                break;
-            }
-            // Else, execute other "su" commands.
-            if (i == 1) {
-                su = "/system/xbin/su";
-            } else if (i == 2) {
-                su = "/system/bin/su";
-            }
-            try {
-                // Execute command as "su".
-                Runtime.getRuntime().exec(new String[]{su, option, command});
-            } catch (IOException e) {
-                success = false;
-                Log.e(LOG_TAG, "Cannot execute su command!\n" + e);
-            } finally {
-                success = true;
-            }
         }
     }
 
