@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean adminDialogWasShowing;
     private boolean overlayDialogWasShowing;
     private boolean accessibilityDialogWasShowing;
-    private boolean mainServiceWasRunning;
 
     private AlertDialog builderAdmin;
     private AlertDialog builderOverlay;
@@ -65,9 +64,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             adminDialogWasShowing = savedInstanceState.getBoolean(ADMIN_DIALOG_WAS_SHOWING);
             overlayDialogWasShowing = savedInstanceState.getBoolean(OVERLAY_DIALOG_WAS_SHOWING);
             accessibilityDialogWasShowing = savedInstanceState.getBoolean(ACCESSIBILITY_DIALOG_WAS_SHOWING);
-            Log.d(LOG_TAG, "firstAdminDialog: " + Boolean.toString(adminDialogWasShowing));
-            Log.d(LOG_TAG, "firstOverlayDialog: " + Boolean.toString(overlayDialogWasShowing));
-            Log.d(LOG_TAG, "firstAccessibilityDialog: " + Boolean.toString(accessibilityDialogWasShowing));
         }
 
         firstRun = Logic.getSharedPrefBoolean(this, KEY_FIRST_RUN, FIRST_RUN_DEFAULT_VALUE);
@@ -76,24 +72,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (BluetoothAdapter.getDefaultAdapter() != null) {
             setListeners();
-            mainServiceWasRunning = Logic.isMyServiceRunning(MainService.class, getApplicationContext());
-            automateServiceRunning.setChecked(mainServiceWasRunning);
         } else {
             showBluetoothNotSupportedDialog();
         }
 
         if (firstRun) {
-            if (Logic.testDeviceAdminPermission(this)) {
-               if (Logic.testSystemOverlayPermission(this)) {
-                   if (!Logic.testAccessibilityPermission(this)) {
-                       showAccessibilityServiceDialog();
-                   }
-               } else {
-                   showSystemOverlayPermissionDialog();
-               }
-            } else {
+            if (!Logic.testDeviceAdminPermission(this))
                 showDeviceAdminPermissionDialog();
-            }
+            else if (!Logic.testSystemOverlayPermission(this))
+                showSystemOverlayPermissionDialog();
+            else if (!Logic.testAccessibilityPermission(this))
+                showAccessibilityServiceDialog();
+
             Logic.setSharedPrefBoolean(this, false, KEY_FIRST_RUN);
         }
 
@@ -102,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     protected void findViews() {
         automateServiceRunning = (Switch) findViewById(R.id.automate_service_running);
+        automateServiceRunning.setChecked(Logic.isMyServiceRunning(MainService.class, getApplicationContext()));
+
         carConnected = (CardView) findViewById(R.id.car_connected);
         carDisconnected = (CardView) findViewById(R.id.car_disconnected);
         inCarOptions = (CardView) findViewById(R.id.in_car_options);
@@ -160,47 +152,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
+
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-        if (isChecked) {
-            if (!mainServiceWasRunning) {
-                if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
-                    android.content.Intent enableIntent = new android.content.Intent(
-                            android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivity(enableIntent);
-                }
+        if (isChecked && !Logic.isMyServiceRunning(MainService.class, getApplicationContext())) {
 
-                if (Logic.testDeviceAdminPermission(this)) {
-                    if (Logic.testSystemOverlayPermission(this)) {
-                        if (Logic.testAccessibilityPermission(this)) {
-                            Intent startIntent = new Intent(MainActivity.this, MainService.class);
-                            startIntent.setAction(Constants.ACTION.START_FOREGROUND_ACTION);
-                            startService(startIntent);
-                            Toast.makeText(this, getString(R.string.service_started), Toast.LENGTH_SHORT).show();
-                        } else {
-                            showAccessibilityServiceDialog();
-                            buttonView.setChecked(false);
-                        }
-                    } else {
-                        showSystemOverlayPermissionDialog();
-                        buttonView.setChecked(false);
-                    }
-                } else {
-                    showDeviceAdminPermissionDialog();
-                    buttonView.setChecked(false);
-                }
-
+            if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                android.content.Intent enableIntent = new android.content.Intent(
+                        android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivity(enableIntent);
             }
 
-        } else {
-            if (Logic.isMyServiceRunning(MainService.class, getApplicationContext())) {
-                Intent stopIntent = new Intent(MainActivity.this, MainService.class);
-                stopIntent.setAction(Constants.ACTION.STOP_FOREGROUND_ACTION);
-                startService(stopIntent);
-                Toast.makeText(this, getString(R.string.service_stopped), Toast.LENGTH_SHORT).show();
-                mainServiceWasRunning = false;
+            if (!Logic.testDeviceAdminPermission(this)) {
+                showDeviceAdminPermissionDialog();
+                buttonView.setChecked(false);
+            } else if (!Logic.testSystemOverlayPermission(this)) {
+                showSystemOverlayPermissionDialog();
+                buttonView.setChecked(false);
+            } else if (!Logic.testAccessibilityPermission(this)) {
+                showAccessibilityServiceDialog();
+                buttonView.setChecked(false);
+            } else {
+                Intent startIntent = new Intent(MainActivity.this, MainService.class);
+                startIntent.setAction(Constants.ACTION.START_FOREGROUND_ACTION);
+                startService(startIntent);
+                Toast.makeText(this, getString(R.string.service_started), Toast.LENGTH_SHORT).show();
             }
+
+
+        } else if (!isChecked && Logic.isMyServiceRunning(MainService.class, getApplicationContext())) {
+
+            Intent stopIntent = new Intent(MainActivity.this, MainService.class);
+            stopIntent.setAction(Constants.ACTION.STOP_FOREGROUND_ACTION);
+            startService(stopIntent);
+            Toast.makeText(this, getString(R.string.service_stopped), Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -213,11 +200,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, getString(R.string.device_admin_permissions_granted), Toast.LENGTH_LONG).show();
             }
 
-            if (!Logic.testSystemOverlayPermission(this)) {
+            if (!Logic.testSystemOverlayPermission(this))
                 showSystemOverlayPermissionDialog();
-            } else if (!Logic.testAccessibilityPermission(this)) {
+            else if (!Logic.testAccessibilityPermission(this))
                 showAccessibilityServiceDialog();
-            }
+
         } else if (requestCode == ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE) {
             if (Settings.canDrawOverlays(this))
                 Toast.makeText(this, getString(R.string.force_rotation_permissions_granted), Toast.LENGTH_LONG).show();
@@ -226,9 +213,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 showAccessibilityServiceDialog();
 
         } else if (requestCode == ACCESSIBILITY_MANAGER_REQUEST_CODE) {
-            if (Logic.testAccessibilityPermission(this)) {
+            if (Logic.testAccessibilityPermission(this))
                 Toast.makeText(this, getString(R.string.accessibility_service_enabled), Toast.LENGTH_LONG).show();
-            }
+
         }
     }
 
@@ -237,48 +224,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onPause();
         if (builderAdmin != null) {
             adminDialogWasShowing = builderAdmin.isShowing();
-            Log.d(LOG_TAG, "adminDialogWasShowing: " + Boolean.toString(adminDialogWasShowing));
-            if (adminDialogWasShowing) {
+            if (adminDialogWasShowing)
                 builderAdmin.dismiss();
-            }
         }
 
         if (builderOverlay != null) {
             overlayDialogWasShowing = builderOverlay.isShowing();
-            Log.d(LOG_TAG, "overlayDialogWasShowing: " + Boolean.toString(overlayDialogWasShowing));
-            if (overlayDialogWasShowing) {
+            if (overlayDialogWasShowing)
                 builderOverlay.dismiss();
-            }
         }
 
         if (builderAccessibility != null) {
             accessibilityDialogWasShowing = builderAccessibility.isShowing();
-            Log.d(LOG_TAG, "accessibilityDialogWasShowing: " + Boolean.toString(accessibilityDialogWasShowing));
-            if (accessibilityDialogWasShowing) {
+            if (accessibilityDialogWasShowing)
                 builderAccessibility.dismiss();
-            }
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(LOG_TAG, "adminDialogIsShowing: " + Boolean.toString(adminDialogWasShowing));
-        if (adminDialogWasShowing) {
+        if (adminDialogWasShowing)
             showDeviceAdminPermissionDialog();
-        }
 
-        Log.d(LOG_TAG, "overlayDialogIsShowing: " + Boolean.toString(overlayDialogWasShowing));
-
-        if (overlayDialogWasShowing) {
+        if (overlayDialogWasShowing)
             showSystemOverlayPermissionDialog();
-        }
 
-        Log.d(LOG_TAG, "accessibilityDialogIsShowing: " + Boolean.toString(accessibilityDialogWasShowing));
-
-        if (accessibilityDialogWasShowing) {
+        if (accessibilityDialogWasShowing)
             showAccessibilityServiceDialog();
-        }
+
     }
 
     @Override

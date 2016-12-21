@@ -37,6 +37,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
     private Sensor mProximity;
     private Context contextToCallback;
     private int carConnectedServiceStartId;
+    private boolean carConnectedCallbackAlreadySent;
 
     public class LocalBinder extends Binder {
         public ProximitySensorService getService() {
@@ -64,8 +65,15 @@ public class ProximitySensorService extends Service implements SensorEventListen
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        carConnectedCallbackAlreadySent = false;
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(LOG_TAG, "onStartCommand");
+        return START_STICKY;
+
+    }
 
     @Override
     public void onDestroy() {
@@ -92,9 +100,10 @@ public class ProximitySensorService extends Service implements SensorEventListen
             Logic.setProximityState(ProximityState.FAR);
         }
 
-        if (contextToCallback instanceof CarConnectedService) {
+        if (contextToCallback instanceof CarConnectedService && !carConnectedCallbackAlreadySent) {
             ((CarConnectedService) contextToCallback).callback(PROXIMITY_CHECK_COMPLETED,
                     carConnectedServiceStartId);
+            carConnectedCallbackAlreadySent = true;
         }
 
         stopSelf();
