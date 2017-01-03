@@ -26,6 +26,7 @@ import pl.maslanka.automatecar.connected.PopupConnectedActivity;
 import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.helpers.ProximityState;
 import pl.maslanka.automatecar.helpers.TurnScreenOnActivity;
 import pl.maslanka.automatecar.services.CarConnectedService;
 import pl.maslanka.automatecar.services.ForceAutoRotationService;
@@ -418,13 +419,19 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         context.sendBroadcast(intent);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public static void showNavi(Context context, int startId) {
 
-        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (service.service.getClassName().equals("com.google.android.apps.gmm.navigation.service.base.NavigationService")) {
-                Log.e("TRUE", "true");
+        final String NAVI_APP_PACKAGE_NAME = "com.google.android.apps.gmm.navigation.service.base.NavigationService";
+        boolean showNavi = Logic.getSharedPrefBoolean(context,
+                KEY_SHOW_NAVI_IN_CAR, SHOW_NAVI_IN_CAR_DEFAULT_VALUE);
+
+        if (showNavi && Logic.getProximityState() != ProximityState.NEAR) {
+            ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            for (ActivityManager.RunningServiceInfo serviceInfo : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceInfo.service.getClassName().equals(NAVI_APP_PACKAGE_NAME)) {
+                    Log.v(LOG_TAG, "Show navigation performing...");
+                    launchIntentFromPackage(context, serviceInfo.service.getPackageName());
+                }
             }
         }
 
