@@ -1,24 +1,24 @@
 package pl.maslanka.automatecar.utils;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
 import android.media.AudioManager;
+import android.media.MediaRouter;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.provider.Settings;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.KeyEvent;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,9 +39,11 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         Constants.CALLBACK_ACTIONS, Constants.DEFAULT_VALUES {
 
     private static final String LOG_TAG = Actions.class.getSimpleName();
+    private static final String A2DP_IDENTIFIER_NAME = "bluetooth_a2dp_audio_route_name";
 
 
     public static void proximityCheck(Context context, ServiceConnection mConnection, int startId) {
+
         boolean checkIfInPocket = Logic.getSharedPrefBoolean(context,
                 KEY_CHECK_IF_IN_POCKET_IN_CAR, CHECK_IF_IN_POCKET_IN_CAR_DEFAULT_VALUE);
 
@@ -55,10 +57,9 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     public static void startForcingAutoRotation(Context context, ServiceConnection mConnection,
                                                 int startId) {
-        Log.d(LOG_TAG, "starting: forceAutoRotationService");
+
         boolean forceAutoRotation = Logic.getSharedPrefBoolean(context,
                 KEY_FORCE_AUTO_ROTATION_IN_CAR, FORCE_AUTO_ROTATION_IN_CAR_DEFAULT_VALUE);
-
 
         if (forceAutoRotation) {
             bindNewService(context, ForceAutoRotationService.class, mConnection, startId);
@@ -66,6 +67,14 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
             ((CarConnectedService) context).callback(FORCE_ROTATION_COMPLETED, startId);
         }
 
+    }
+
+    private static void bindNewService(Context context, Class<?> cls, ServiceConnection mConnection,
+                                       int startId) {
+        Intent intent = new Intent(context, cls);
+        intent.putExtra(START_ID, startId);
+        context.startService(intent);
+        context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     public static void showConnectedPopup(Context context, int startId) {
@@ -99,7 +108,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
 
         if (appList.size() > 0 && !Logic.isScreenOn(context)) {
-            Log.d(LOG_TAG, "screen is turned off - it will be invoked.");
+            Log.d(LOG_TAG, "screen is turned off - will be invoked.");
             Intent turnScreenOn = new Intent(context, TurnScreenOnActivity.class);
             turnScreenOn.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(turnScreenOn);
@@ -152,8 +161,8 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         if (changeMobileDataStateInCar && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
                 int isDataOn = Settings.Global.getInt(context.getContentResolver(), "mobile_data");
-                Log.v(LOG_TAG, "isDataOn: " + Integer.toString(isDataOn));
-                Log.v(LOG_TAG, "mobileDataEnableInCar: " + Integer.toString(mobileDataEnableInCarAsInt));
+                Log.v(LOG_TAG, "isMobileDataOn: " + Integer.toString(isDataOn));
+                Log.v(LOG_TAG, "mobileDataEnablePreference: " + Integer.toString(mobileDataEnableInCarAsInt));
 
                 if (isDataOn != mobileDataEnableInCarAsInt) {
                     Logic.setMobileDataStateFromLollipop(context, mobileDataEnableInCarAsInt);
@@ -168,8 +177,8 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
         } else if (changeMobileDataStateInCar) {
             boolean isDataOn = Logic.getMobileDataStateBelowLollipop(context);
-            Log.v(LOG_TAG, "isDataOn: " + Boolean.toString(isDataOn));
-            Log.v(LOG_TAG, "mobileDataEnableInCar: " + Boolean.toString(mobileDataEnableInCar));
+            Log.v(LOG_TAG, "isMobileDataOn: " + Boolean.toString(isDataOn));
+            Log.v(LOG_TAG, "mobileDataEnablePreference: " + Boolean.toString(mobileDataEnableInCar));
 
             if (isDataOn != mobileDataEnableInCar) {
                 Logic.setMobileDataStateBelowLollipop(context, mobileDataEnableInCar);
@@ -183,11 +192,76 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     public static void setMediaVolume(Context context, int startId) {
 
+        boolean setMediaVolumeInCar = Logic.getSharedPrefBoolean(context,
+                KEY_SET_MEDIA_VOLUME_IN_CAR, SET_MEDIA_VOLUME_IN_CAR_DEFAULT_VALUE);
+        int volumeLevelInCar = Integer.parseInt(Logic.getSharedPrefString(context,
+                KEY_MEDIA_VOLUME_LEVEL_IN_CAR, Integer.toString(MEDIA_VOLUME_LEVEL_IN_CAR_DEFAULT_VALUE)));
+
+
+        if (setMediaVolumeInCar) {
+
+            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volumeLevelInCar, 0);
+
+            /*
+            Fix for Android 4.3 and higher:
+            When system media volume level is set to specified value but NO MEDIA WAS PLAYED, then
+            volume levels (system media and bluetooth a2dp media) are not fixed!
+
+            In such situation changing only system media level will not change bluetooth a2dp volume!
+            That's why we need to change a2dp volume separately AFTER media stream is routed to
+            bluetooth a2dp.
+             */
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+
+                waitForBluetoothA2dpRoute(context);
+
+                //Set the volume level once more for bluetooth a2dp media
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volumeLevelInCar, 0);
+            }
+
+        }
+
         if (context instanceof CarConnectedService) {
             ((CarConnectedService) context).callback(SET_MEDIA_VOLUME_COMPLETED, startId);
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private static void waitForBluetoothA2dpRoute(Context context) {
+        final int MAX_LOOP_NUMBER = 100;
+        final int SLEEP_BETWEEN_CHECK = 100;
+        int counter = 0;
+
+        MediaRouter mediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        CharSequence selectedRouteDesc = mediaRouter.
+                getSelectedRoute(MediaRouter.ROUTE_TYPE_LIVE_AUDIO).getDescription();
+        String a2dpRouteSystemDesc = Resources.getSystem().getString(Resources.getSystem()
+                .getIdentifier(A2DP_IDENTIFIER_NAME, "string", "android"));
+
+        try {
+            while (counter < MAX_LOOP_NUMBER && (selectedRouteDesc == null ||
+                    !selectedRouteDesc.toString().equals(a2dpRouteSystemDesc))) {
+
+                Log.v(LOG_TAG, "Waiting for Bluetooth A2DP route... ");
+
+                Thread.sleep(SLEEP_BETWEEN_CHECK);
+
+                counter++;
+                selectedRouteDesc = mediaRouter.
+                        getSelectedRoute(MediaRouter.ROUTE_TYPE_LIVE_AUDIO).getDescription();
+
+            }
+
+            if (counter == MAX_LOOP_NUMBER)
+                Log.e(LOG_TAG, "Bluetooth A2DP is still not the selected route!");
+
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+
+    }
 
     public static void playMusic(Context context, int startId) {
 
@@ -196,67 +270,39 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         boolean playMusic = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC_IN_CAR, PLAY_MUSIC_IN_CAR_DEFAULT_VALUE);
         boolean playMusicOnA2dp = Logic.getSharedPrefBoolean(context, KEY_PLAY_MUSIC_ON_A2DP_IN_CAR,
                 PLAY_MUSIC_ON_A2DP_IN_CAR_DEFAULT_VALUE);
-        String musicPlayer = Logic.getSharedPrefString(context, KEY_SELECT_MUSIC_PLAYER_IN_CAR, null);
+        String musicPlayerPackageName = Logic.getSharedPrefString(context, KEY_SELECT_MUSIC_PLAYER_IN_CAR, null);
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         try {
-            if (playMusic) {
-                if (musicPlayer != null) {
+            if (playMusic && musicPlayerPackageName != null) {
 
-                    List<ActivityInfo> musicPlayersActivityInfo =
-                            Logic.getListOfMediaBroadcastReceivers(context);
-                    ActivityInfo musicPlayerInfo = new ActivityInfo();
+                ActivityInfo musicPlayerInfo = getMusicPlayerInfo(context, musicPlayerPackageName);
 
-                    for (ActivityInfo activityInfo: musicPlayersActivityInfo) {
-                        if (activityInfo.packageName.equals(musicPlayer)) {
-                            musicPlayerInfo = activityInfo;
-                        }
-                    }
+                ComponentName component =
+                        new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
 
-                    ComponentName component =
-                            new ComponentName(musicPlayerInfo.packageName, musicPlayerInfo.name);
+                Log.d(LOG_TAG, "broadcastName: " + musicPlayerInfo.name);
 
-                    Log.d(LOG_TAG, "broadcastName: " + musicPlayerInfo.name);
-
-                    if (playMusicOnA2dp) {
-
-                        waitForA2dp(manager);
-
-                        if (manager.isBluetoothA2dpOn()) {
-                            Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
-
-                            startPlayingMusicOnComponent(context, component);
-                            Log.v(LOG_TAG, "Waiting for music to play...");
-                            Thread.sleep(Constants.WAIT_FOR_MUSIC_PLAY);
-                            if (!manager.isMusicActive())
-                                retryPlayingMusicOnComponent(context, sleepTimes*1000, component);
-                        }
-
-                    } else {
-                        startPlayingMusicOnComponent(context, component);
-
-                        Thread.sleep(Constants.WAIT_FOR_MUSIC_PLAY);
-                        if (!manager.isMusicActive())
-                            retryPlayingMusicOnComponent(context, sleepTimes*1000, component);
-                    }
-
+                if (playMusicOnA2dp) {
+                    waitForA2dp(manager);
+                    checkForA2dpAndPlayOnComponentIfTrue(manager, context, component, sleepTimes);
                 } else {
-                    Log.d(LOG_TAG, "musicPlayer: no Music Player defined");
-                    if (playMusicOnA2dp) {
-
-                        waitForA2dp(manager);
-
-                        if (manager.isBluetoothA2dpOn()) {
-                            Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
-                            startPlayingMusic(context);
-                        }
-
-                    } else {
-                        startPlayingMusic(context);
-                    }
+                    playOnComponentWithoutCheckingA2dp(context, component, manager, sleepTimes);
                 }
+
+            } else if (playMusic) {
+
+                Log.d(LOG_TAG, "musicPlayer: no Music Player defined");
+
+                if (playMusicOnA2dp) {
+                    waitForA2dp(manager);
+                    checkForA2dpAndPlayIfTrue(manager, context);
+                } else {
+                    startPlayingMusic(context);
+                }
+
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | NullPointerException e) {
             e.printStackTrace();
         }
 
@@ -265,7 +311,122 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         }
     }
 
+    private static ActivityInfo getMusicPlayerInfo(Context context, String musicPlayerPackageName) {
+        List<ActivityInfo> musicPlayersActivityInfo =
+                Logic.getListOfMediaBroadcastReceivers(context);
+        ActivityInfo musicPlayerInfo;
+
+        for (ActivityInfo activityInfo: musicPlayersActivityInfo) {
+            if (activityInfo.packageName.equals(musicPlayerPackageName)) {
+                musicPlayerInfo = activityInfo;
+                return musicPlayerInfo;
+            }
+        }
+
+        return new ActivityInfo();
+    }
+
+    private static void waitForA2dp(AudioManager manager) {
+        final int MAX_LOOP_NUMBER = 100;
+        final int SLEEP_BETWEEN_CHECK = 100;
+        int counter = 0;
+
+        try {
+            while (counter < MAX_LOOP_NUMBER && !manager.isBluetoothA2dpOn()) {
+                Log.v(LOG_TAG, "Waiting for Bluetooth A2DP profile becoming ready...");
+                Thread.sleep(SLEEP_BETWEEN_CHECK);
+                counter++;
+            }
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
+    private static void checkForA2dpAndPlayOnComponentIfTrue(AudioManager manager, Context context,
+                                                             ComponentName component, int sleepTimes) throws InterruptedException {
+        if (manager.isBluetoothA2dpOn()) {
+            Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
+            playOnComponentWithoutCheckingA2dp(context, component, manager, sleepTimes);
+        } else {
+            Log.e(LOG_TAG, "Bluetooth A2DP is still turned off! Music will not be played!");
+        }
+    }
+
+    private static void playOnComponentWithoutCheckingA2dp(Context context, ComponentName component,
+                                                           AudioManager manager, int sleepTimes) throws InterruptedException {
+        startPlayingMusicOnComponent(context, component);
+        Log.v(LOG_TAG, "Waiting for music to play...");
+        Thread.sleep(Constants.WAIT_FOR_MUSIC_PLAY);
+        if (!manager.isMusicActive())
+            retryPlayingMusicOnComponent(context, sleepTimes*1000, component);
+    }
+
+    private static void checkForA2dpAndPlayIfTrue(AudioManager manager, Context context) throws InterruptedException {
+        if (manager.isBluetoothA2dpOn()) {
+            Log.d(LOG_TAG, "Bluetooth A2DP is turned on!");
+            startPlayingMusic(context);
+        } else {
+            Log.e(LOG_TAG, "Bluetooth A2DP is still turned off! Music will not be played!");
+        }
+    }
+
+
+    private static void startPlayingMusicOnComponent(Context context, ComponentName component)
+            throws InterruptedException {
+        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_DOWN);
+        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
+        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_UP);
+    }
+
+    private static void retryPlayingMusicOnComponent(Context context, int sleepAfterComponentLaunch,
+                                                     ComponentName component) throws InterruptedException {
+        Log.d(LOG_TAG, "Music still not active! Launching music player to retry to play music.");
+        launchIntentFromPackage(context, component.getPackageName());
+        Thread.sleep(sleepAfterComponentLaunch);
+        startPlayingMusicOnComponent(context, component);
+    }
+
+    private static void launchIntentFromPackage(Context context, String packageName) {
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+
+        if (launchIntent != null) {
+            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(launchIntent);
+        } else {
+            Log.e("AppLaunchingError", "Package " + packageName + " not found!");
+        }
+    }
+
+    private static void startPlayingMusic(Context context) throws InterruptedException {
+        sendPlayButtonEvent(context, KeyEvent.ACTION_DOWN);
+        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
+        sendPlayButtonEvent(context, KeyEvent.ACTION_UP);
+    }
+
+    private static void sendOrderedPlayButtonEvent(Context context, ComponentName component, int action) {
+        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        intent.setComponent(component);
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
+        context.sendOrderedBroadcast(intent, null);
+    }
+
+    private static void sendPlayButtonEvent(Context context, int action) {
+        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
+        context.sendBroadcast(intent);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public static void showNavi(Context context, int startId) {
+
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (service.service.getClassName().equals("com.google.android.apps.gmm.navigation.service.base.NavigationService")) {
+                Log.e("TRUE", "true");
+            }
+        }
 
         if (context instanceof CarConnectedService) {
             ((CarConnectedService) context).callback(SHOW_NAVI_COMPLETED, startId);
@@ -305,71 +466,6 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
 
 
-    }
-
-    private static void launchIntentFromPackage(Context context, String packageName) {
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
-
-        if (launchIntent != null) {
-            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(launchIntent);
-        } else {
-            Log.e("AppLaunchingError", "Package " + packageName + " not found!");
-        }
-    }
-
-    private static void startPlayingMusicOnComponent(Context context, ComponentName component)
-            throws InterruptedException {
-        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_DOWN);
-        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
-        sendOrderedPlayButtonEvent(context, component, KeyEvent.ACTION_UP);
-    }
-
-    private static void retryPlayingMusicOnComponent(Context context, int sleepAfterComponentLaunch,
-                                                     ComponentName component) throws InterruptedException {
-        Log.d(LOG_TAG, "Music still not active! Launching music player to retry to play music.");
-        launchIntentFromPackage(context, component.getPackageName());
-        Thread.sleep(sleepAfterComponentLaunch);
-        startPlayingMusicOnComponent(context, component);
-    }
-
-    private static void startPlayingMusic(Context context) throws InterruptedException {
-        sendPlayButtonEvent(context, KeyEvent.ACTION_DOWN);
-        Thread.sleep(Constants.SLEEP_BETWEEN_BUTTON_PRESS);
-        sendPlayButtonEvent(context, KeyEvent.ACTION_UP);
-    }
-
-    private static void sendOrderedPlayButtonEvent(Context context, ComponentName component, int action) {
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.setComponent(component);
-        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
-        context.sendOrderedBroadcast(intent, null);
-    }
-
-    private static void sendPlayButtonEvent(Context context, int action) {
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(action, KeyEvent.KEYCODE_MEDIA_PLAY));
-        context.sendBroadcast(intent);
-    }
-
-    private static void bindNewService(Context context, Class<?> cls, ServiceConnection mConnection,
-                                       int startId) {
-        Intent intent = new Intent(context, cls);
-        intent.putExtra(START_ID, startId);
-        context.startService(intent);
-        context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    private static void waitForA2dp(AudioManager manager) throws InterruptedException {
-        final int MAX_LOOP_NUMBER = 100;
-        final int SLEEP_BETWEEN_CHECK = 100;
-        int counter = 0;
-        while (!manager.isBluetoothA2dpOn() && counter < MAX_LOOP_NUMBER) {
-            Log.d(LOG_TAG, "Is A2DP profile on?: " + Boolean.toString(manager.isBluetoothA2dpOn()));
-            Thread.sleep(SLEEP_BETWEEN_CHECK);
-            counter++;
-        }
     }
 
 

@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -19,15 +18,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.InputFilter;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.util.List;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.prefother.MediaVolumeLevelPref;
 import pl.maslanka.automatecar.services.HelperAccessibilityService;
 import pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference;
 import pl.maslanka.automatecar.userinputfilter.InputFilterMinMax;

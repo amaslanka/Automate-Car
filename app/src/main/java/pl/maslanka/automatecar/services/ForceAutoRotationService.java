@@ -87,7 +87,6 @@ public class ForceAutoRotationService extends Service implements Constants.BROAD
         try {
             orientationChanger = new LinearLayout(this);
             // Using TYPE_SYSTEM_OVERLAY is crucial to make window appear on top
-            
             // Need the permission android.permission.SYSTEM_ALERT_WINDOW
             WindowManager.LayoutParams orientationLayout = new WindowManager
                     .LayoutParams(WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY, 0, PixelFormat.RGBA_8888);

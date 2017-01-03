@@ -95,7 +95,7 @@
     <string name="root_features">Root features</string>
     <string name="dock_trigger">Dock trigger</string>
     <string name="wireless_loading">Wireless loading</string>
-    <string name="current_level">Current level: %1$d\u002F100</string>
+    <string name="current_level">Current level: %1$d\u002F%2$d</string>
 
 
 </resources>
