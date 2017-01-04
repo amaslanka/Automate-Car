@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.prefconnected;
+package pl.maslanka.automatecar.prefdisconnected;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Set;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.prefconnected.adapters.ArrayAdapterWithIcon;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.prefdisconnected.adapters.ArrayAdapterWithIcon;
 import pl.maslanka.automatecar.utils.Logic;
 
 /**
@@ -105,9 +105,9 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS,
                 appsFromPrefs = new HashSet<>();
 
                 installedApps = Logic.getListOfUserInstalledApps(activity);
-                appsToSave = Logic.readList(activity, APPS_TO_LAUNCH);
+                appsToSave = Logic.readList(activity, APPS_TO_CLOSE);
 
-                appsFromPrefs.addAll(Logic.getSharedPrefStringSet(activity, KEY_APPS_TO_LAUNCH_IN_CAR));
+                appsFromPrefs.addAll(Logic.getSharedPrefStringSet(activity, KEY_APPS_TO_CLOSE));
 
                 createAppListData();
                 checkForUninstalledApps(activity);
@@ -127,11 +127,11 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS,
                                 for (PairObject<String, String> pair: appsToSave) {
                                     Log.v(LOG_TAG, "element: " + pair.toString());
                                 }
-                                Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_APPS_TO_LAUNCH_IN_CAR);
-                                Logic.saveListToInternalStorage(activity, appsToSave, APPS_TO_LAUNCH);
+                                Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_APPS_TO_CLOSE);
+                                Logic.saveListToInternalStorage(activity, appsToSave, APPS_TO_CLOSE);
 
-                                ((AppsToLaunch) getActivity()).buildAndRefreshView();
-                                ((AppsToLaunch) getActivity()).notifyAdapterDataHasChanged();
+                                ((AppsToClose) getActivity()).buildAndRefreshView();
+                                ((AppsToClose) getActivity()).notifyAdapterDataHasChanged();
                             }
                         })
                         .setNegativeButton(getResources().getString(android.R.string.cancel), null);
@@ -231,7 +231,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS,
                 appsFromPrefs.remove(uninstalledApp);
             }
 
-            Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_APPS_TO_LAUNCH_IN_CAR);
+            Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_APPS_TO_CLOSE);
         }
 
         void setCheckStateToCheckBoxes() {

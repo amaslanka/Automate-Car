@@ -39,6 +39,12 @@
             android:name=".prefconnected.AppsToLaunch"
             android:label="@string/apps_to_launch" />
         <activity
+            android:name=".prefdisconnected.PrefsCarDisconnected"
+            android:label="@string/car_disconnected" />
+        <activity
+            android:name=".prefdisconnected.AppsToClose"
+            android:label="@string/apps_to_close" />
+        <activity
             android:name=".connected.PopupConnectedActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"

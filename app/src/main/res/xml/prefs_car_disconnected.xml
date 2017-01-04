@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+
+    <PreferenceCategory android:title="@string/trigger">
+
+        <MultiSelectListPreference
+            android:title="@string/select_trigger"
+            android:entries="@array/triggers_entries"
+            android:entryValues="@array/triggers_entryValues"
+            android:key="trigger_type_out_car"/>
+
+        <MultiSelectListPreference
+            android:title="@string/select_bluetooth_devices"
+            android:key="bluetooth_devices_addresses_out_car" />
+
+        <Preference
+            android:title="@string/select_nfc_tags"
+            android:key="nfc_tags_out_car" />
+
+
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/accidental_disconnection_protection">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/wait_for_reconnection"
+            android:key="wait_for_reconnection" />
+
+        <pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference
+            android:dependency="wait_for_reconnection"
+            android:defaultValue="20"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:inputType="number"
+            android:title="@string/wait_time"
+            android:key="wait_time" />
+
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/navigation_stop">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/show_dialog_to_confirm_navi_stop"
+            android:key="show_dialog_to_confirm_navi_stop" />
+
+        <pl.maslanka.automatecar.userinputfilter.EditTextIntegerPreference
+            android:dependency="show_dialog_to_confirm_navi_stop"
+            android:defaultValue="10"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:inputType="number"
+            android:title="@string/dialog_timeout"
+            android:key="dialog_timeout_out_car" />
+
+        <CheckBoxPreference
+            android:dependency="show_dialog_to_confirm_navi_stop"
+            android:defaultValue="true"
+            android:title="@string/cancel_navi_on_dialog_timeout"
+            android:key="cancel_navi_on_dialog_timeout" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/control_media">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/pause_music"
+            android:key="pause_music" />
+
+        <Preference
+            android:dependency="pause_music"
+            android:title="@string/select_music_player"
+            android:key="select_music_player_out_car" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/set_media_volume_out_car"
+            android:key="set_media_volume_out_car" />
+
+        <pl.maslanka.automatecar.prefdisconnected.MediaVolumeLevelPref
+            android:layout="@layout/preference_volume_seek_bar"
+            android:dependency="set_media_volume_out_car"
+            android:key="media_volume_level_out_car" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/connectivity">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/change_wifi_state_in_car"
+            android:key="change_wifi_state_out_car" />
+
+        <SwitchPreference
+            android:dependency="change_wifi_state_out_car"
+            android:defaultValue="false"
+            android:title="@string/wifi_off"
+            android:key="wifi_enable_out_car" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/connectivity_root_required">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/change_mobile_data_state_in_car"
+            android:key="change_mobile_data_state_out_car" />
+
+        <SwitchPreference
+            android:dependency="change_mobile_data_state_out_car"
+            android:defaultValue="false"
+            android:title="@string/mobile_data_off"
+            android:key="mobile_data_enable_out_car" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+    <PreferenceCategory android:title="@string/close_apps">
+
+        <Preference
+            android:title="@string/apps_to_close"
+            android:key="apps_to_close" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+
+    <PreferenceCategory  android:title="@string/other_features">
+
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/check_if_in_pocket"
+            android:key="check_if_in_pocket_out_car" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/show_home_screen"
+            android:key="show_home_screen" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false"/>
+
+
+</PreferenceScreen>

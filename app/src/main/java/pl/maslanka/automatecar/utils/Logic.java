@@ -278,11 +278,11 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
     }
 
     public static void saveListToInternalStorage(Context context, LinkedList<PairObject<String,
-            String>> appList) {
+            String>> appList, String fileName) {
 
         ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir(PATH, Context.MODE_PRIVATE);
-        File myPath = new File(directory, FILE_NAME);
+        File myPath = new File(directory, fileName);
 
         FileOutputStream fos;
         ObjectOutputStream out;
@@ -297,12 +297,12 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         }
     }
 
-    public static LinkedList<PairObject<String, String>> readList(Context context) {
+    public static LinkedList<PairObject<String, String>> readList(Context context, String fileName) {
 
         LinkedList<PairObject<String, String>> appList = new LinkedList<>();
         ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir(PATH, Context.MODE_PRIVATE);
-        File myPath = new File(directory, FILE_NAME);
+        File myPath = new File(directory, fileName);
 
         FileInputStream fis;
         ObjectInputStream in;

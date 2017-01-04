@@ -37,7 +37,7 @@ import pl.maslanka.automatecar.services.ProximitySensorService;
  */
 
 public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFICATIONS,
-        Constants.CALLBACK_ACTIONS, Constants.DEFAULT_VALUES {
+        Constants.CALLBACK_ACTIONS, Constants.DEFAULT_VALUES, Constants.FILE_NAMES {
 
     private static final String LOG_TAG = Actions.class.getSimpleName();
     private static final String A2DP_IDENTIFIER_NAME = "bluetooth_a2dp_audio_route_name";
@@ -101,7 +101,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     public static void launchApps(Context context, int startId) {
 
-        LinkedList<PairObject<String, String>> appList = Logic.readList(context);
+        LinkedList<PairObject<String, String>> appList = Logic.readList(context, APPS_TO_LAUNCH);
         int sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
                 context, KEY_SLEEP_TIMES_IN_CAR, Integer.toString(SLEEP_TIMES_IN_CAR_DEFAULT_VALUE)));
 
@@ -154,9 +154,9 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
     public static void changeMobileDataState(Context context, int startId) {
 
         boolean changeMobileDataStateInCar = Logic.getSharedPrefBoolean(context,
-                KEY_CHANGE_MOBILE_DATA_STATE_IN_CAR, KEY_CHANGE_MOBILE_DATA_STATE_IN_CAR_DEFAULT_VALUE);
+                KEY_CHANGE_MOBILE_DATA_STATE_IN_CAR, CHANGE_MOBILE_DATA_STATE_IN_CAR_DEFAULT_VALUE);
         boolean mobileDataEnableInCar = Logic.getSharedPrefBoolean(context,
-                KEY_MOBILE_DATA_ENABLE_IN_CAR, KEY_MOBILE_DATA_ENABLE_IN_CAR_DEFAULT_VALUE);
+                KEY_MOBILE_DATA_ENABLE_IN_CAR, MOBILE_DATA_ENABLE_IN_CAR_DEFAULT_VALUE);
         int mobileDataEnableInCarAsInt = (mobileDataEnableInCar) ? 1 : 0;
 
         if (changeMobileDataStateInCar && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

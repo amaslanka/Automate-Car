@@ -96,6 +96,20 @@
     <string name="dock_trigger">Dock trigger</string>
     <string name="wireless_loading">Wireless loading</string>
     <string name="current_level">Current level: %1$d\u002F%2$d</string>
+    
+    
+    
+    <string name="accidental_disconnection_protection">Accidental disconnection protection</string>
+    <string name="wait_for_reconnection">Wait for reconnection</string>
+    <string name="wait_time">Set wait time</string>
+    <string name="navigation_stop">Navigation cancellation</string>
+    <string name="show_dialog_to_confirm_navi_stop">Show dialog to confirm navigation stop</string>
+    <string name="cancel_navi_on_dialog_timeout">Cancel navigation on dialog timeout</string>
+    <string name="pause_music">Pause music when disconnected</string>
+    <string name="set_media_volume_out_car">Set media volume</string>
+    <string name="close_apps">Close apps</string>
+    <string name="apps_to_close">Select apps to close</string>
+    <string name="show_home_screen">Back to home screen at the end</string>
 
 
 </resources>

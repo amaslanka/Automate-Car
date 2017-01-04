@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.prefconnected;
+package pl.maslanka.automatecar.prefdisconnected;
 
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -20,17 +20,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.prefconnected.adapters.ItemAdapter;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
-import pl.maslanka.automatecar.utils.Logic;
 import pl.maslanka.automatecar.helpers.QuattroObject;
+import pl.maslanka.automatecar.prefdisconnected.adapters.ItemAdapter;
+import pl.maslanka.automatecar.utils.Logic;
 
 /**
  * Created by Artur on 15.11.2016.
  */
 
-public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_APPS_FRAGMENT,
+public class AppsToClose extends AppCompatActivity implements Constants.SELECT_APPS_FRAGMENT,
         Constants.PREF_KEYS, Constants.FILE_NAMES {
 
     private ArrayList<QuattroObject<Long, String, String, Drawable>> mItemArray;
@@ -107,8 +107,8 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
 
         mDragListView = (DragListView) findViewById(R.id.drag_list_view);
         appPackages = new ArrayList<>();
-        appPackages.addAll(Logic.getSharedPrefStringSet(this, KEY_APPS_TO_LAUNCH_IN_CAR));
-        appList = Logic.readList(this, APPS_TO_LAUNCH);
+        appPackages.addAll(Logic.getSharedPrefStringSet(this, KEY_APPS_TO_CLOSE));
+        appList = Logic.readList(this, APPS_TO_CLOSE);
 
         setFloatingActionButton();
         getFragment();
@@ -126,7 +126,7 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
                     saveLists();
                     selectAppsFragment = new SelectAppsFragment();
                     getSupportFragmentManager().beginTransaction()
-                            .add(android.R.id.content, selectAppsFragment, TAG_SELECT_APPS_FRAGMENT_IN_CAR)
+                            .add(android.R.id.content, selectAppsFragment, TAG_SELECT_APPS_FRAGMENT_OUT_CAR)
                             .commit();
                 } else if (selectAppsFragment.getAppListCreatorStatus() == AsyncTask.Status.FINISHED) {
                     saveLists();
@@ -140,7 +140,7 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
         try {
 
             selectAppsFragment = (SelectAppsFragment) getSupportFragmentManager()
-                    .findFragmentByTag(TAG_SELECT_APPS_FRAGMENT_IN_CAR);
+                    .findFragmentByTag(TAG_SELECT_APPS_FRAGMENT_OUT_CAR);
 
             appListWasShowing = savedInstance.getBoolean(KEY_APP_LIST_WAS_SHOWING);
 
@@ -264,8 +264,8 @@ public class AppsToLaunch extends AppCompatActivity implements Constants.SELECT_
 
     protected void saveLists() {
         Logic.setSharedPrefStringSet(
-                AppsToLaunch.this, new HashSet<>(appPackages), KEY_APPS_TO_LAUNCH_IN_CAR);
-        Logic.saveListToInternalStorage(AppsToLaunch.this, appList, APPS_TO_LAUNCH);
+                AppsToClose.this, new HashSet<>(appPackages), KEY_APPS_TO_CLOSE);
+        Logic.saveListToInternalStorage(AppsToClose.this, appList, APPS_TO_CLOSE);
     }
 
     protected void dismissDialogs() {

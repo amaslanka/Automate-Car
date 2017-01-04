@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import pl.maslanka.automatecar.prefdisconnected.PrefsCarDisconnected;
 import pl.maslanka.automatecar.prefother.PrefsOther;
 import pl.maslanka.automatecar.utils.DeviceAdminLock;
 import pl.maslanka.automatecar.helpers.ActivityForResult;
@@ -132,7 +133,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(carConnectedIntent);
                 break;
             case R.id.car_disconnected:
-
+                Log.d(LOG_TAG, "car disconnected card clicked");
+                Intent carDisconnectedIntent = new Intent(MainActivity.this, PrefsCarDisconnected.class);
+                startActivity(carDisconnectedIntent);
                 break;
 
             case R.id.in_car_options:

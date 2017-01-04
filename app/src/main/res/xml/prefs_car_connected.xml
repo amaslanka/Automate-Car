@@ -159,7 +159,6 @@
         <pl.maslanka.automatecar.prefconnected.MediaVolumeLevelPref
             android:layout="@layout/preference_volume_seek_bar"
             android:dependency="set_media_volume_in_car"
-            android:defaultValue="false"
             android:key="media_volume_level_in_car" />
 
     </PreferenceCategory>

@@ -19,12 +19,14 @@ public class Constants {
     public static final int WAIT_FOR_MUSIC_PLAY = 2000;
 
     public interface FILE_NAMES {
-        String PATH = "appList";
-        String FILE_NAME = "appList.obj";
+        String PATH = "appLists";
+        String APPS_TO_LAUNCH = "appsToLaunch.obj";
+        String APPS_TO_CLOSE = "appsToClose.obj";
     }
 
     public interface SELECT_APPS_FRAGMENT {
-        String TAG_SELECT_APPS_FRAGMENT = "select_apps_fragment";
+        String TAG_SELECT_APPS_FRAGMENT_IN_CAR = "select_apps_fragment_in_car";
+        String TAG_SELECT_APPS_FRAGMENT_OUT_CAR = "select_apps_fragment_out_car";
     }
 
     public interface POPUP_CONNECTED_FRAGMENT {
@@ -37,6 +39,8 @@ public class Constants {
 
         int DIALOG_DURATION_IN_CAR_MAX_VALUE = 600;
         int DIALOG_DURATION_IN_CAR_MIN_VALUE = 1;
+        int DIALOG_DURATION_OUT_CAR_MAX_VALUE = 600;
+        int DIALOG_DURATION_OUT_CAR_MIN_VALUE = 1;
         int SLEEP_TIMES_IN_CAR_MIN_VALUE = 1;
         int SLEEP_TIMES_IN_CAR_MAX_VALUE = 20;
 
@@ -46,15 +50,30 @@ public class Constants {
         boolean FORCE_AUTO_ROTATION_IN_CAR_DEFAULT_VALUE = false;
         boolean CHANGE_WIFI_STATE_IN_CAR_DEFAULT_VALUE = false;
         boolean WIFI_ENABLE_IN_CAR_DEFAULT_VALUE = false;
-        boolean KEY_CHANGE_MOBILE_DATA_STATE_IN_CAR_DEFAULT_VALUE = false;
-        boolean KEY_MOBILE_DATA_ENABLE_IN_CAR_DEFAULT_VALUE = false;
+        boolean CHANGE_MOBILE_DATA_STATE_IN_CAR_DEFAULT_VALUE = false;
+        boolean MOBILE_DATA_ENABLE_IN_CAR_DEFAULT_VALUE = false;
         int SLEEP_TIMES_IN_CAR_DEFAULT_VALUE = 8;
         boolean PLAY_MUSIC_IN_CAR_DEFAULT_VALUE = false;
         boolean PLAY_MUSIC_ON_A2DP_IN_CAR_DEFAULT_VALUE = false;
         boolean SET_MEDIA_VOLUME_IN_CAR_DEFAULT_VALUE = false;
-        int MEDIA_VOLUME_LEVEL_IN_CAR_DEFAULT_VALUE = 50;
+        int MEDIA_VOLUME_LEVEL_IN_CAR_DEFAULT_VALUE = 0;
         boolean CHECK_IF_IN_POCKET_IN_CAR_DEFAULT_VALUE = false;
         boolean SHOW_NAVI_IN_CAR_DEFAULT_VALUE =  true;
+
+        boolean WAIT_FOR_RECONNECTION_DEFAULT_VALUE = true;
+        int WAIT_TIME_DEFAULT_VALUE = 20;
+        boolean SHOW_DIALOG_TO_CONFIRM_NAVI_STOP_DEFAULT_VALUE = true;
+        int DIALOG_TIMEOUT_OUT_CAR_DEFAULT_VALUE = 10;
+        boolean CANCEL_NAVI_ON_DIALOG_TIMEOUT_DEFAULT_VALUE = true;
+        boolean PAUSE_MUSIC_DEFAULT_VALUE = false;
+        boolean SET_MEDIA_VOLUME_OUT_CAR_DEFAULT_VALUE = false;
+        int MEDIA_VOLUME_LEVEL_OUT_CAR_DEFAULT_VALUE = 0;
+        boolean CHANGE_WIFI_STATE_OUT_CAR_DEFAULT_VALUE = false;
+        boolean WIFI_ENABLE_OUT_CAR_DEFAULT_VALUE = false;
+        boolean CHANGE_MOBILE_DATA_STATE_OUT_CAR_DEFAULT_VALUE = false;
+        boolean MOBILE_DATA_ENABLE_OUT_CAR_DEFAULT_VALUE = false;
+        boolean KEY_CHECK_IF_IN_POCKET_OUT_CAR_DEFAULT_VALUE = false;
+        boolean KEY_SHOW_HOME_SCREEN_DEFAULT_VALUE = true;
 
         boolean DISMISS_LOCK_SCREEN_IN_CAR_DEFAULT_VALUE = false;
         boolean NFC_DOCK_TRIGGER_DEFAULT_VALUE = false;
@@ -87,6 +106,26 @@ public class Constants {
         String KEY_MEDIA_VOLUME_LEVEL_IN_CAR = "media_volume_level_in_car";
         String KEY_CHECK_IF_IN_POCKET_IN_CAR = "check_if_in_pocket_in_car";
         String KEY_SHOW_NAVI_IN_CAR = "show_navi_in_car";
+
+        String KEY_TRIGGER_TYPE_OUT_CAR = "trigger_type_out_car";
+        String KEY_BLUETOOTH_DEVICES_ADDRESSES_OUT_CAR = "bluetooth_devices_addresses_out_car";
+        String KEY_NFC_TAGS_OUT_CAR = "nfc_tags_out_car";
+        String KEY_WAIT_FOR_RECONNECTION = "wait_for_reconnection";
+        String KEY_WAIT_TIME = "wait_time";
+        String KEY_SHOW_DIALOG_TO_CONFIRM_NAVI_STOP = "show_dialog_to_confirm_navi_stop";
+        String KEY_DIALOG_TIMEOUT_OUT_CAR = "dialog_timeout_out_car";
+        String KEY_CANCEL_NAVI_ON_DIALOG_TIMEOUT = "cancel_navi_on_dialog_timeout";
+        String KEY_PAUSE_MUSIC = "pause_music";
+        String KEY_SELECT_MUSIC_PLAYER_OUT_CAR = "select_music_player_out_car";
+        String KEY_SET_MEDIA_VOLUME_OUT_CAR = "set_media_volume_out_car";
+        String KEY_MEDIA_VOLUME_LEVEL_OUT_CAR = "media_volume_level_out_car";
+        String KEY_CHANGE_WIFI_STATE_OUT_CAR = "change_wifi_state_out_car";
+        String KEY_WIFI_ENABLE_OUT_CAR = "wifi_enable_out_car";
+        String KEY_CHANGE_MOBILE_DATA_STATE_OUT_CAR = "change_mobile_data_state_out_car";
+        String KEY_MOBILE_DATA_ENABLE_OUT_CAR = "mobile_data_enable_out_car";
+        String KEY_APPS_TO_CLOSE = "apps_to_close";
+        String KEY_CHECK_IF_IN_POCKET_OUT_CAR = "check_if_in_pocket_out_car";
+        String KEY_SHOW_HOME_SCREEN = "show_home_screen";
 
         String KEY_DISMISS_LOCK_SCREEN = "dismiss_lock_screen";
         String KEY_NFC_DOCK_TRIGGER = "nfc_dock_trigger";
