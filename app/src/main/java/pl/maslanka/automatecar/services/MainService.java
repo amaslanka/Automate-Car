@@ -20,6 +20,7 @@ import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
 
 public class MainService extends Service implements Constants.BROADCAST_NOTIFICATIONS{
     private static final String LOG_TAG = "MainService";
+    private static final int NOTIFICATION_PRIORITY = -2;
     private Notification notification;
     private IntentFilter mIntentFilter;
     private final AppBroadcastReceiver mReceiver = new AppBroadcastReceiver();
@@ -62,6 +63,8 @@ public class MainService extends Service implements Constants.BROADCAST_NOTIFICA
                     .setContentTitle(getString(R.string.app_name))
                     .setTicker(getString(R.string.app_name))
                     .setContentText(getString(R.string.service_running))
+                    .setPriority(NOTIFICATION_PRIORITY)
+                    .setShowWhen(false)
                     .setSmallIcon(R.drawable.icon)
                     .setContentIntent(pendingIntent)
                     .setOngoing(true)
