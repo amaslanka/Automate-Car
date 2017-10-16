@@ -33,6 +33,10 @@ public class Constants {
         String TAG_POPUP_CONNECTED_FRAGMENT = "popup_connected_fragment";
     }
 
+    public interface POPUP_DISCONNECTED_FRAGMENT {
+        String TAG_POPUP_DISCONNECTED_FRAGMENT = "popup_disconnected_fragment";
+    }
+
     public interface DEFAULT_VALUES {
         int START_ID_NO_VALUE = -1;
         boolean FIRST_RUN_DEFAULT_VALUE = true;
@@ -43,6 +47,8 @@ public class Constants {
         int DIALOG_DURATION_OUT_CAR_MIN_VALUE = 1;
         int SLEEP_TIMES_IN_CAR_MIN_VALUE = 1;
         int SLEEP_TIMES_IN_CAR_MAX_VALUE = 20;
+        int SCREEN_OFF_TIMEOUT_DEFAULT_VALUE = 15000;
+
 
         boolean SHOW_CANCEL_DIALOG_IN_CAR_DEFAULT_VALUE = true;
         int DIALOG_TIMEOUT_IN_CAR_DEFAULT_VALUE = 10;
@@ -72,8 +78,9 @@ public class Constants {
         boolean WIFI_ENABLE_OUT_CAR_DEFAULT_VALUE = false;
         boolean CHANGE_MOBILE_DATA_STATE_OUT_CAR_DEFAULT_VALUE = false;
         boolean MOBILE_DATA_ENABLE_OUT_CAR_DEFAULT_VALUE = false;
-        boolean KEY_CHECK_IF_IN_POCKET_OUT_CAR_DEFAULT_VALUE = false;
-        boolean KEY_SHOW_HOME_SCREEN_DEFAULT_VALUE = true;
+        boolean TURN_SCREEN_OFF_OUT_CAR_DEFAULT_VALUE = false;
+        boolean CHECK_IF_IN_POCKET_OUT_CAR_DEFAULT_VALUE = false;
+        boolean SHOW_HOME_SCREEN_DEFAULT_VALUE = true;
 
         boolean DISMISS_LOCK_SCREEN_IN_CAR_DEFAULT_VALUE = false;
         boolean NFC_DOCK_TRIGGER_DEFAULT_VALUE = false;
@@ -84,6 +91,7 @@ public class Constants {
 
     public interface PREF_KEYS {
         String KEY_FIRST_RUN = "first_run";
+        String KEY_MAIN_SERVICE_STARTED = "main_service_started";
 
         String KEY_TRIGGER_TYPE_IN_CAR = "trigger_type_in_car";
         String KEY_BLUETOOTH_DEVICES_ADDRESSES_IN_CAR = "bluetooth_devices_addresses_in_car";
@@ -124,6 +132,7 @@ public class Constants {
         String KEY_CHANGE_MOBILE_DATA_STATE_OUT_CAR = "change_mobile_data_state_out_car";
         String KEY_MOBILE_DATA_ENABLE_OUT_CAR = "mobile_data_enable_out_car";
         String KEY_APPS_TO_CLOSE = "apps_to_close";
+        String KEY_TURN_SCREEN_OFF_OUT_CAR = "turn_screen_off_out_car";
         String KEY_CHECK_IF_IN_POCKET_OUT_CAR = "check_if_in_pocket_out_car";
         String KEY_SHOW_HOME_SCREEN = "show_home_screen";
 
@@ -149,12 +158,22 @@ public class Constants {
         String FORCE_ROTATION_ACTION = "com.maslanka.automatecar.force.rotation.action";
         String POPUP_CONNECTED_ACTION = "com.maslanka.automatecar.popup.connected.action";
         String CONTINUE_CONNECTED_ACTION = "com.maslanka.automatecar.continue.connected.action";
-        String DISCONTINUE_CONNECTED_ACTION = "com.maslanka.automatecar.discontinue.action";
+        String DISCONTINUE_CONNECTED_ACTION = "com.maslanka.automatecar.discontinue.connected.action";
         String CHANGE_WIFI_STATE_ACTION = "com.maslanka.automatecar.change.wifi.state.action";
         String CHANGE_MOBILE_DATA_STATE_ACTION = "com.maslanka.automatecar.change.mobile.data.state.action";
         String SET_MEDIA_VOLUME_ACTION = "com.maslanka.automatecar.set.media.volume.action";
         String PLAY_MUSIC_ACTION = "com.maslanka.automatecar.play.music.action";
         String SHOW_NAVI_ACTION = "com.maslanka.automatecar.show.navi.action";
+
+        String WAIT_FOR_RECONNECTION_ACTION = "com.maslanka.automatecar.wait.for.reconnection.action";
+        String STOP_FORCING_ROTATION_ACTION = "com.maslanka.automatecar.stop.forcing.rotation.action";
+        String POPUP_DISCONNECTED_ACTION = "com.maslanka.automatecar.popup.disconnected.action";
+        String NAVIGATION_CANCELLATION_ACTION = "com.maslanka.automatecar.navigation.cancellation.action";
+        String TURN_SCREEN_OFF_ACTION = "com.maslanka.automatecar.turn.screen.off.action";
+        String PAUSE_MUSIC_ACTION = "com.maslanka.automatecar.pause.music.action";
+        String CLOSE_APPS_ACTION = "com.maslanka.automatecar.close.apps.action";
+        String BACK_TO_HOME_SCREEN_ACTION = "com.maslanka.automatecar.back.to.home.screen.action";
+
     }
 
     public interface CALLBACK_ACTIONS {
@@ -169,5 +188,15 @@ public class Constants {
         String SET_MEDIA_VOLUME_COMPLETED = "com.maslanka.automatecar.set.media.volume.completed";
         String PLAY_MUSIC_COMPLETED = "com.maslanka.automatecar.play.music.completed";
         String SHOW_NAVI_COMPLETED = "com.maslanka.automatecar.show.navi.completed";
+
+        String WAIT_FOR_RECONNECTION_COMPLETED = "com.maslanka.automatecar.show.navi.wait.for.reconnection.completed";
+        String STOP_FORCING_ROTATION_COMPLETED = "com.maslanka.automatecar.stop.forcing.rotation.completed";
+        String POPUP_DISCONNECTED_FINISH_CONTINUE = "com.maslanka.automatecar.show.navi.popup.disconnected.finish.continue";
+        String POPUP_DISCONNECTED_FINISH_DISCONTINUE = "com.maslanka.automatecar.show.navi.popup.disconnected.finish.discontinue";
+        String NAVIGATION_CANCELLATION_COMPLETED = "com.maslanka.automatecar.navigation.cancellation.completed";
+        String TURN_SCREEN_OFF_COMPLETED = "com.maslanka.automatecar.turn.screen.off.completed";
+        String PAUSE_MUSIC_COMPLETED = "com.maslanka.automatecar.pause.music.completed";
+        String CLOSE_APPS_COMPLETED = "com.maslanka.automatecar.close.apps.completed";
+        String BACK_TO_HOME_SCREEN_COMPLETED = "com.maslanka.automatecar.back.to.home.screen.completed";
     }
 }

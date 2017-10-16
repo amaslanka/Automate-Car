@@ -8,7 +8,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -162,6 +164,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (isChecked && !Logic.isMyServiceRunning(MainService.class, getApplicationContext())) {
 
+            Logic.setSharedPrefBoolean(getApplicationContext(), true, Constants.PREF_KEYS.KEY_MAIN_SERVICE_STARTED);
+
             if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
                 android.content.Intent enableIntent = new android.content.Intent(
                         android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -186,6 +190,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         } else if (!isChecked && Logic.isMyServiceRunning(MainService.class, getApplicationContext())) {
+
+            Logic.setSharedPrefBoolean(getApplicationContext(), false, Constants.PREF_KEYS.KEY_MAIN_SERVICE_STARTED);
 
             Intent stopIntent = new Intent(MainActivity.this, MainService.class);
             stopIntent.setAction(Constants.ACTION.STOP_FOREGROUND_ACTION);

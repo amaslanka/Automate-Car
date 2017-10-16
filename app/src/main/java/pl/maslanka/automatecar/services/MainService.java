@@ -15,7 +15,7 @@ import android.util.Log;
 import pl.maslanka.automatecar.MainActivity;
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.helpers.Constants;
-import pl.maslanka.automatecar.utils.AppBroadcastReceiver;
+import pl.maslanka.automatecar.receivers.AppBroadcastReceiver;
 
 
 public class MainService extends Service implements Constants.BROADCAST_NOTIFICATIONS{

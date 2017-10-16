@@ -160,6 +160,10 @@
 
     <PreferenceCategory  android:title="@string/other_features">
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/turn_screen_off_disconnected"
+            android:key="turn_screen_off_out_car" />
 
         <CheckBoxPreference
             android:defaultValue="false"

@@ -134,6 +134,7 @@ public class PrefsCarDisconnectedFragment extends com.github.machinarius.prefere
         appsToClose.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
+                RootUtil.askRootPermissions();
                 Intent appsToClose = new Intent(getActivity(), AppsToClose.class);
                 getActivity().startActivity(appsToClose);
                 return false;

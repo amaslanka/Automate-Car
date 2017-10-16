@@ -12,7 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Set;
 
-import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
+import pl.maslanka.automatecar.helpers.ConnectingProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.callbackmessages.MessageForceAutoRotation;
 import pl.maslanka.automatecar.utils.Logic;
@@ -40,6 +40,8 @@ public class HelperAccessibilityService extends AccessibilityService implements
     @Override
     protected void onServiceConnected() {
 
+        Log.e(LOG_TAG, "onServiceConnected");
+
         setRotationExcludedApps(Logic.getSharedPrefStringSet(this, KEY_ROTATION_EXCLUDED_APPS_IN_CAR));
 
         setForceAutoRotation(Logic.getSharedPrefBoolean(this, KEY_FORCE_AUTO_ROTATION_IN_CAR,
@@ -62,7 +64,9 @@ public class HelperAccessibilityService extends AccessibilityService implements
 
             Logic.setCurrentForegroundAppPackage(event.getPackageName().toString());
 
-            if (forceAutoRotation && Logic.getCarConnectedProcessState() == CarConnectedProcessState.COMPLETED) {
+            if (forceAutoRotation
+                    && Logic.getCarConnectedProcessState() == ConnectingProcessState.COMPLETED
+                    && Logic.getCarDisconnectedProcessState() != ConnectingProcessState.PERFORMING) {
                 if (rotationExcludedApps.contains(event.getPackageName().toString())) {
 
                     if (Logic.isMyServiceRunning(ForceAutoRotationService.class, this)) {

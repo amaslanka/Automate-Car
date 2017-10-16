@@ -1,4 +1,4 @@
-package pl.maslanka.automatecar.connected;
+package pl.maslanka.automatecar.disconnected;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,10 +11,7 @@ import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.disconnected.PopupDisconnectedFragment;
-import pl.maslanka.automatecar.helpers.CallbackService;
 import pl.maslanka.automatecar.helpers.Constants;
-import pl.maslanka.automatecar.services.CarConnectedService;
 import pl.maslanka.automatecar.services.CarDisconnectedService;
 
 import static android.view.KeyEvent.KEYCODE_BACK;
@@ -23,7 +20,7 @@ import static android.view.KeyEvent.KEYCODE_BACK;
  * Created by Artur on 29.11.2016.
  */
 
-public class PopupConnectedFragment extends Fragment
+public class PopupDisconnectedFragment extends Fragment
         implements Constants.PREF_KEYS, Constants.DEFAULT_VALUES, Constants.BROADCAST_NOTIFICATIONS,
         Constants.CALLBACK_ACTIONS{
 
@@ -44,7 +41,7 @@ public class PopupConnectedFragment extends Fragment
         setRetainInstance(true);
 
         try {
-            contextToCallback = ((PopupConnectedActivity) getActivity()).getContextToCallback();
+            contextToCallback = ((PopupDisconnectedActivity) getActivity()).getContextToCallback();
 
             createAlertDialog();
             setAlertDialogParameters();
@@ -60,20 +57,20 @@ public class PopupConnectedFragment extends Fragment
 
     protected void createAlertDialog() {
         alertDialog = new AlertDialog.Builder(getActivity())
-                .setTitle(getString(R.string.car_connected) + " - " + PopupConnectedActivity.dialogTimeout + "s")
-                .setMessage(getString(R.string.car_detected_desc))
+                .setTitle(getString(R.string.car_disconnected) + " - " + PopupDisconnectedActivity.dialogTimeout + "s")
+                .setMessage(getString(R.string.cancel_navi_desc))
                 .setIcon(R.drawable.connected_icon)
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         counter.cancel();
-                        sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_CONTINUE);
+                        sendCallbackToCarDisconnectedService(POPUP_DISCONNECTED_FINISH_CONTINUE);
                         getActivity().finish();
                     }
                 })
                 .setNegativeButton(getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         counter.cancel();
-                        sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_DISCONTINUE);
+                        sendCallbackToCarDisconnectedService(POPUP_DISCONNECTED_FINISH_DISCONTINUE);
                         getActivity().finish();
                     }
                 }).create();
@@ -87,7 +84,7 @@ public class PopupConnectedFragment extends Fragment
             @Override
             public void onCancel(DialogInterface dialog) {
                 counter.cancel();
-                sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_DISCONTINUE);
+                sendCallbackToCarDisconnectedService(POPUP_DISCONNECTED_FINISH_DISCONTINUE);
                 getActivity().finish();
             }
         });
@@ -96,7 +93,7 @@ public class PopupConnectedFragment extends Fragment
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KEYCODE_BACK) {
                     counter.cancel();
-                    sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_DISCONTINUE);
+                    sendCallbackToCarDisconnectedService(POPUP_DISCONNECTED_FINISH_DISCONTINUE);
                     getActivity().finish();
                     return true;
                 }
@@ -106,27 +103,27 @@ public class PopupConnectedFragment extends Fragment
     }
 
     protected void startCounter() {
-        counter = new CountDownTimer(PopupConnectedActivity.dialogTimeout*1000, 1000) {
+        counter = new CountDownTimer(PopupDisconnectedActivity.dialogTimeout*1000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 timeoutLeft = (int) millisUntilFinished/1000;
-                if (CarConnectedService.isCanceled()) {
+                if (CarDisconnectedService.isCanceled()) {
                     sendCancelCallback();
                     cancel();
                     if (getActivity() != null) {
                         getActivity().finish();
                     }
                 } else if (isAdded()) {
-                    alertDialog.setTitle(getString(R.string.car_connected) + " - " + timeoutLeft + "s");
+                    alertDialog.setTitle(getString(R.string.car_disconnected) + " - " + timeoutLeft + "s");
                 }
-            }
 
+            }
             @Override
             public void onFinish() throws NullPointerException {
-                if (PopupConnectedActivity.actionDialogTimeout && timeoutLeft == 1 && getActivity() != null) {
-                    sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_CONTINUE);
+                if (PopupDisconnectedActivity.actionDialogTimeout && timeoutLeft == 1 && getActivity() != null) {
+                    sendCallbackToCarDisconnectedService(POPUP_DISCONNECTED_FINISH_CONTINUE);
                 } else {
-                    sendCallbackToPopupConnectedActivity(POPUP_CONNECTED_FINISH_DISCONTINUE);
+                    sendCallbackToCarDisconnectedService(POPUP_DISCONNECTED_FINISH_DISCONTINUE);
                 }
 
                 if (getActivity() != null) {
@@ -136,10 +133,11 @@ public class PopupConnectedFragment extends Fragment
         }.start();
     }
 
-    private void sendCallbackToPopupConnectedActivity(String action) {
-        if (contextToCallback instanceof CallbackService){
-            ((CallbackService) contextToCallback).callback(action,
-                    PopupConnectedActivity.carConnectedServiceStartId);
+    private void sendCallbackToCarDisconnectedService(String action) {
+        Log.d(TAG, "sendCallbackToCarDisconnectedService: " + action);
+        if (contextToCallback instanceof CarDisconnectedService){
+            ((CarDisconnectedService) contextToCallback).callback(action,
+                    PopupDisconnectedActivity.carDisconnectedServiceStartId);
         }
     }
 

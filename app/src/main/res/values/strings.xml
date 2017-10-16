@@ -57,6 +57,7 @@
     <string name="force_auto_rotation">Force auto-rotation</string>
     <string name="rotation_excluded_apps">Excluded apps</string>
     <string name="check_if_in_pocket">Check if device is in pocket</string>
+    <string name="turn_screen_off_disconnected">Turn screen off when disconnected</string>
     <string name="cancellation_dialog">Cancellation dialog</string>
     <string name="show_cancel_dialog">Show dialog to cancel operation</string>
     <string name="dialog_timeout">Dialog duration</string>
@@ -110,6 +111,9 @@
     <string name="close_apps">Close apps</string>
     <string name="apps_to_close">Select apps to close</string>
     <string name="show_home_screen">Back to home screen at the end</string>
+
+    <string name="cancel_navi_desc">Car bluetooth set has been disconnected. Do you want to stop navigation?</string>
+
 
 
 </resources>

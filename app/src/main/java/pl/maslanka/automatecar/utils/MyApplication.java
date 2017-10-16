@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import pl.maslanka.automatecar.services.CarConnectedService;
+import pl.maslanka.automatecar.services.CarDisconnectedService;
 
 /**
  * Created by Artur on 11.12.2016.
@@ -21,6 +22,7 @@ public class MyApplication extends Application {
         super.onCreate();
         MyApplication.context = getApplicationContext();
         registerActivityLifecycleCallbacks(new CarConnectedService());
+        registerActivityLifecycleCallbacks(new CarDisconnectedService());
     }
 
     public static Context getAppContext() {

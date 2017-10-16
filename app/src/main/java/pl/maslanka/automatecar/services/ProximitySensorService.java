@@ -17,6 +17,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import pl.maslanka.automatecar.callbackmessages.MessageProximitySensor;
+import pl.maslanka.automatecar.helpers.CallbackService;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.ProximityState;
 import pl.maslanka.automatecar.utils.Logic;
@@ -36,8 +37,8 @@ public class ProximitySensorService extends Service implements SensorEventListen
     private SensorManager mSensorManager;
     private Sensor mProximity;
     private Context contextToCallback;
-    private int carConnectedServiceStartId;
-    private boolean carConnectedCallbackAlreadySent;
+    private int serviceStartId;
+    private boolean callbackAlreadySent;
 
     public class LocalBinder extends Binder {
         public ProximitySensorService getService() {
@@ -65,7 +66,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        carConnectedCallbackAlreadySent = false;
+        callbackAlreadySent = false;
     }
 
     @Override
@@ -86,7 +87,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
     @Nullable
     public IBinder onBind(Intent intent) {
         Log.d(LOG_TAG, "onBind");
-        carConnectedServiceStartId = intent.getIntExtra(START_ID, START_ID_NO_VALUE);
+        serviceStartId = intent.getIntExtra(START_ID, START_ID_NO_VALUE);
         return mBinder;
     }
 
@@ -100,10 +101,10 @@ public class ProximitySensorService extends Service implements SensorEventListen
             Logic.setProximityState(ProximityState.FAR);
         }
 
-        if (contextToCallback instanceof CarConnectedService && !carConnectedCallbackAlreadySent) {
-            ((CarConnectedService) contextToCallback).callback(PROXIMITY_CHECK_COMPLETED,
-                    carConnectedServiceStartId);
-            carConnectedCallbackAlreadySent = true;
+        if (contextToCallback instanceof CallbackService && !callbackAlreadySent) {
+            ((CallbackService) contextToCallback).callback(PROXIMITY_CHECK_COMPLETED,
+                    serviceStartId);
+            callbackAlreadySent = true;
         }
 
         stopSelf();

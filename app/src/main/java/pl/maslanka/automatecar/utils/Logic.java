@@ -45,13 +45,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
-import pl.maslanka.automatecar.helpers.CarConnectedProcessState;
+import pl.maslanka.automatecar.helpers.ConnectingProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
 import pl.maslanka.automatecar.helpers.PairObject;
 import pl.maslanka.automatecar.helpers.ProximityState;
+import pl.maslanka.automatecar.receivers.AppBroadcastReceiver;
 
 import static android.content.Context.POWER_SERVICE;
 
@@ -64,7 +63,8 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
     private static final String LOG_TAG = Logic.class.getSimpleName();
 
     private static ProximityState proximityState = ProximityState.NOT_TESTED;
-    private static CarConnectedProcessState carConnectedProcessState = CarConnectedProcessState.NOT_STARTED;
+    private static ConnectingProcessState carConnectedProcessState = ConnectingProcessState.NOT_STARTED;
+    private static ConnectingProcessState carDisconnectedProcessState = ConnectingProcessState.NOT_STARTED;
     private static boolean startWithProximityFarPerformed;
     private static String currentForegroundAppPackage = "";
 
@@ -76,12 +76,20 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         Logic.proximityState = proximityState;
     }
 
-    public static CarConnectedProcessState getCarConnectedProcessState() {
+    public static ConnectingProcessState getCarConnectedProcessState() {
         return carConnectedProcessState;
     }
 
-    public static void setCarConnectedProcessState(CarConnectedProcessState carConnectedProcessState) {
+    public static void setCarConnectedProcessState(ConnectingProcessState carConnectedProcessState) {
         Logic.carConnectedProcessState = carConnectedProcessState;
+    }
+
+    public static ConnectingProcessState getCarDisconnectedProcessState() {
+        return carDisconnectedProcessState;
+    }
+
+    public static void setCarDisconnectedProcessState(ConnectingProcessState carDisconnectedProcessState) {
+        Logic.carDisconnectedProcessState = carDisconnectedProcessState;
     }
 
     public static String getCurrentForegroundAppPackage() {
@@ -500,5 +508,25 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         }
         return false;
     }
+
+    public static void startServiceWithAction(Context context, String action, Class<?> cls) {
+        Intent intent = new Intent(context, cls);
+        intent.setAction(action);
+        context.startService(intent);
+    }
+
+    public static synchronized boolean checkIfBtDeviceConnected(Context context) {
+        Set<String> sharedPrefBtDeviceAddresses =
+                Logic.getSharedPrefStringSet(context, KEY_BLUETOOTH_DEVICES_ADDRESSES_IN_CAR);
+
+        for (String device: sharedPrefBtDeviceAddresses) {
+            if (AppBroadcastReceiver.connectedBluetoothDevices.contains(device)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
 }
