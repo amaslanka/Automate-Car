@@ -700,23 +700,17 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
             try {
                 int systemScreenOffTimeout = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT);
                 if (systemScreenOffTimeout < 1000) {
-                    Log.e(LOG_TAG, "SYSTEM LOW screenOffTimeoutFinal: " + systemScreenOffTimeout);
                     //screen timeout was probably set by this app
                     screenOffTimeout = Logic.getSharedPrefInt(context, USER_SCREEN_OFF_TIMEOUT, SCREEN_OFF_TIMEOUT_DEFAULT_VALUE);
                 } else {
-                    Log.e(LOG_TAG, "SYSTEM HIGH screenOffTimeoutFinal: " + systemScreenOffTimeout);
                     Logic.setSharedPrefInt(context, systemScreenOffTimeout, USER_SCREEN_OFF_TIMEOUT);
                     screenOffTimeout = systemScreenOffTimeout;
                 }
-                screenOffTimeout = Math.max(
-                        Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT),
-                        SCREEN_OFF_TIMEOUT_DEFAULT_VALUE);
             } catch (Settings.SettingNotFoundException e) {
                 e.printStackTrace();
             }
             Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, 100);
             final int screenOffTimeoutFinal = screenOffTimeout;
-            Log.e(LOG_TAG, "screenOffTimeoutFinal: " + screenOffTimeoutFinal);
             BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
