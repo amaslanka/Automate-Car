@@ -3,9 +3,11 @@ package pl.maslanka.automatecar.utils;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
@@ -696,6 +698,16 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
         if (turnScreenOff) {
             try {
+                int systemScreenOffTimeout = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT);
+                if (systemScreenOffTimeout < 1000) {
+                    Log.e(LOG_TAG, "SYSTEM LOW screenOffTimeoutFinal: " + systemScreenOffTimeout);
+                    //screen timeout was probably set by this app
+                    screenOffTimeout = Logic.getSharedPrefInt(context, USER_SCREEN_OFF_TIMEOUT, SCREEN_OFF_TIMEOUT_DEFAULT_VALUE);
+                } else {
+                    Log.e(LOG_TAG, "SYSTEM HIGH screenOffTimeoutFinal: " + systemScreenOffTimeout);
+                    Logic.setSharedPrefInt(context, systemScreenOffTimeout, USER_SCREEN_OFF_TIMEOUT);
+                    screenOffTimeout = systemScreenOffTimeout;
+                }
                 screenOffTimeout = Math.max(
                         Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT),
                         SCREEN_OFF_TIMEOUT_DEFAULT_VALUE);
@@ -704,12 +716,16 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
             }
             Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, 100);
             final int screenOffTimeoutFinal = screenOffTimeout;
-            new Handler().postDelayed(new Runnable() {
+            Log.e(LOG_TAG, "screenOffTimeoutFinal: " + screenOffTimeoutFinal);
+            BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
                 @Override
-                public void run() {
+                public void onReceive(Context context, Intent intent) {
+                    Log.d(LOG_TAG, "Screen off! Restoring screen timeout: " + screenOffTimeoutFinal);
                     Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, screenOffTimeoutFinal);
+                    context.getApplicationContext().unregisterReceiver(this);
                 }
-            }, 3000);
+            };
+            context.getApplicationContext().registerReceiver(screenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
         }
 
         if (context instanceof CallbackService) {

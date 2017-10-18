@@ -92,6 +92,7 @@ public class Constants {
     public interface PREF_KEYS {
         String KEY_FIRST_RUN = "first_run";
         String KEY_MAIN_SERVICE_STARTED = "main_service_started";
+        String USER_SCREEN_OFF_TIMEOUT = "user_screen_off_timeout";
 
         String KEY_TRIGGER_TYPE_IN_CAR = "trigger_type_in_car";
         String KEY_BLUETOOTH_DEVICES_ADDRESSES_IN_CAR = "bluetooth_devices_addresses_in_car";

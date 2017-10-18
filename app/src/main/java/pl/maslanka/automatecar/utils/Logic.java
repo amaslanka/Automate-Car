@@ -246,6 +246,15 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         editor.apply();
     }
 
+    public static void setSharedPrefInt(Context context, int integer, String key) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putInt(key, integer);
+        editor.apply();
+
+    }
+
     public static void setSharedPrefStringSet(Context context, Set<String> set, String key) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
@@ -272,6 +281,15 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         SharedPreferences prefs =
                 PreferenceManager.getDefaultSharedPreferences(context);
         result = prefs.getString(key, defaultValue);
+        return result;
+
+    }
+
+    public static int getSharedPrefInt(Context context, String key, int defaultValue) {
+        int result;
+        SharedPreferences prefs =
+                PreferenceManager.getDefaultSharedPreferences(context);
+        result = prefs.getInt(key, defaultValue);
         return result;
 
     }

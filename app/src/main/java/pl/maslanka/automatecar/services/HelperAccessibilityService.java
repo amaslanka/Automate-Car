@@ -65,6 +65,7 @@ public class HelperAccessibilityService extends AccessibilityService implements
             Logic.setCurrentForegroundAppPackage(event.getPackageName().toString());
 
             if (forceAutoRotation
+                    && event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                     && Logic.getCarConnectedProcessState() == ConnectingProcessState.COMPLETED
                     && Logic.getCarDisconnectedProcessState() != ConnectingProcessState.PERFORMING) {
                 if (rotationExcludedApps.contains(event.getPackageName().toString())) {
