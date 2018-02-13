@@ -22,6 +22,7 @@ public class Constants {
         String PATH = "appLists";
         String APPS_TO_LAUNCH = "appsToLaunch.obj";
         String APPS_TO_CLOSE = "appsToClose.obj";
+        String ACTIVITIES_TO_LAUNCH = "activitiesToLaunch.obj";
     }
 
     public interface SELECT_APPS_FRAGMENT {

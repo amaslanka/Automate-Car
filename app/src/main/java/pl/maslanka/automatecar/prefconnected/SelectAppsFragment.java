@@ -28,7 +28,7 @@ import java.util.Set;
 import pl.maslanka.automatecar.R;
 import pl.maslanka.automatecar.prefconnected.adapters.ArrayAdapterWithIcon;
 import pl.maslanka.automatecar.helpers.Constants;
-import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.helpers.AppObject;
 import pl.maslanka.automatecar.utils.Logic;
 
 /**
@@ -46,7 +46,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS,
     private List<Drawable> appIcons;
     private List<String> appPackages;
     private Set<String> appsFromPrefs;
-    private LinkedList<PairObject<String, String>> appsToSave;
+    private LinkedList<AppObject> appsToSave;
     private ArrayAdapterWithIcon adapter;
     private AlertDialog.Builder builder;
     private AlertDialog appList;
@@ -124,7 +124,7 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS,
                             public void onClick(DialogInterface dialog, int which) {
                                 Log.v(LOG_TAG, "appsFromPrefs: " + appsFromPrefs.toString());
                                 Log.v(LOG_TAG, "appsToSave - print: ");
-                                for (PairObject<String, String> pair: appsToSave) {
+                                for (AppObject pair: appsToSave) {
                                     Log.v(LOG_TAG, "element: " + pair.toString());
                                 }
                                 Logic.setSharedPrefStringSet(activity, appsFromPrefs, KEY_APPS_TO_LAUNCH_IN_CAR);
@@ -179,10 +179,10 @@ public class SelectAppsFragment extends Fragment implements Constants.PREF_KEYS,
                     */
                     if (wasChecked) {
                         appsFromPrefs.remove(appPackages.get(position));
-                        appsToSave.remove(new PairObject<>(appNames.get(position), appPackages.get(position)));
+                        appsToSave.remove(new AppObject(appNames.get(position), appPackages.get(position), null));
                     } else {
                         appsFromPrefs.add(appPackages.get(position));
-                        appsToSave.add(new PairObject<>(appNames.get(position), appPackages.get(position)));
+                        appsToSave.add(new AppObject(appNames.get(position), appPackages.get(position), null));
                     }
 
                 }

@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,18 +33,18 @@ import com.woxthebox.draglistview.DragItemAdapter;
 import java.util.ArrayList;
 
 import pl.maslanka.automatecar.R;
-import pl.maslanka.automatecar.helpers.QuattroObject;
+import pl.maslanka.automatecar.helpers.AppAdapterItem;
 import pl.maslanka.automatecar.prefdisconnected.AppsToClose;
 
 public class ItemAdapter extends
-        DragItemAdapter<QuattroObject<Long, String, String, Drawable>, ItemAdapter.ViewHolder> {
+        DragItemAdapter<AppAdapterItem, ItemAdapter.ViewHolder> {
 
     private Activity mActivity;
     private int mLayoutId;
     private int mGrabHandleId;
     private boolean mDragOnLongPress;
 
-    public ItemAdapter(Activity activity, ArrayList<QuattroObject<Long, String, String, Drawable>> list,
+    public ItemAdapter(Activity activity, ArrayList<AppAdapterItem> list,
                        int layoutId, int grabHandleId, boolean dragOnLongPress) {
         mActivity = activity;
         mLayoutId = layoutId;
@@ -64,8 +65,15 @@ public class ItemAdapter extends
         super.onBindViewHolder(holder, position);
         String text = mItemList.get(position).getName();
         Drawable icon = mItemList.get(position).getDrawable();
+        String description = mItemList.get(position).getActivityName();
         holder.mText.setText(text);
         holder.itemView.setTag(position);
+        if (!TextUtils.isEmpty(description)) {
+            holder.mDescription.setVisibility(View.VISIBLE);
+            holder.mDescription.setText(description);
+        } else {
+            holder.mDescription.setVisibility(View.GONE);
+        }
         holder.mImage.setImageDrawable(icon);
     }
 
@@ -76,12 +84,14 @@ public class ItemAdapter extends
 
     public class ViewHolder extends DragItemAdapter.ViewHolder {
         public TextView mText;
+        public TextView mDescription;
         public ImageView mImage;
 
 
         public ViewHolder(final View itemView) {
             super(itemView, mGrabHandleId, mDragOnLongPress);
             mText = (TextView) itemView.findViewById(R.id.text);
+            mDescription = itemView.findViewById(R.id.description);
             mImage = (ImageView) itemView.findViewById(R.id.image);
         }
 

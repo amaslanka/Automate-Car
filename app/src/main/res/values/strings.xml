@@ -78,13 +78,16 @@
     <string name="max_min_seconds_dialog_message">Please input value between %1$d and %2$d (in seconds)</string>
     <string name="select_apps">Select Apps</string>
     <string name="select_music_player">Select Music Player</string>
+    <string name="select_activity">Select Activity</string>
     <string name="loading_app_list">Loading Apps</string>
+    <string name="loading_activities">Loading Activities</string>
     <string name="add_apps">Add apps</string>
     <string name="drag_apps_to_change_order">Drag apps icons to change order</string>
     <string name="car_detected_desc">Car bluetooth set has been connected. Do you want to enable car mode?</string>
     <string name="delete_app_question">Delete app?</string>
     <string name="sure_about_deleting_app_question">Are you sure you want to delete this app?</string>
     <string name="clear_selection">Clear selection</string>
+    <string name="no_activities_found">No activities found</string>
     <string name="accessibility_service_description">Accessibility service is used to manage forced
                                                     screen rotation</string>
     <string name="accessibility_service_label">Screen rotation accessibility service</string>

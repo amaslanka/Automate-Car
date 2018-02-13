@@ -13,11 +13,12 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.MediaRouter;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -31,7 +32,7 @@ import pl.maslanka.automatecar.disconnected.PopupDisconnectedActivity;
 import pl.maslanka.automatecar.helpers.CallbackService;
 import pl.maslanka.automatecar.helpers.ConnectingProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
-import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.helpers.AppObject;
 import pl.maslanka.automatecar.helpers.ProximityState;
 import pl.maslanka.automatecar.helpers.TurnScreenOnActivity;
 import pl.maslanka.automatecar.services.CarConnectedService;
@@ -126,7 +127,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
     public static void launchApps(Context context, int startId) {
 
-        LinkedList<PairObject<String, String>> appList = Logic.readList(context, APPS_TO_LAUNCH);
+        LinkedList<AppObject> appList = Logic.readList(context, APPS_TO_LAUNCH);
         int sleepTimes = Integer.parseInt(Logic.getSharedPrefString(
                 context, KEY_SLEEP_TIMES_IN_CAR, Integer.toString(SLEEP_TIMES_IN_CAR_DEFAULT_VALUE)));
 
@@ -142,9 +143,15 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
         try {
             Thread.sleep(1000);
-            for (PairObject<String, String> app: appList) {
+            for (AppObject app: appList) {
 
-                launchIntentFromPackage(context, app.getPackageName());
+                if (!TextUtils.isEmpty(app.getActivityName())) {
+                    Log.d(LOG_TAG, "LAUNCH ACTIVITY: packageName: " + app.getPackageName() + " activity: " + app.getActivityName());
+                    launchActivity(context, app.getPackageName(), app.getActivityName());
+                } else {
+                    Log.d(LOG_TAG, "launchIntentFromPackage ACTIVITY: packageName: " + app.getPackageName() + " activity: " + app.getActivityName());
+                    launchIntentFromPackage(context, app.getPackageName());
+                }
 
                 Thread.sleep(sleepTimes*1000);
 
@@ -522,6 +529,24 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         startPlayingMusicOnComponent(context, component);
     }
 
+    private static void launchActivity(Context context, String packageName, String activityName) {
+        try {
+            if (activityName.endsWith("FreeNavCreateShortcutActivity")) {
+                Intent intent = context.getPackageManager().getLaunchIntentForPackage("com.google.android.apps.maps");
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("google.navigation:/?free=1&mode=d&entry=fnls"));
+                context.startActivity(intent);
+            } else {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.setComponent(new ComponentName(packageName, activityName));
+                context.startActivity(intent);
+            }
+        } catch (Exception ex) {
+            Log.e(LOG_TAG, "Cannot start activity: " + packageName + ", " + activityName + ", reason: " + ex.getMessage());
+        }
+    }
+
     private static void launchIntentFromPackage(Context context, String packageName) {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
 
@@ -695,8 +720,9 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
         boolean turnScreenOff = Logic.getSharedPrefBoolean(context,
                 KEY_TURN_SCREEN_OFF_OUT_CAR, TURN_SCREEN_OFF_OUT_CAR_DEFAULT_VALUE);
         int screenOffTimeout = SCREEN_OFF_TIMEOUT_DEFAULT_VALUE;
+        boolean isScreenOn = Logic.isScreenOn(context);
 
-        if (turnScreenOff) {
+        if (turnScreenOff && isScreenOn) {
             try {
                 int systemScreenOffTimeout = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT);
                 if (systemScreenOffTimeout < 1000) {
@@ -759,13 +785,13 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
     public static void killApps(Context context, int startId) {
 
         boolean isDeviceRooted = RootUtil.isDeviceRooted();
-        LinkedList<PairObject<String, String>> appList = Logic.readList(context, APPS_TO_CLOSE);
+        LinkedList<AppObject> appList = Logic.readList(context, APPS_TO_CLOSE);
 
 
         if (isDeviceRooted) {
             Log.d(LOG_TAG, "Device rooted");
             try {
-                for (PairObject<String, String> app: appList) {
+                for (AppObject app: appList) {
                     Log.d(LOG_TAG, "app: " + app.getPackageName());
                     Process suProcess = Runtime.getRuntime().exec("su");
                     DataOutputStream os = new DataOutputStream(suProcess.getOutputStream());
@@ -781,7 +807,7 @@ public class Actions implements Constants.PREF_KEYS, Constants.BROADCAST_NOTIFIC
 
             ActivityManager am = (ActivityManager) context.getSystemService(Activity.ACTIVITY_SERVICE);
 
-            for (PairObject<String, String> app: appList) {
+            for (AppObject app: appList) {
                 am.killBackgroundProcesses(app.getPackageName());
             }
 

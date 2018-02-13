@@ -20,9 +20,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import pl.maslanka.automatecar.R;
+import pl.maslanka.automatecar.helpers.AppAdapterItem;
 import pl.maslanka.automatecar.helpers.Constants;
-import pl.maslanka.automatecar.helpers.PairObject;
-import pl.maslanka.automatecar.helpers.QuattroObject;
+import pl.maslanka.automatecar.helpers.AppObject;
 import pl.maslanka.automatecar.prefdisconnected.adapters.ItemAdapter;
 import pl.maslanka.automatecar.utils.Logic;
 
@@ -33,10 +33,10 @@ import pl.maslanka.automatecar.utils.Logic;
 public class AppsToClose extends AppCompatActivity implements Constants.SELECT_APPS_FRAGMENT,
         Constants.PREF_KEYS, Constants.FILE_NAMES {
 
-    private ArrayList<QuattroObject<Long, String, String, Drawable>> mItemArray;
+    private ArrayList<AppAdapterItem> mItemArray;
     private DragListView mDragListView;
     private ArrayList<String> appPackages;
-    private LinkedList<PairObject<String, String>> appList;
+    private LinkedList<AppObject> appList;
     private ItemAdapter listAdapter;
 
     private final String LOG_TAG = this.getClass().getSimpleName();
@@ -157,7 +157,7 @@ public class AppsToClose extends AppCompatActivity implements Constants.SELECT_A
             @Override
             public void onItemDragEnded(int fromPosition, int toPosition) {
                 if (fromPosition != toPosition) {
-                    PairObject<String, String> appInFromPosition = appList.get(fromPosition);
+                    AppObject appInFromPosition = appList.get(fromPosition);
 
                     if (fromPosition > toPosition) {
                         appList.removeLastOccurrence(appInFromPosition);
@@ -178,8 +178,8 @@ public class AppsToClose extends AppCompatActivity implements Constants.SELECT_A
 
     protected void checkForAnyDeletedApps() {
         for (int i = 0; i < mItemArray.size(); i++) {
-            PairObject<String, String> appListItem =
-                    new PairObject<>(mItemArray.get(i).getName(), mItemArray.get(i).getPackageName());
+            AppObject appListItem =
+                    new AppObject(mItemArray.get(i).getName(), mItemArray.get(i).getPackageName(), null);
 
             if (!appList.contains(appListItem)) {
                 mItemArray.remove(i);
@@ -200,8 +200,8 @@ public class AppsToClose extends AppCompatActivity implements Constants.SELECT_A
                     newIndex = i;
 
 
-                QuattroObject<Long, String, String, Drawable> appItem = new QuattroObject<>(newIndex,
-                        appList.get(i).getName(), appList.get(i).getPackageName(),
+                AppAdapterItem appItem = new AppAdapterItem(newIndex,
+                        appList.get(i).getName(), appList.get(i).getPackageName(), null,
                         getPackageManager().getApplicationIcon(appList.get(i).getPackageName()));
 
                 if (!mItemArray.contains(appItem)) {
@@ -218,10 +218,10 @@ public class AppsToClose extends AppCompatActivity implements Constants.SELECT_A
 
     protected long getNewMaxIndex() {
         return Collections.max(mItemArray,
-                new Comparator<QuattroObject<Long, String, String, Drawable>>() {
+                new Comparator<AppAdapterItem>() {
             @Override
-            public int compare(QuattroObject<Long, String, String, Drawable> o1,
-                               QuattroObject<Long, String, String, Drawable> o2) {
+            public int compare(AppAdapterItem o1,
+                               AppAdapterItem o2) {
                 return o1.getIndex().compareTo(o2.getIndex());
             }
         }).getIndex() + 1;
@@ -237,11 +237,11 @@ public class AppsToClose extends AppCompatActivity implements Constants.SELECT_A
     public void deleteApp(int position) {
        /*
        * equals method checks only name and package name, so there is no point
-       * of creating new QuattroObject with Index and Icon, because it is only
+       * of creating new AppAdapterItem with Index and Icon, because it is only
        * for deletion purposes.
        * */
-        QuattroObject<Long, String, String, Drawable> appItem = new QuattroObject<>(null,
-                appList.get(position).getName(), appList.get(position).getPackageName(),
+        AppAdapterItem appItem = new AppAdapterItem(null,
+                appList.get(position).getName(), appList.get(position).getPackageName(), null,
                 null);
 
         appPackages.remove(appList.get(position).getPackageName());

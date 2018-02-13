@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.hardware.display.DisplayManager;
@@ -40,6 +41,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -48,7 +50,7 @@ import java.util.Set;
 
 import pl.maslanka.automatecar.helpers.ConnectingProcessState;
 import pl.maslanka.automatecar.helpers.Constants;
-import pl.maslanka.automatecar.helpers.PairObject;
+import pl.maslanka.automatecar.helpers.AppObject;
 import pl.maslanka.automatecar.helpers.ProximityState;
 import pl.maslanka.automatecar.receivers.AppBroadcastReceiver;
 
@@ -213,6 +215,27 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         return musicPlayers;
     }
 
+    public static ArrayList<ActivityInfo> getAllActivities(Context context, String packageName) {
+        try {
+            PackageInfo pi = context.getPackageManager().getPackageInfo(
+                    packageName, PackageManager.GET_ACTIVITIES);
+            ArrayList<ActivityInfo> ai = new ArrayList<>(Arrays.asList(pi.activities));
+
+            for (int i = 0; i < ai.size(); i++) {
+                if (!ai.get(i).exported) {
+                    ai.remove(i);
+                    i--;
+                }
+            }
+
+            return ai;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static List<ActivityInfo> getListOfMediaBroadcastReceivers(Context activity) {
         final PackageManager pm = activity.getPackageManager();
         List<ResolveInfo> musicPlayersResolveInfo;
@@ -303,8 +326,7 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
 
     }
 
-    public static void saveListToInternalStorage(Context context, LinkedList<PairObject<String,
-            String>> appList, String fileName) {
+    public static void saveListToInternalStorage(Context context, LinkedList<AppObject> appList, String fileName) {
 
         ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir(PATH, Context.MODE_PRIVATE);
@@ -323,9 +345,9 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         }
     }
 
-    public static LinkedList<PairObject<String, String>> readList(Context context, String fileName) {
+    public static LinkedList<AppObject> readList(Context context, String fileName) {
 
-        LinkedList<PairObject<String, String>> appList = new LinkedList<>();
+        LinkedList<AppObject> appList = new LinkedList<>();
         ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir(PATH, Context.MODE_PRIVATE);
         File myPath = new File(directory, fileName);
@@ -336,7 +358,7 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
         try {
             fis = new FileInputStream(myPath);
             in = new ObjectInputStream(fis);
-            appList = (LinkedList<PairObject<String, String>>) in.readObject();
+            appList = (LinkedList<AppObject>) in.readObject();
             in.close();
         } catch (IOException ex) {
             Log.d("readList", "File not found!");
@@ -344,7 +366,7 @@ public class Logic implements Constants.PREF_KEYS, Constants.FILE_NAMES {
             ex.printStackTrace();
         }
 
-        return appList != null ? appList : new LinkedList<PairObject<String, String>>();
+        return appList != null ? appList : new LinkedList<AppObject>();
 
     }
 
